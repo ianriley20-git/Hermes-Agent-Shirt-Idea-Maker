@@ -4,9 +4,10 @@ Run via a scheduled cron job. Produces at most 3 shirt design concepts
 and sends them to the operator on Telegram. This file is the full
 instruction set — the cron job itself just points here.
 
-Before doing anything else, read `prompts/_brand_voice.md` in full. The
-tone bar it defines is non-negotiable for every idea below — do not
-soften it to hit a quota.
+Before doing anything else, read `prompts/_brand_voice.md` in full,
+including the memory/learning-from-feedback section — the rules and
+accumulated feedback there are non-negotiable for every idea below, do
+not soften them to hit a quota.
 
 ## Step 1 — Reddit check
 
@@ -36,14 +37,27 @@ saturated/generic they look. This is a sense check, not a blocker — a
 crowded niche isn't automatically disqualifying if Riley Ink's angle on
 it is genuinely different, but flag it either way.
 
-## Step 4 — Filter for brand voice
+## Step 4 — Riley Ink catalog check (avoid duplicates)
+
+Search rileyink.com for anything close to each surviving concept (by
+topic and by similar tagline wording). If something very close already
+exists in the catalog, drop that concept — the goal is new ideas, not
+reskins of what's already for sale. A concept that's merely in the same
+general niche as an existing product (e.g. another fantasy football
+shirt) is fine; only drop it for genuine overlap in the actual joke/angle.
+
+## Step 5 — Filter for brand voice
 
 Apply the test in `prompts/_brand_voice.md` to everything that survived
-Steps 1–3. Reject anything sincere, cutesy, punny, or generic-gift-shop.
-Be honest about the reject rate — if most of what's trending doesn't fit
-Riley Ink's voice, that's an expected outcome, not a failure to fix.
+Steps 1–4. Both the deadpan/absurdist and wordplay/pun-driven registers
+are in bounds (see that file) — the actual hard rejects are sincerity,
+soft/cutesy tone, and generic gift-shop humor, not puns as such. Check
+memory for feedback patterns from previously approved/rejected concepts
+and let that inform which ideas to lead with. Be honest about the reject
+rate — if most of what's trending doesn't fit Riley Ink's voice, that's
+an expected outcome, not a failure to fix.
 
-## Step 5 — Output
+## Step 6 — Output
 
 Output **at most 3** ideas, each formatted exactly like this:
 

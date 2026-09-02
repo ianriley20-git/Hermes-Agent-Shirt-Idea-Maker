@@ -5,8 +5,10 @@ for the daily schedule (see `AGENTS.md` for how that message is
 recognized). Deeper and narrower than `daily_scan.md` — one theme,
 searched harder, more candidate ideas returned.
 
-Before doing anything else, read `prompts/_brand_voice.md` in full. The
-tone bar it defines is non-negotiable — do not soften it to hit a quota.
+Before doing anything else, read `prompts/_brand_voice.md` in full,
+including the memory/learning-from-feedback section — the rules and
+accumulated feedback there are non-negotiable, do not soften them to hit
+a quota.
 
 ## Step 0 — Identify the theme
 
@@ -34,23 +36,33 @@ volume.
 
 Beyond Reddit and Trends, do a general web search on the theme — news,
 culture commentary, anything showing why this theme might be timely or
-what current angles on it already exist (useful for Step 5's
+what current angles on it already exist (useful for Step 6's
 differentiation check).
 
 ## Step 4 — Etsy cross-check
 
 Search Etsy for the theme + "shirt" / "t-shirt". Note how saturated it
 is and what angles are already overdone — this directly informs which
-concepts in Step 6 should lean toward a less-obvious take.
+concepts in Step 7 should lean toward a less-obvious take.
 
-## Step 5 — Filter for brand voice
+## Step 5 — Riley Ink catalog check (avoid duplicates)
 
-Apply the test in `prompts/_brand_voice.md`. Reject anything sincere,
-cutesy, punny, or generic-gift-shop. Because this is a deeper single-theme
-dive, push for variety in angle/approach across surviving ideas rather
-than several small variations on the same joke.
+Search rileyink.com for anything close to each surviving concept (by
+topic and by similar tagline wording). Drop concepts that genuinely
+overlap an existing product's joke/angle — being in the same general
+niche as an existing product is fine, being the same joke isn't.
 
-## Step 6 — Output
+## Step 6 — Filter for brand voice
+
+Apply the test in `prompts/_brand_voice.md`. Both the deadpan/absurdist
+and wordplay/pun-driven registers are in bounds (see that file) — the
+actual hard rejects are sincerity, soft/cutesy tone, and generic
+gift-shop humor, not puns as such. Check memory for feedback patterns
+from previously approved/rejected concepts. Because this is a deeper
+single-theme dive, push for variety in angle/approach across surviving
+ideas rather than several small variations on the same joke.
+
+## Step 7 — Output
 
 Output **4 to 6** ideas (fewer is fine, never pad to hit the range), each
 formatted exactly like this:

@@ -40,6 +40,28 @@ Updated as each stage lands; check items off (or delete them) once resolved.
 - [ ] Niche keyword list (fantasy football, gambling, sports betting, ugly
       christmas sweater, back to school) is fixed from your spec — flag here
       if you want to add/remove any.
+- [ ] Live cron job (`hermes cron create ...`, 8am Eastern) not yet run on
+      the server — blocked on being back at a computer (mobile console
+      can't paste the long command). Full command is in the conversation
+      history / can be regenerated on request.
+
+## Brand voice (revised after reviewing the real catalog)
+- [x] Original `_brand_voice.md` rejected all puns/wordplay — too narrow.
+      Checked rileyink.com's actual catalog (e.g. "250 Years of Beers",
+      "Agent of Chaos" = deadpan; "99 Problems But a King Ain't One",
+      "Abe Drinkin'" = wordplay) and confirmed both registers are
+      legitimate. Rewrote the file so hard rejects are sincerity/cutesy/
+      generic-gift-shop only, not puns as such.
+- [x] Added a memory-based feedback loop instead of a static filter: the
+      agent should log every approve/reject decision (Stage 5/6) and
+      consult accumulated patterns when generating future ideas.
+- [ ] **This depends on Stage 5/6 actually writing to memory when the
+      operator says yes/no** — not built yet, since those stages don't
+      exist yet. Don't forget to wire this in when building Stage 5/6,
+      or the "learns over time" behavior won't actually happen.
+- [x] Added a Riley Ink catalog duplicate-check step to both
+      `daily_scan.md` and `seeded_search.md` (checks rileyink.com before
+      finalizing output, drops genuine duplicates).
 
 ## Stage 4 (seasonal calendar)
 - [ ] `config/seasonal_calendar.md` ships with placeholder season/date pairs —

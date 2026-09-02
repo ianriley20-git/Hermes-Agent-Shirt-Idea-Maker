@@ -10,39 +10,69 @@ instead of copy-pasting a tone paragraph into every file and letting them drift.
 
 ## What Riley Ink is
 
-Deadpan. Absurdist. Ironic. A shirt that looks like it's making a very
-serious point about something that does not deserve one.
+The real catalog (rileyink.com) spans two legitimate registers, and
+both are in bounds:
 
-## What Riley Ink is NOT
+- **Deadpan/absurdist**: a shirt that looks like it's making a very
+  serious point about something that does not deserve one. E.g. "250
+  Years of Beers," "Agent of Chaos," "999 Challenge Completed."
+- **Wordplay/pun-driven novelty**: sharp, punchy wordplay in the same
+  irreverent register. E.g. "99 Problems But a King Ain't One," "Abe
+  Drinkin'," "A Rump a Pum Pum."
+
+Don't pre-filter down to only one of these. Generate across the range —
+the operator's approve/reject decisions on actual output (see "Learning
+from feedback" below) are the real filter over time, not a rulebook
+guess made before they ever see it.
+
+## What Riley Ink is NOT (hard rejects, regardless of register)
 
 - Not sincere. No shirt should read as a genuine expression of feeling.
-- Not cutesy. No puns that would be at home on a "Live Laugh Love" sign.
-- Not generic gift-shop humor. If the joke would work equally well on a
-  mug at a truck stop, it's rejected.
-- Not exclamation-point energy. Enthusiasm reads as inauthentic for this
-  brand — deadpan delivery is the joke.
+- Not "Live Laugh Love" cutesy — soft, greeting-card-sentimental humor,
+  as opposed to sharp wordplay.
+- Not generic gift-shop humor. If the joke would work equally well,
+  unchanged, on a mug at any truck stop with no connection to the
+  specific niche/moment, it's rejected.
+- Not exclamation-point / "wine mom" enthusiasm-as-the-joke. The site's
+  own marketing copy leans this way sometimes ("Ridiculously Funny!") —
+  that's store copy, not shirt copy. Actual designs are sharper than that.
 - Not explaining the joke. If a tagline needs a subtitle to land, it's
   rejected.
 
 ## Working test
 
-Before accepting any tagline or concept, apply this test:
+1. Is this sincere, soft/cutesy, or generic-gift-shop regardless of
+   whether it's deadpan or pun-driven? (Reject — this is the actual
+   bar, not the pun/no-pun question.)
+2. Would a stock greeting-card company have made this, unchanged? (Reject.)
+3. Does the humor come from a flat/serious delivery of something absurd,
+   OR from genuinely sharp wordplay (not soft/cute wordplay)? Either is
+   fine. (Good sign either way.)
+4. Check memory (see below) for feedback patterns from past
+   approved/rejected concepts — treat this as a strong signal, not an
+   absolute rule.
 
-1. Would this be believable as a real, slightly-too-earnest corporate or
-   civic announcement, worn ironically? (Good sign.)
-2. Does it rely on a pun, rhyme, or "wine mom" register to get a laugh?
-   (Reject.)
-3. Could a stock greeting-card company have made this? (Reject.)
-4. Is the humor in the flat delivery of something absurd, rather than in
-   the wordplay itself? (Good sign.)
+## Learning from feedback (memory)
 
-## Reference examples (tone only, not real product copy)
+Hermes has a persistent Memory tool — use it. Whenever the operator
+approves or rejects a concept or generated image (Stage 5/6), record it:
+the tagline/theme, which register it was (deadpan vs. wordplay), and any
+reason the operator gave. Before finalizing a list of candidate ideas in
+any prompt, check memory for patterns in what's been approved/rejected
+before and let that inform which candidates to lead with — early on
+there may be little or no history, and that's fine, don't force a
+pattern out of a handful of data points.
 
-- Good: "PARTICIPANT" on a shirt with no other context.
-- Good: "I Have Never Won Anything" over a plain trophy icon.
-- Bad: "Sweater Weather? More Like SWEATER BETTER!" (pun, exclamation, cute)
-- Bad: "Blessed & Betting" (gift-shop alliteration, insincere-sincere hybrid)
+## Reference examples
+
+- Real, in-bounds (either register): "250 Years of Beers," "Agent of
+  Chaos," "999 Challenge Completed," "99 Problems But a King Ain't One,"
+  "Abe Drinkin'."
+- Bad (hard reject, invented for contrast): "Sweater Weather? More Like
+  SWEATER BETTER!" (soft/cute, exclamation-point energy — not the same
+  thing as sharp wordplay). "Blessed & Betting" (gift-shop alliteration,
+  insincere-sincere hybrid).
 
 Every prompt file that produces or screens design concepts must reject
-anything that fails this test and say so explicitly rather than softening
-it into something "close enough."
+anything that fails the hard-reject test and say so explicitly rather
+than softening it into something "close enough."
