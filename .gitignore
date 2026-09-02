@@ -1,0 +1,26 @@
+# Secrets
+.env
+config/.env
+*.env
+!config/.env.example
+
+# Hermes local state (memory, sessions, cron db) if ever run from inside the repo
+.hermes/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python (if any connector scripts use it)
+__pycache__/
+*.pyc
+.venv/
+
+# Node (if any connector scripts use it)
+node_modules/
+
+# Generated design output (images pulled locally for review)
+/output/
+*.log
