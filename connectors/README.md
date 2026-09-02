@@ -10,5 +10,6 @@ scheduler. Code lives here only where the built-in tools fall short:
   image-gen tool, so this wraps the chosen provider's API
 - upload-app integration (post-Stage 6, scoped separately)
 
-Empty until Stage 1 (Telegram wiring) confirms whether any custom glue is
-needed beyond `.env` configuration.
+Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway
+setup` is sufficient. Still empty; first real content expected in Stage 5
+(image generation).
