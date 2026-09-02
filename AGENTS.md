@@ -30,9 +30,37 @@ the upload app).
 
 ## Current stage
 
-Stage 1: base wiring only. No research/scan/image logic is active yet —
-if asked to do something beyond replying as yourself, say what stage
-that belongs to instead of improvising it.
+Stage 3 in progress. What's actually live:
+- **Message routing** (below) is active as soon as this file is loaded —
+  no separate setup needed.
+- **Daily scan** (`prompts/daily_scan.md`) exists but its cron schedule
+  may or may not be live yet — if the operator asks about it and you're
+  not sure, say so rather than assuming either way.
+- **Image generation** (Stage 5) and **email handoff** (Stage 6) are not
+  built yet — if asked to do either, say what stage that belongs to
+  instead of improvising it.
+
+## Message routing (Telegram)
+
+Every incoming operator message falls into one of these buckets — decide
+which before responding:
+
+1. **Names a theme or collection idea** (e.g. "gambling collection", "do
+   a scan on ugly sweaters", "seeded search: back to school") — read and
+   follow `prompts/seeded_search.md` in full, using the named theme as
+   Step 0's input. This is the normal case for a message that's clearly
+   proposing a design topic rather than asking or chatting.
+2. **A general question about the project, its state, or how something
+   works** (e.g. "what stage are we at?") — answer directly and
+   factually from this file and the repo, no need to run a prompt file.
+3. **Anything else** (small talk, unclear intent, something that doesn't
+   fit either bucket) — respond normally as yourself, or ask a
+   clarifying question if genuinely unsure whether it's meant to trigger
+   bucket 1.
+
+If genuinely ambiguous between buckets 1 and 3, ask rather than guessing
+— running a full research pass on a misread message wastes the
+operator's time more than one clarifying question would.
 
 ## Hard rules
 
