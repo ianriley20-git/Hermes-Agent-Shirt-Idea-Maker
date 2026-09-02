@@ -44,6 +44,8 @@ from you in Telegram first.
   eventually the upload-app hookup).
 - `/config` — `.env.example` (secrets template — never commit the real
   `.env`), subreddit/keyword lists, and the seasonal calendar.
+- [`TODO.md`](TODO.md) — running list of decisions/placeholders deferred to
+  a later stage. Check here for anything still needing your input.
 
 ## Build stages
 
