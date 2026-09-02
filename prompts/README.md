@@ -8,8 +8,11 @@ independently of any script.
   other prompt file below; not run standalone.
 - `daily_scan.md` — Stage 2. Scheduled daily trend scan.
 - `seeded_search.md` — Stage 3. On-demand deep-dive on a theme you name.
-- `image_style.md` — Stage 5. Riley Ink image-generation style template
-  (placeholder until you paste in the real one).
+- `image_style.md` — Stage 5. Riley Ink image-generation style template:
+  a fixed style header plus per-design fields (Main graphic/Main
+  text/Style direction). Content is real, not a placeholder — the
+  chaining logic that fills it in from an approved concept is still
+  Stage 5 work.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

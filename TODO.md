@@ -46,10 +46,15 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       needs your real dates and nudge-window lengths.
 
 ## Stage 5 (image generation)
-- [ ] `prompts/image_style.md` ships as a placeholder — needs your real Riley
-      Ink image style prompt pasted in.
-- [ ] Image gen provider: you're leaning GPT-4o/DALL-E — confirm before Stage
-      5 starts (I'll ask again when we get there).
+- [x] `prompts/image_style.md` now has your real Riley Ink style header +
+      per-design field structure (Main graphic / Main text / Style
+      direction), written ahead of schedule while blocked on Stage 2's
+      live cron wiring (mobile paste limitation).
+- [x] Image gen provider: confirmed OpenAI (`gpt-image-2-medium`) during
+      Stage 1 setup — already configured on the server.
+- [ ] Still needed in Stage 5 itself: the actual chain from an approved
+      Stage 2/3 concept -> filled-in template -> API call -> Telegram
+      yes/no. Not built yet, just the prompt content is ready.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
