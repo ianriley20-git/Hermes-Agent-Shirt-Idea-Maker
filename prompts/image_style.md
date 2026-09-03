@@ -1,35 +1,78 @@
-# Riley Ink image generation template
+# Riley Ink image generation templates
 
-Used in Stage 5 to turn an approved concept (from `daily_scan.md` or
-`seeded_search.md` output) into an actual image generation prompt. Two
-parts: a fixed style header (always included, verbatim, unchanged
-between designs) and per-design fields filled in from the approved
-concept.
+Used in Stage 5 to turn a finalized concept (from `daily_scan.md` or
+`seeded_search.md`) into an actual image generation prompt. There are
+two style templates below — **use Style A by default** for every
+concept unless the operator has explicitly requested the other style
+for this run (only possible for an on-demand seeded search message,
+since the daily cron scan has no one to ask). If in doubt which was
+requested, default to Style A.
 
-## Fixed style header (always include, exactly as written)
+---
+
+## Style A — Negative-space retro screen print (DEFAULT)
+
+### Fixed header (always include, exactly as written)
+
+```
+Vintage retro t-shirt illustration, mid-high detail screen print graphic, simulate 3-color ink print on a dark shirt, use only light ink colors, no black or dark ink, all shadows, outlines, and depth are created using transparent negative space where the shirt color shows through, do not fill dark areas with color, forms must be defined by cutout shapes and negative space instead of strokes or outlines, layered flat ink shapes with internal detail, balanced detail not overly simplified, slightly distressed vintage texture, 70s 80s retro athletic aesthetic, print-ready design, centered composition, transparent background, avoid sticker style, avoid patch style, avoid logo outline style, no gradients, no glow, no 3D, no realism, no soft shading, no drop shadows, no thick outlines, avoid solid background fills behind the design.
+```
+
+### Per-design fields
+
+Unlike Style B, the style/mood here is fixed by the header above — only
+two things vary per design:
+
+- **Scene**: the illustrated subject/action, concrete and specific
+  (subject, pose, key details) — comes from the concept's "Visual
+  concept" line, expanded into a real description.
+- **Text treatment**: the exact text (usually the tagline or a short
+  excerpt of it) plus a font/style note when it matters to the joke
+  (e.g. a knight motif wants a medieval-style font; a monster wants a
+  horror-movie font).
+
+### Worked examples
+
+```
+A knight holding up a beer in triumph. The text says "Call me Sir Veza" and font is knights of the round table style font.
+```
+
+```
+George Washington dunking a basketball in this exact pose. He's wearing his iconic uniform. Text says "GOAT"
+```
+
+```
+An enormous hotdog rampaging through a city. Text says "GLIZZILA" in old school monster font
+```
+
+### Full prompt assembly
+
+The fixed header, followed by a blank line, followed by the scene +
+text treatment (same shape as the worked examples above).
+
+---
+
+## Style B — Flat vector / white background (on request only)
+
+### Fixed header (always include, exactly as written)
 
 ```
 Please generate a graphic. A vintage-style graphic t-shirt design. Style: flat graphic illustration, screen-print aesthetic, limited color palette of 3–5 colors, no photorealism. The design should read clearly as a standalone centered chest graphic suitable for a t-shirt. White background, isolated design only, no model or shirt mockup. Distressed or clean retro look depending on the design. Bold typography integrated into the graphic. The overall feel should match classic American novelty, vintage sports, or pop culture humor tees. The output should be the graphic design element only — no shirt, no fabric, no clothing shape. Render it as a standalone logo/graphic on a plain white background, as if it were a vector art file ready for printing.
 ```
 
-## Per-design fields
+### Per-design fields
 
-Filled in fresh for every concept — never reused between designs.
-
-- **Main graphic**: the central illustrated scene/subject. Comes from
-  the approved concept's "Visual concept" line — expand it into a
-  concrete illustrated description (subject, pose, expression, key
-  props), the way the worked example below does.
-- **Main text**: any text/lettering integrated into the graphic itself
-  (not necessarily the full tagline — often a shorter element pulled
-  from it, like a number, phrase, or word treated as a graphic element).
+- **Main graphic**: the central illustrated scene/subject. Expand the
+  concept's "Visual concept" line into a concrete illustrated
+  description (subject, pose, expression, key props).
+- **Main text**: text/lettering integrated into the graphic (often
+  shorter than the full tagline — a number, phrase, or word treated as
+  a graphic element).
 - **Style direction**: a short line steering palette and mood for this
-  specific design (e.g. "Patriotic vintage Americana, red/white/blue
-  palette, distressed retro feel, celebratory and irreverent"). Default
-  to something consistent with `_brand_voice.md` (deadpan, ironic — never
-  sincere) if the approved concept doesn't obviously suggest a palette.
+  specific design. Default to something consistent with
+  `_brand_voice.md` if the concept doesn't obviously suggest a palette.
 
-## Worked example
+### Worked example
 
 ```
 Main graphic: Uncle Sam wearing a birthday party hat instead of his tall top hat, grinning broadly and raising a foamy pint of beer in a cheers gesture. Illustrated in a classic vintage caricature style with exaggerated expression.
@@ -37,13 +80,7 @@ Main text: "250"
 Style direction: Patriotic vintage Americana, red/white/blue palette, distressed retro feel, celebratory and irreverent
 ```
 
-(This example: America's 250th anniversary played as a beer toast
-instead of a solemn milestone — deadpan/absurdist, matches the brand
-voice test in `_brand_voice.md` rather than a sincere "happy
-anniversary" treatment.)
+### Full prompt assembly
 
-## Full prompt assembly
-
-The fixed style header, followed by a blank line, followed by the three
-per-design fields — same shape as the worked example above. That
-complete block is what gets sent to the image generation API in Stage 5.
+The fixed header, followed by a blank line, followed by the three
+per-design fields (same shape as the worked example above).

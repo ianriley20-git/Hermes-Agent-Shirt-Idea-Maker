@@ -77,14 +77,10 @@ a concept that didn't earn it).
 
 ## Step 7 — Generate images
 
-For each finalized concept, assemble an image prompt using
-`prompts/image_style.md`: the fixed style header, plus per-design fields
-derived from the concept — **Main graphic** expands the "Visual concept"
-line into a concrete illustrated description, **Main text** is the
-tagline or a short graphic-appropriate excerpt of it, **Style
-direction** follows from the concept's tone (default to something
-consistent with `_brand_voice.md` if nothing obvious suggests a
-palette). Generate one image per finalized concept.
+For each finalized concept, assemble an image prompt using **Style A**
+(the default) from `prompts/image_style.md` — there's no operator to ask
+for a style preference on an automatic cron run, so always use the
+default here. Generate one image per finalized concept.
 
 ## Step 8 — Send to Telegram
 

@@ -10,12 +10,18 @@ including the memory/learning-from-feedback section — the rules and
 accumulated feedback there are non-negotiable, do not soften them to hit
 a quota.
 
-## Step 0 — Identify the theme
+## Step 0 — Identify the theme (and any style request)
 
 Take the theme from the operator's message (e.g. "gambling collection",
 "do a scan on ugly sweaters" → theme is "ugly christmas sweaters"). If
 it's genuinely ambiguous what the theme is, ask a clarifying question
 instead of guessing.
+
+Also check whether the message requests a specific image style (e.g.
+"...in the white background style", "...flat vector this one"). If so,
+use **Style B** from `prompts/image_style.md` for this run instead of
+the default. If no style is mentioned, use **Style A** (default) — don't
+ask, just proceed with the default.
 
 ## Step 1 — Reddit check (broader than the daily scan)
 
@@ -79,14 +85,11 @@ send only the "nothing cleared the bar" message — don't run Step 8.
 
 ## Step 8 — Generate images
 
-For each finalized concept, assemble an image prompt using
-`prompts/image_style.md`: the fixed style header, plus per-design fields
-derived from the concept — **Main graphic** expands "Visual concept"
-into a concrete illustrated description, **Main text** is the tagline
-or a short graphic-appropriate excerpt, **Style direction** follows
-from the concept's tone. Generate one image per finalized concept —
-with 4-6 concepts this means several images; that's expected for an
-on-demand deep dive.
+For each finalized concept, assemble an image prompt using whichever
+style was identified in Step 0 (Style A by default, Style B if
+requested) from `prompts/image_style.md`. Generate one image per
+finalized concept — with 4-6 concepts this means several images; that's
+expected for an on-demand deep dive.
 
 ## Step 9 — Send to Telegram
 

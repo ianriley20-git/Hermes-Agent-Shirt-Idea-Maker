@@ -94,16 +94,19 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       get blocked by anything else. Pick this up whenever.
 
 ## Stage 5 (image generation) — built ahead of Stage 4
-- [x] `prompts/image_style.md` has your real Riley Ink style header +
-      per-design field structure (Main graphic / Main text / Style
-      direction).
+- [x] `prompts/image_style.md` now has **two** real style templates:
+      Style A (negative-space retro screen print on a dark shirt —
+      default) and Style B (flat vector/white background — on request
+      only, via a seeded-search message like "...in the white
+      background style"). Your call on making A the default.
 - [x] Image gen provider: OpenAI `gpt-image-2-medium`, configured since
       Stage 1.
 - [x] Chained into both `daily_scan.md` and `seeded_search.md`: each
       surviving concept now gets turned into an actual image and sent
       to Telegram with a caption + yes/no prompt, instead of text-only
-      output. Applies to both the daily cron scan and on-demand seeded
-      search (your call — consistency over lower cost).
+      output. Applies to both the daily cron scan (always Style A, no
+      one to ask) and on-demand seeded search (Style A unless Style B
+      requested).
 - [x] Approve/reject replies route through `AGENTS.md` bucket 2 and log
       to memory (feeds the brand-voice learning loop above).
 - [ ] **Not yet tested live** — no real cron/seeded-search run has gone
