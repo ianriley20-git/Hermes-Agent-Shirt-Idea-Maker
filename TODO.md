@@ -108,7 +108,11 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       one to ask) and on-demand seeded search (Style A unless Style B
       requested).
 - [x] Approve/reject replies route through `AGENTS.md` bucket 2 and log
-      to memory (feeds the brand-voice learning loop above).
+      to memory (feeds the brand-voice learning loop above). **Confirmed
+      live**: a single compound reply ("Yes I bet on weather no Yes
+      former betting sponsor No to the others") was correctly parsed
+      into 2 approvals + 4 rejections, logged individually, with an
+      accurate note that Stage 6 isn't built yet so nothing was emailed.
 - [x] **Confirmed working live**: a "gambling collection" seeded search
       returned 6 real images in Style A, each with a real citation
       (e.g. actual BBC Sport story on the Premier League gambling
