@@ -40,10 +40,33 @@ Updated as each stage lands; check items off (or delete them) once resolved.
 - [ ] Niche keyword list (fantasy football, gambling, sports betting, ugly
       christmas sweater, back to school) is fixed from your spec — flag here
       if you want to add/remove any.
-- [ ] Live cron job (`hermes cron create ...`, 8am Eastern) not yet run on
-      the server — blocked on being back at a computer (mobile console
-      can't paste the long command). Full command is in the conversation
-      history / can be regenerated on request.
+- [x] Live cron job created on the server: "Daily trend scan", `0 8 * * *`
+      (America/New_York, set as the server's timezone), delivers to
+      `telegram:8808947868`, repeats forever. First automatic run is the
+      next 8 AM Eastern after creation. Not yet observed running for
+      real (only the manual seeded-search test has been verified) — worth
+      confirming the first automatic run actually lands.
+
+## Stage 3 (on-demand seeded search) — verified working
+- [x] Confirmed end-to-end on Telegram: "gambling collection" correctly
+      routed to `seeded_search.md` (not treated as a general question),
+      ran real Reddit/Trends/web/Etsy/Riley-Ink-catalog research, and
+      returned good concepts per the operator.
+- [x] **Operational gotcha**: a running Telegram gateway session can get
+      stuck after a network hiccup (saw `httpx.ReadTimeout` /
+      `TimedOut` in the logs) and silently stop receiving messages with
+      no error shown to the user — it just never replies. Fix: as
+      `hermes`, `export XDG_RUNTIME_DIR=/run/user/1000` (needed fresh
+      each new console login, doesn't persist) then
+      `systemctl --user restart hermes-gateway.service`. If a message
+      to the bot goes unanswered for more than ~2-3 minutes with no
+      "typing" indicator, this is the first thing to check/try before
+      assuming the prompt/routing logic is broken.
+- [x] Also confirmed: an existing Telegram conversation thread does
+      *not* automatically pick up a `git pull`'d update to
+      `AGENTS.md`/prompts mid-thread. Send `/new --yes` in Telegram to
+      start a fresh session after any server-side update, before
+      re-testing.
 
 ## Brand voice (revised after reviewing the real catalog)
 - [x] Original `_brand_voice.md` rejected all puns/wordplay — too narrow.

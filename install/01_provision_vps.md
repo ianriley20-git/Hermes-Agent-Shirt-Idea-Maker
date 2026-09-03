@@ -267,6 +267,47 @@ hermes gateway status
 Look for `✓ User gateway service is running` and
 `✓ Systemd linger is enabled (service survives logout)`.
 
+**Note:** `export XDG_RUNTIME_DIR=/run/user/1000` is not a one-time fix —
+it's needed again every time you open a *new* Console session (closing
+and reopening the tab, or logging back in after time away) and then try
+to run any `systemctl --user ...` or `hermes gateway ...` command. If one
+of those commands ever fails with `Failed to connect to bus`, re-run the
+export line first before troubleshooting anything else.
+
+---
+
+## Troubleshooting: bot stops replying, no error, no "typing" indicator
+
+This happened once during testing after a Telegram network hiccup (visible
+in the logs as `httpx.ReadTimeout` / `telegram.error.TimedOut`) — the
+gateway's connection to Telegram got stuck and silently stopped receiving
+messages, with nothing visible to the operator in the chat itself. If a
+message goes unanswered for more than ~2-3 minutes with no "typing"
+indicator ever appearing, try this before assuming something's wrong with
+a prompt file:
+
+```bash
+export XDG_RUNTIME_DIR=/run/user/1000
+systemctl --user restart hermes-gateway.service
+hermes gateway status
+```
+
+Then resend the message.
+
+## Troubleshooting: bot seems to ignore a change you just pulled
+
+An existing Telegram conversation thread does **not** automatically
+reload `AGENTS.md` or updated prompt files mid-conversation — it keeps
+using whatever was loaded when that conversation session started. After
+any `git pull` on the server, start a fresh session before testing:
+in Telegram, send:
+
+```
+/new --yes
+```
+
+then retry your test message.
+
 ---
 
 ## Part 12 — Test it

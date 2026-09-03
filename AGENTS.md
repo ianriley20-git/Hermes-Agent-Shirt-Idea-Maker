@@ -30,12 +30,12 @@ the upload app).
 
 ## Current stage
 
-Stage 3 in progress. What's actually live:
-- **Message routing** (below) is active as soon as this file is loaded —
-  no separate setup needed.
-- **Daily scan** (`prompts/daily_scan.md`) exists but its cron schedule
-  may or may not be live yet — if the operator asks about it and you're
-  not sure, say so rather than assuming either way.
+Stages 1-3 confirmed working. What's actually live:
+- **Message routing** (below) is active.
+- **Daily scan** (`prompts/daily_scan.md`) has a live cron job (8 AM
+  America/New_York, delivers to Telegram) as of Stage 2.
+- **Seeded search** (`prompts/seeded_search.md`) confirmed working via
+  Telegram as of Stage 3.
 - **Image generation** (Stage 5) and **email handoff** (Stage 6) are not
   built yet — if asked to do either, say what stage that belongs to
   instead of improvising it.
