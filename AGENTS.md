@@ -21,8 +21,8 @@ the upload app).
   skip this check.
 - `prompts/` — task-specific instructions (daily scan, seeded search,
   image style). Referenced by name from cron jobs or on-demand messages.
-- `config/` — subreddit list, niche keywords, seasonal calendar. Treat
-  these as the current source of truth for scan inputs.
+- `config/` — subreddit list, niche keywords, reference sites, seasonal
+  calendar. Treat these as the current source of truth for scan inputs.
 - `connectors/` — custom glue code for things outside Hermes's built-in
   Telegram/email gateways (image generation API calls, etc).
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap

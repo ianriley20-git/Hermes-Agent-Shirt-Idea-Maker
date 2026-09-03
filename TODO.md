@@ -169,6 +169,35 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       just trust the bot's "email sent" confirmation.
 - [ ] Not yet tested live — first real test happens once the Gmail app
       password is in place.
+- [ ] **Blocked on DigitalOcean**: outbound SMTP ports 465/587 are
+      blocked by default on all droplets (confirmed via direct TCP
+      test — port 443 works, 465/587 both fail to even complete a TCP
+      handshake). This is DO's standard anti-spam policy, not a config
+      bug. Fix: file a support ticket at cloud.digitalocean.com/support
+      requesting ports 465/587 be unblocked for low-volume transactional
+      email; not instant or 100% guaranteed. Fallback if denied/slow:
+      switch to a transactional email provider that supports port 2525
+      (e.g. Mailjet), which DO does not block.
+
+## Content quality (creative feedback after first real daily-scan-quality
+concepts, 2026-09-03)
+- [x] Feedback: images were strong, but taglines were too wordy/too
+      tied to a specific news stat (e.g. "Ten teams enter 2026 with new
+      head coaches, tying the NFL record..." as the actual tagline
+      content, not just the justification). Added a hard rule to
+      `_brand_voice.md`: the trend/stat justifies *why now* (goes in
+      "Why it's timely"), the tagline itself must stand alone and be
+      short, like real examples ("250," "GOAT," "Ben Drankin") — not a
+      restated fact.
+- [x] Added a new research source: `config/reference_sites.md`
+      (m00nshot.com, awesometees.co, silverlaketshirts.com) — browsed
+      for design/joke *format* inspiration (historical figure + modern
+      activity, name-pun, single deadpan word), never for copying
+      specific wording/artwork. Wired into both `daily_scan.md` and
+      `seeded_search.md` as a new step, on equal footing with the
+      Reddit/Trends checks, not just a style check.
+- [ ] Not yet tested live — next daily scan or seeded search will be the
+      first to reflect both fixes.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

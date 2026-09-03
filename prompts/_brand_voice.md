@@ -38,6 +38,15 @@ guess made before they ever see it.
   that's store copy, not shirt copy. Actual designs are sharper than that.
 - Not explaining the joke. If a tagline needs a subtitle to land, it's
   rejected.
+- Not a news caption. A trend/stat is *why now*, not *the joke itself*.
+  If a tagline only makes sense to someone who already read the
+  specific news story behind it, it's too specific — find the
+  underlying universal theme instead (e.g. "ten teams have new head
+  coaches, tying a record" → the universal theme is *someone to
+  blame*, not the specific stat). Real Riley Ink taglines are short and
+  land standalone — "250," "GOAT," "Agent of Chaos," "Ben Drankin" —
+  not multi-clause sentences restating a fact. If it doesn't fit
+  comfortably on a chest print at a glance, it's too wordy.
 
 ## Working test
 
@@ -48,7 +57,11 @@ guess made before they ever see it.
 3. Does the humor come from a flat/serious delivery of something absurd,
    OR from genuinely sharp wordplay (not soft/cute wordplay)? Either is
    fine. (Good sign either way.)
-4. Check memory (see below) for feedback patterns from past
+4. Would this tagline still land for someone who never saw the specific
+   news/trend behind it? If it only works as an inside reference to one
+   dated fact, rework it toward the underlying evergreen theme. (See
+   "Not a news caption" above.)
+5. Check memory (see below) for feedback patterns from past
    approved/rejected concepts — treat this as a strong signal, not an
    absolute rule.
 
