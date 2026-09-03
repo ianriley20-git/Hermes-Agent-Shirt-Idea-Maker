@@ -38,10 +38,10 @@ now, see `TODO.md`). What's actually live:
   image per surviving concept (not just text).
 - **Seeded search** (`prompts/seeded_search.md`) confirmed working via
   Telegram, also now generates + sends images.
-- **Email handoff** (Stage 6) is not built yet — an approved ("yes")
-  design is logged to memory but nothing further happens automatically.
-  If asked to do more than that (send an email, post anywhere), say
-  that's Stage 6 and not built yet, instead of improvising it.
+- **Email handoff** (Stage 6): an approved ("yes") design is logged to
+  memory AND emailed to `EMAIL_HOME_ADDRESS` per the updated bucket 2
+  below. The upload-app connector is still out of scope — if asked to
+  post anywhere beyond emailing, say that's out of scope for now.
 
 ## Message routing (Telegram)
 
@@ -55,12 +55,24 @@ which before responding:
    proposing a design topic rather than asking or chatting.
 2. **A yes/no/approval reply to a previously sent design image** (e.g.
    "yes", "no", "yes on the Uncle Sam one", "reject the second one") —
-   log the decision to memory: tagline, register (deadpan/wordplay),
-   approved or rejected, and any reason the operator gave. See the
-   learning-from-feedback section in `prompts/_brand_voice.md`. Reply
-   briefly confirming what was logged. If approved, note that email
-   handoff (Stage 6) isn't built yet, so nothing further happens
-   automatically for now — the approval is saved, not acted on.
+   a message can approve/reject more than one design at once; handle
+   each individually:
+   - **Always**: log the decision to memory — tagline, register
+     (deadpan/wordplay), approved or rejected, and any reason the
+     operator gave. See the learning-from-feedback section in
+     `prompts/_brand_voice.md`.
+   - **On approval only**: send one email per approved design to
+     `EMAIL_HOME_ADDRESS` (from `.env`) with subject `New design:
+     "[tagline]"`, the generated image attached (use the `MEDIA:/path`
+     marker in your message with the image file's actual path — check
+     where the `image_gen` tool saved it earlier in this conversation),
+     and a short body recapping the tagline, why it's timely, and
+     source. This is the one explicit "yes" the hard rule below
+     requires — send it immediately, don't ask for a second
+     confirmation.
+   - Reply briefly on Telegram confirming what was logged and, for each
+     approval, that the email was sent (or if it failed, say so plainly
+     rather than claiming success).
 3. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.

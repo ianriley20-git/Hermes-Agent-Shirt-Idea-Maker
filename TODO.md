@@ -144,8 +144,31 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       concept (up to 3/day, up to 6 per on-demand search) rather than
       only after a separate approval-to-generate step. Worth keeping an
       eye on actual OpenAI usage/cost after a few days.
-- [ ] Stage 6 (email handoff) still doesn't exist — a "yes" reply is
-      logged to memory only, nothing is emailed yet.
+## Stage 6 (email handoff)
+- [x] `AGENTS.md` bucket 2 now sends one email per approved design
+      (subject `New design: "[tagline]"`, image attached via the
+      `MEDIA:/path` marker, body recaps why-it's-timely/source) to
+      `EMAIL_HOME_ADDRESS`, in addition to logging to memory. Uses
+      Hermes's built-in email gateway/send-message tool — no custom
+      connector code needed.
+- [ ] **Sender account setup in progress**: a dedicated Gmail account
+      for outbound send, with an app password (2FA required first).
+      Recipient confirmed as ianriley20@gmail.com. Once the app
+      password exists, add to `~/.hermes/.env` on the server:
+      `EMAIL_ADDRESS`, `EMAIL_PASSWORD` (the app password, not the
+      regular login), `EMAIL_SMTP_HOST=smtp.gmail.com`,
+      `EMAIL_SMTP_PORT=587`, `EMAIL_IMAP_HOST=imap.gmail.com`,
+      `EMAIL_IMAP_PORT=993`, `EMAIL_HOME_ADDRESS=ianriley20@gmail.com`
+      — then `hermes gateway setup` again to add the Email platform,
+      restart the gateway, `/new --yes`, and retest.
+- [ ] Hermes had a known bug (now closed/fixed upstream, per GitHub
+      issue #15160) where outbound emails were accepted by SMTP but
+      silently bounced downstream due to a missing Date header. Our
+      version (0.19.0) should postdate the fix, but **verify by
+      actually checking the inbox** after the first real test — don't
+      just trust the bot's "email sent" confirmation.
+- [ ] Not yet tested live — first real test happens once the Gmail app
+      password is in place.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
