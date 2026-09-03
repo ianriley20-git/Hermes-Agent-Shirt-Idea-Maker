@@ -8,7 +8,18 @@ scan step.
 - m00nshot.com
 - awesometees.co
 - silverlaketshirts.com
+- crazydogtshirts.com
+- textualtees.com
+- snorgtees.com
+- shirtmandude.com
+- solidthreads.com (home of the Headline Shirts brand)
+- lookhuman.com
+- bustedtees.com
 
+Deliberately excludes huge multi-artist marketplaces (Redbubble,
+TeePublic, Threadless, Design By Humans) — quality and voice vary too
+wildly there to be a useful *format* signal; the sites above are direct
+brand storefronts with a consistent enough voice to actually learn from.
 Add more anytime — no code change required, the prompt reads this file
 directly at run time.
 
