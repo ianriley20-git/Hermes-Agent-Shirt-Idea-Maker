@@ -57,22 +57,54 @@ and let that inform which ideas to lead with. Be honest about the reject
 rate — if most of what's trending doesn't fit Riley Ink's voice, that's
 an expected outcome, not a failure to fix.
 
-## Step 6 — Output
+## Step 6 — Finalize concepts
 
-Output **at most 3** ideas, each formatted exactly like this:
+Settle on **at most 3** ideas, each with:
 
 ```
-1. Tagline: "..."
-   Visual concept: [one line]
-   Why it's timely: [one line, cite the actual signal — subreddit post,
-     trends spike, or Etsy gap]
-   Source: [subreddit name / trends keyword / etsy search]
+Tagline: "..."
+Visual concept: [one line]
+Why it's timely: [one line, cite the actual signal — subreddit post,
+  trends spike, or Etsy gap]
+Source: [subreddit name / trends keyword / etsy search]
 ```
 
-If fewer than 3 ideas clear the bar, output fewer — never pad with
-weaker ideas to hit 3. If nothing clears the bar at all, say exactly
-that ("Nothing cleared the bar today") and briefly note what was
-closest, rather than lowering the standard.
+If fewer than 3 ideas clear the bar, use fewer — never pad with weaker
+ideas to hit 3. If nothing clears the bar at all, skip straight to
+Step 8 and send only the "nothing cleared the bar" message — don't run
+Steps 7 (image generation costs money and time; don't spend either on
+a concept that didn't earn it).
 
-This output is sent directly to the operator on Telegram — write it as
-the final message, not as a report to summarize afterward.
+## Step 7 — Generate images
+
+For each finalized concept, assemble an image prompt using
+`prompts/image_style.md`: the fixed style header, plus per-design fields
+derived from the concept — **Main graphic** expands the "Visual concept"
+line into a concrete illustrated description, **Main text** is the
+tagline or a short graphic-appropriate excerpt of it, **Style
+direction** follows from the concept's tone (default to something
+consistent with `_brand_voice.md` if nothing obvious suggests a
+palette). Generate one image per finalized concept.
+
+## Step 8 — Send to Telegram
+
+If nothing cleared the bar in Step 6: send exactly that ("Nothing
+cleared the bar today") and briefly note what was closest, rather than
+lowering the standard to produce an image anyway.
+
+Otherwise, for each generated image, send it as its own message with a
+caption:
+
+```
+Tagline: "..."
+Why it's timely: [one line]
+Source: [subreddit / trends keyword / etsy search]
+
+Reply "yes" or "no" on this one (or reference it by tagline if replying
+to more than one).
+```
+
+This is the actual delivered output — write captions as the final
+message content, not as a report to summarize afterward. A later
+"yes"/"no" reply is handled separately (see `AGENTS.md` message
+routing) — this prompt's job ends once the images are sent.

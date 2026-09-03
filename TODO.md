@@ -78,28 +78,45 @@ Updated as each stage lands; check items off (or delete them) once resolved.
 - [x] Added a memory-based feedback loop instead of a static filter: the
       agent should log every approve/reject decision (Stage 5/6) and
       consult accumulated patterns when generating future ideas.
-- [ ] **This depends on Stage 5/6 actually writing to memory when the
-      operator says yes/no** — not built yet, since those stages don't
-      exist yet. Don't forget to wire this in when building Stage 5/6,
-      or the "learns over time" behavior won't actually happen.
+- [x] Now wired: `AGENTS.md` message routing bucket 2 handles a
+      yes/no/approval reply by logging it to memory. Not yet observed
+      actually happening live (depends on Stage 5 being tested end to
+      end first) — worth confirming a real approve/reject gets logged.
 - [x] Added a Riley Ink catalog duplicate-check step to both
       `daily_scan.md` and `seeded_search.md` (checks rileyink.com before
       finalizing output, drops genuine duplicates).
 
-## Stage 4 (seasonal calendar)
+## Stage 4 (seasonal calendar) — deliberately deferred, not skipped
 - [ ] `config/seasonal_calendar.md` ships with placeholder season/date pairs —
       needs your real dates and nudge-window lengths.
+- [ ] Built out of order on purpose: jumped to Stage 5 first since that's
+      what you wanted to see working next, and Stage 4 doesn't block or
+      get blocked by anything else. Pick this up whenever.
 
-## Stage 5 (image generation)
-- [x] `prompts/image_style.md` now has your real Riley Ink style header +
+## Stage 5 (image generation) — built ahead of Stage 4
+- [x] `prompts/image_style.md` has your real Riley Ink style header +
       per-design field structure (Main graphic / Main text / Style
-      direction), written ahead of schedule while blocked on Stage 2's
-      live cron wiring (mobile paste limitation).
-- [x] Image gen provider: confirmed OpenAI (`gpt-image-2-medium`) during
-      Stage 1 setup — already configured on the server.
-- [ ] Still needed in Stage 5 itself: the actual chain from an approved
-      Stage 2/3 concept -> filled-in template -> API call -> Telegram
-      yes/no. Not built yet, just the prompt content is ready.
+      direction).
+- [x] Image gen provider: OpenAI `gpt-image-2-medium`, configured since
+      Stage 1.
+- [x] Chained into both `daily_scan.md` and `seeded_search.md`: each
+      surviving concept now gets turned into an actual image and sent
+      to Telegram with a caption + yes/no prompt, instead of text-only
+      output. Applies to both the daily cron scan and on-demand seeded
+      search (your call — consistency over lower cost).
+- [x] Approve/reject replies route through `AGENTS.md` bucket 2 and log
+      to memory (feeds the brand-voice learning loop above).
+- [ ] **Not yet tested live** — no real cron/seeded-search run has gone
+      through the new image-generation path yet. First real test is
+      either tomorrow's 8am daily scan, or an on-demand seeded search
+      message sent now.
+- [ ] Image generation costs real money per image (`gpt-image-2-medium`,
+      ~40s each) and now happens automatically for every surviving
+      concept (up to 3/day, up to 6 per on-demand search) rather than
+      only after a separate approval-to-generate step. Worth keeping an
+      eye on actual OpenAI usage/cost after a few days.
+- [ ] Stage 6 (email handoff) still doesn't exist — a "yes" reply is
+      logged to memory only, nothing is emailed yet.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

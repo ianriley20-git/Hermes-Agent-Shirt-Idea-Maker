@@ -62,21 +62,51 @@ from previously approved/rejected concepts. Because this is a deeper
 single-theme dive, push for variety in angle/approach across surviving
 ideas rather than several small variations on the same joke.
 
-## Step 7 — Output
+## Step 7 — Finalize concepts
 
-Output **4 to 6** ideas (fewer is fine, never pad to hit the range), each
-formatted exactly like this:
+Settle on **4 to 6** ideas (fewer is fine, never pad to hit the range),
+each with:
 
 ```
-1. Tagline: "..."
-   Visual concept: [one line]
-   Why it's timely: [one line, cite the actual signal]
-   Source: [subreddit / trends phrase / web result / etsy search]
+Tagline: "..."
+Visual concept: [one line]
+Why it's timely: [one line, cite the actual signal]
+Source: [subreddit / trends phrase / web result / etsy search]
 ```
 
-If nothing on this theme clears the bar, say so plainly ("Nothing on
+If nothing on this theme clears the bar, skip straight to Step 9 and
+send only the "nothing cleared the bar" message — don't run Step 8.
+
+## Step 8 — Generate images
+
+For each finalized concept, assemble an image prompt using
+`prompts/image_style.md`: the fixed style header, plus per-design fields
+derived from the concept — **Main graphic** expands "Visual concept"
+into a concrete illustrated description, **Main text** is the tagline
+or a short graphic-appropriate excerpt, **Style direction** follows
+from the concept's tone. Generate one image per finalized concept —
+with 4-6 concepts this means several images; that's expected for an
+on-demand deep dive.
+
+## Step 9 — Send to Telegram
+
+If nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
-lowering the standard to fill the output.
+lowering the standard to produce an image anyway.
 
-This output is sent directly to the operator on Telegram — write it as
-the final message, not as a report to summarize afterward.
+Otherwise, for each generated image, send it as its own message with a
+caption:
+
+```
+Tagline: "..."
+Why it's timely: [one line]
+Source: [subreddit / trends phrase / web result / etsy search]
+
+Reply "yes" or "no" on this one (or reference it by tagline if replying
+to more than one).
+```
+
+This is the actual delivered output — write captions as the final
+message content, not as a report to summarize afterward. A later
+"yes"/"no" reply is handled separately (see `AGENTS.md` message
+routing) — this prompt's job ends once the images are sent.
