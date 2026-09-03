@@ -15,8 +15,17 @@ requested, default to Style A.
 ### Fixed header (always include, exactly as written)
 
 ```
-Vintage retro t-shirt illustration, mid-high detail screen print graphic, simulate 3-color ink print on a dark shirt, use only light ink colors, no black or dark ink, all shadows, outlines, and depth are created using transparent negative space where the shirt color shows through, do not fill dark areas with color, forms must be defined by cutout shapes and negative space instead of strokes or outlines, layered flat ink shapes with internal detail, balanced detail not overly simplified, slightly distressed vintage texture, 70s 80s retro athletic aesthetic, print-ready design, centered composition, transparent background, avoid sticker style, avoid patch style, avoid logo outline style, no gradients, no glow, no 3D, no realism, no soft shading, no drop shadows, no thick outlines, avoid solid background fills behind the design.
+Vintage retro t-shirt illustration, mid-high detail screen print graphic, simulate a 3-to-5-color ink print on a dark shirt, use multiple distinct light ink colors across the design — for example cream/off-white, orange or red, and navy or blue, plus a warm skin-tone ink where a face or figure appears — rather than a single accent color, no black or dark ink, all shadows, outlines, and depth are created using transparent negative space where the shirt color shows through, do not fill dark areas with color, forms must be defined by cutout shapes and negative space instead of strokes or outlines, layered flat ink shapes with internal detail, balanced detail not overly simplified, slightly distressed vintage texture, 70s 80s retro athletic aesthetic, print-ready design, centered composition, transparent background, avoid sticker style, avoid patch style, avoid logo outline style, no gradients, no glow, no 3D, no realism, no soft shading, no drop shadows, no thick outlines, avoid solid background fills behind the design, avoid monochrome or two-tone results — vary the ink colors meaningfully across different elements of the design rather than rendering everything in one tan/gold ink.
 ```
+
+### Real reference designs (rileyink.com — ground truth for the color fix above)
+
+- **"Safety Third"**: cream script text, orange accent text, blue/red star details, full-color face/figure — on black.
+- **"Did Someone Say Oil?"**: cream Uncle Sam figure, red bow tie and lettering, white outline text — on black.
+- **"USA"** (Washington dunking): red bold lettering, white outline, navy uniform details — on red.
+- **"Spilling the Tea Since '73"**: cream figures, orange script text, multicolor striped accent bar — on black.
+
+None of these are one-tone-plus-negative-space — every one uses at least 3 distinct inks. Match this density of color, not the flatter look from earlier tests.
 
 ### Per-design fields
 
