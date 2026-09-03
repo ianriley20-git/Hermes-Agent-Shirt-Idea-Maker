@@ -30,8 +30,8 @@ the upload app).
 
 ## Current stage
 
-Stages 1-3 confirmed working; Stage 5 (image generation) in progress.
-What's actually live:
+Stages 1-3 and 5 confirmed working (Stage 4 deliberately skipped for
+now, see `TODO.md`). What's actually live:
 - **Message routing** (below) is active.
 - **Daily scan** (`prompts/daily_scan.md`) has a live cron job (8 AM
   America/New_York, delivers to Telegram) and now generates + sends an

@@ -109,10 +109,32 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       requested).
 - [x] Approve/reject replies route through `AGENTS.md` bucket 2 and log
       to memory (feeds the brand-voice learning loop above).
-- [ ] **Not yet tested live** — no real cron/seeded-search run has gone
-      through the new image-generation path yet. First real test is
-      either tomorrow's 8am daily scan, or an on-demand seeded search
-      message sent now.
+- [x] **Confirmed working live**: a "gambling collection" seeded search
+      returned 6 real images in Style A, each with a real citation
+      (e.g. actual BBC Sport story on the Premier League gambling
+      shirt-front ban) and a good deadpan/wordplay mix. Daily cron scan
+      (Style A only) still not directly observed yet — first real run
+      is the next 8am Eastern.
+- [x] **Operational gotcha**: the "Local Browser" tool selected during
+      Stage 1 setup was never actually functional — Playwright's
+      Chromium browser binary was never downloaded, so every Google
+      Trends check (and general page-reading) silently failed all the
+      way through Stage 2/3 testing (`check_browser_requirements
+      returned False` in the gateway logs). Also found: DuckDuckGo
+      (our free search provider) is search-only and can't extract full
+      page content (`"cannot extract URL content"` in logs) — the fixed
+      browser tool substitutes for this. Fix (as `hermes`, in
+      `/home/hermes/.hermes/hermes-agent`):
+      ```
+      npx playwright install chromium          # as hermes, downloads the browser binary
+      # then as root, using hermes's local npx (root has no npx/node on PATH):
+      PATH="/home/hermes/.local/bin:$PATH" /home/hermes/.local/bin/npx playwright install-deps chromium
+      ```
+      Confirm with `hermes doctor` — `browser` should show ✓ (not
+      `browser-cdp`, that's a separate optional tool, still unmet and
+      fine to ignore). Restart the gateway after
+      (`systemctl --user restart hermes-gateway.service`, with
+      `XDG_RUNTIME_DIR` set first as usual).
 - [ ] Image generation costs real money per image (`gpt-image-2-medium`,
       ~40s each) and now happens automatically for every surviving
       concept (up to 3/day, up to 6 per on-demand search) rather than

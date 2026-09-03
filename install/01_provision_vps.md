@@ -166,13 +166,55 @@ this:
    Scraping**, **Image Generation**, and **Cron Jobs** are checked
    (they are by default), then Enter.
 7. **Browser automation provider** → **Local Browser** (free, no key
-   needed) is pre-selected — accept it.
+   needed) is pre-selected — accept it. **This does not actually work
+   yet** — selecting it here does not install the browser itself. See
+   Part 8a below, right after finishing this wizard, or Google
+   Trends/page-reading will silently fail later with no obvious error.
 8. **Image generation provider** → if it lists **OpenAI [configured]**,
    accept it (reuses the key from Part 7). Then pick a quality tier —
    **medium** (the default/balanced option) is a good start.
 9. **Search provider** → skip the default "Nous Subscription" option
    (needs a separate account) and pick **DuckDuckGo (ddgs)** instead —
-   free, no key needed.
+   free, no key needed. (Note: DuckDuckGo can search but can't extract
+   full page content — Part 8a's browser fix covers that gap too.)
+
+---
+
+## Part 8a — Actually install the browser (do this now, not later)
+
+The setup wizard's "Local Browser" selection doesn't install anything by
+itself. Do this now while you're already in the terminal, or Google
+Trends checks will silently fail later with no error shown to you —
+just missing results.
+
+**As `hermes`, download the browser binary:**
+```bash
+cd /home/hermes/.hermes/hermes-agent
+npx playwright install chromium
+```
+Let it finish (downloads ~300MB total, can take a minute or two).
+
+**As `root`, install the system libraries it needs** (root doesn't have
+Node on its PATH, so use the full path explicitly):
+```bash
+exit
+PATH="/home/hermes/.local/bin:$PATH" /home/hermes/.local/bin/npx playwright install-deps chromium
+```
+
+**Back as `hermes`, confirm it worked:**
+```bash
+sudo -i -u hermes
+hermes doctor
+```
+Look for `✓ browser` under "Tool Availability" and `✓ Playwright
+Chromium (browser engine)` under "External Tools". (`browser-cdp` is a
+separate, optional tool — it'll still show unmet, that's fine, ignore it.)
+
+If the gateway is already running, restart it to pick up the fix:
+```bash
+export XDG_RUNTIME_DIR=/run/user/1000
+systemctl --user restart hermes-gateway.service
+```
 
 ---
 
