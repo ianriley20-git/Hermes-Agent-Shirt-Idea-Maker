@@ -9,7 +9,7 @@ including the memory/learning-from-feedback section and the "not a news
 caption" rule — the rules and accumulated feedback there are
 non-negotiable for every idea below, do not soften them to hit a quota.
 
-## Step 1 — Reddit check
+## Step 1 — Reddit check (topic/timing signal only — not content)
 
 Read `config/subreddits.md`. For each subreddit listed, use web search
 (and browser navigation if search results are thin) to check its current
@@ -18,28 +18,39 @@ navigating directly to `https://www.reddit.com/r/<name>/top/?t=day`.
 Note anything with unusually high engagement (comment/upvote counts that
 stand out, not just any post) or a recurring theme across multiple posts.
 
+This step only identifies **what's topical right now** — a short list
+of hot topics/angles. Don't draft taglines or full concepts from Reddit
+content directly; that happens in Step 3, using the format sources
+there. Reddit content tends to produce overly specific, wordy,
+news-caption-style copy when used directly — that's why it's split out.
+
 If a subreddit turns out to be dead, tiny, or gone, say so — don't force
 a result from it, and mention it so the list can be corrected later.
 
-## Step 2 — Google Trends check
+## Step 2 — Google Trends check (topic/timing signal only — not content)
 
 Read `config/niche_keywords.md`. For each keyword, check its current
 trend direction — navigate to Google Trends (trends.google.com) for the
 keyword, or if that's not practically renderable, fall back to a web
 search for recent news/spikes around that keyword. Note anything showing
-a clear upward spike, not just steady baseline interest.
+a clear upward spike, not just steady baseline interest. Same as Step 1
+— this identifies *what's* timely, not the actual joke/copy.
 
-## Step 3 — Reference site scan (format inspiration)
+## Step 3 — Reference site format match (primary creative source)
 
-Read `config/reference_sites.md`. Browse each site's categories/designs
-for anything matching today's niches or Riley Ink's voice. Note the
-underlying **format/structure** of designs that land well (e.g.
-"historical figure doing a modern activity," "a name turned into a
-pun," "a single deadpan word standalone") — not the specific wording.
-This is a source of *new* concept ideas, on equal footing with Steps 1-2,
-not just a style check: generate at least one candidate concept inspired
-by a format you found here, with entirely original wording/subject.
-Never reproduce another shop's specific tagline or artwork.
+Read `config/reference_sites.md`. This is where concepts actually get
+drafted — the main creative step, not a style check. For each topic
+flagged as hot in Steps 1-2, browse the reference sites for a design
+whose underlying **format/structure** fits (e.g. "historical figure
+doing a modern activity," "a name turned into a pun," "a single deadpan
+word standalone"), then draft an original concept applying that format
+to the current topic — entirely new wording/subject, never another
+shop's specific tagline or artwork.
+
+If Steps 1-2 turned up little topical signal, it's fine to draft a
+concept straight from a strong reference-site format applied to one of
+Riley Ink's core niches (`config/niche_keywords.md`) without a specific
+news hook — timeliness helps but isn't required for every concept.
 
 ## Step 4 — Etsy cross-check
 

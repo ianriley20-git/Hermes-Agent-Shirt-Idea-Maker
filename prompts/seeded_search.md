@@ -23,39 +23,47 @@ use **Style B** from `prompts/image_style.md` for this run instead of
 the default. If no style is mentioned, use **Style A** (default) — don't
 ask, just proceed with the default.
 
-## Step 1 — Reddit check (broader than the daily scan)
+## Step 1 — Reddit check (angle/timing signal only — not content)
 
 Not limited to `config/subreddits.md` — search Reddit broadly for the
 theme itself (e.g. a `site:reddit.com <theme>` search, plus checking any
 subreddit in `config/subreddits.md` that's obviously related). Look for
-recent high-engagement posts and recurring sub-themes/jokes/angles within
-the topic, not just "is this trending at all."
+recent high-engagement posts and recurring sub-themes/jokes/angles
+within the topic, not just "is this trending at all."
 
-## Step 2 — Trends check
+This step and Steps 2-3 only identify **which specific angles within
+the theme** are currently resonating. Don't draft taglines directly
+from Reddit/Trends/news content — that happens in Step 4, using the
+format sources there. Used directly, this content tends to produce
+overly specific, wordy, news-caption-style copy.
+
+## Step 2 — Trends check (angle/timing signal only — not content)
 
 Check Google Trends for the theme and any obvious related phrases (not
 just the exact wording the operator used — try a couple of reasonable
 variations). Note direction (rising/falling/flat), not just current
 volume.
 
-## Step 3 — Reference site scan (format inspiration)
-
-Read `config/reference_sites.md`. Browse each site's categories/designs
-for anything matching this theme or Riley Ink's voice. Note the
-underlying **format/structure** of designs that land well (e.g.
-"historical figure doing a modern activity," "a name turned into a
-pun," "a single deadpan word standalone") — not the specific wording.
-This is a source of *new* concept ideas on this theme, on equal footing
-with Steps 1-2: generate at least one candidate inspired by a format
-found here, with entirely original wording. Never reproduce another
-shop's specific tagline or artwork.
-
-## Step 4 — Web search
+## Step 3 — Web search (angle/timing signal only — not content)
 
 Beyond Reddit and Trends, do a general web search on the theme — news,
 culture commentary, anything showing why this theme might be timely or
-what current angles on it already exist (useful for Step 7's
-differentiation check).
+what current angles on it already exist (useful for Step 5's
+differentiation check, and as more signal for Step 4).
+
+## Step 4 — Reference site format match (primary creative source)
+
+Read `config/reference_sites.md`. This is where concepts actually get
+drafted — the main creative step, not a style check. For each angle
+surfaced in Steps 1-3 (or the theme generally, if nothing specific
+surfaced), browse the reference sites for a design whose underlying
+**format/structure** fits (e.g. "historical figure doing a modern
+activity," "a name turned into a pun," "a single deadpan word
+standalone"), then draft an original concept applying that format to
+this theme — entirely new wording/subject, never another shop's
+specific tagline or artwork. Aim for enough concepts here across
+different formats to comfortably reach Step 8's 4-6 target after
+filtering.
 
 ## Step 5 — Etsy cross-check
 
