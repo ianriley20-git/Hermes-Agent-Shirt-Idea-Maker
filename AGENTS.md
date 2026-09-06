@@ -74,10 +74,22 @@ which before responding:
        in the body (`<img src="data:image/png;base64,...">`) — this
        skill's `send` command has no file-attachment support, so this
        is the way to get the image into the email at all. Read the
-       generated image file, base64-encode it, build the HTML body
-       with the tagline/why-it's-timely/source recap as text plus the
-       embedded image.
-     - Subject: `New design: "[tagline]"`.
+       generated image file and base64-encode it.
+     - Subject: exactly `Design Approved` (fixed text, not per-design —
+       the tagline goes in the body, not the subject).
+     - Body content, in this order:
+       1. **Title**: a short product-listing title (this can just be
+          the tagline, or a lightly cleaned-up version of it if the
+          tagline doesn't read naturally as a product name).
+       2. **Description**: 1-2 sentences of product-listing copy
+          describing the design — written the way you'd describe it to
+          a customer browsing the shop, in Riley Ink's voice, not a
+          restatement of "why it's timely." This is meant to be
+          directly usable in the operator's product builder app for the
+          listing title/description, not just an internal note.
+       3. The embedded image.
+       4. A short "for reference" line with why-it's-timely and source
+          — useful context, but secondary to the Title/Description above.
      - This is the one explicit "yes" the hard rule below requires —
        send it immediately, don't ask for a second confirmation.
    - Reply briefly on Telegram confirming what was logged and, for each

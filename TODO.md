@@ -208,6 +208,32 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       and `~/.hermes/google_token.json` on the server (not in git,
       analogous to `.env`) — if the droplet is ever rebuilt, this whole
       OAuth setup needs to be redone from scratch.
+- [x] Email spec revised per operator request: subject is now a fixed
+      `Design Approved` (not per-tagline), and the body leads with a
+      generated **Title** + **Description** meant to be pasted directly
+      into the operator's shirt product-builder app, with the
+      why-it's-timely/source recap demoted to a secondary reference
+      line. Updated in `AGENTS.md` bucket 2.
+
+## Image generation compositional fixes (2026-09-04 through 09-06)
+- [x] **Round 1 (too complex)**: real test output looked "AI generated"
+      due to full realistic-perspective scenes (grocery aisle, throne
+      room, doctor's office), multi-character casts, and scattered
+      background props. Added hard "one subject, no scene" rules to
+      `image_style.md`.
+- [x] **Round 2 (corrected an overcorrection)**: Round 1's fix banned
+      backgrounds and arched text too broadly. Real rileyink.com/m00nshot
+      examples (Sir Veza, Disappointments/All Of You, High On Life,
+      I'd Hit That) showed that flat iconic emblem backgrounds (badge
+      arches, sunbursts, simplified silhouette skylines) and bold arced
+      text integrated with the subject are *correct* conventions, not
+      the failure mode — the actual line is realistic/perspective
+      rendering vs. flat iconic shapes, not "any background at all."
+      Also broadened "subject" to include objects (cards) and
+      typography-only designs, not just illustrated characters.
+- [ ] Not yet tested live — next test should specifically check whether
+      compositions now land in between (simple + iconic, not empty and
+      not overcomplicated).
 
 ## Content quality (creative feedback after first real daily-scan-quality
 concepts, 2026-09-03)
