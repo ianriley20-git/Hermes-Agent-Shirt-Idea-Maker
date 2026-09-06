@@ -371,3 +371,96 @@ hermes config set terminal.cwd ~/riley-ink-pipeline
 cp ~/riley-ink-pipeline/install/SOUL.md ~/.hermes/SOUL.md
 ```
 then message the bot again.
+
+---
+
+## Part 13 — Email (Stage 6): Gmail via OAuth API, not SMTP
+
+**Skip plain SMTP entirely.** DigitalOcean blocks outbound SMTP ports
+465/587 on every droplet by default (anti-spam policy) — confirmed via
+a raw TCP test that bypassed Hermes completely. No `.env` config fixes
+this; it's a network-level block. See `TODO.md` for the full diagnostic
+trail if curious. The working path is Gmail's OAuth2 API (HTTPS/443),
+via Hermes's `google-workspace` skill.
+
+### Google Cloud setup (in a browser, logged in as your sending Gmail account)
+
+1. `console.cloud.google.com` — the default "My First Project" is fine,
+   no need to create a new one.
+2. Search bar → **Gmail API** → **Enable**.
+3. Left sidebar → **OAuth consent screen** (may appear as "Google Auth
+   Platform") → **Get started** → fill in app name, your email for
+   support/contact, choose **External**, add your sending account as a
+   **test user**.
+4. **Credentials** → **Create Credentials** → **OAuth client ID** →
+   **Desktop app** → Create → **Download JSON**.
+
+### On the server (as `hermes`)
+
+Get the JSON onto the server (open it as text on your phone/computer,
+copy, paste into `nano ~/client_secret.json`), then:
+
+```bash
+python3 ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --client-secret ~/client_secret.json
+```
+
+**Important:** don't run the rest of this with bare `python3` — the
+script tries to `pip install` its dependencies into the system Python,
+which Ubuntu 24.04 blocks (`externally-managed-environment`). Use
+Hermes's own venv Python instead for every subsequent command:
+
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --auth-url
+```
+
+This prints a Google OAuth URL. Open it (logged in as the sending
+account), approve through the "unverified app" warning (expected — this
+app isn't published), and check only the permissions you actually need
+(for sending only: **"Send email on your behalf"**). It'll fail to load
+`http://localhost:1/?code=...` afterward — that's expected, copy the
+full failed-redirect URL and exchange it:
+
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --auth-code 'PASTE_THE_FULL_URL_HERE'
+```
+
+### If you hit `invalid_grant` on the code exchange
+
+This happened during initial setup even with fresh, fast (<1 minute)
+codes — not an expiration issue. What fixed it: **don't do this part
+yourself through the console** — instead, message the bot on Telegram
+and ask it to set up its own Gmail OAuth using its terminal/file tools,
+e.g.:
+
+> I need you to set up Gmail OAuth for yourself using the
+> google-workspace skill. The client secret is already saved at
+> ~/.hermes/google_client_secret.json (or wherever you put it). Use the
+> venv python, not bare python3. Generate the auth URL and give it to me
+> directly here in Telegram — I'll open it, approve, and paste the
+> redirect URL back to you here so you can complete the token exchange
+> yourself.
+
+Hermes can read and patch its own skill code if something's actually
+broken in it, and Telegram's copy/paste is far more reliable than the
+DigitalOcean browser console (no corruption bugs). This combination —
+narrower requested scope plus Hermes handling its own exchange — is
+what actually got a clean `AUTHENTICATED` result after the manual
+console approach kept failing.
+
+### Verify
+
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --check
+```
+
+Then message the bot on Telegram asking it to send you a real test
+email, and **check your actual inbox** — don't just trust a "sent
+successfully" reply.
+
+### Known limitation: no attachments
+
+This skill's `gmail send` has no file-attachment support (confirmed in
+its source, not just docs) — only plain/HTML body. Design images get
+embedded as a base64 data URI inside an `<img>` tag in the HTML body
+instead of a true attachment (see `AGENTS.md` bucket 2). Viewable and
+usually right-click-saveable, but not a clean downloadable attachment.

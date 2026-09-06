@@ -39,8 +39,9 @@ now, see `TODO.md`). What's actually live:
 - **Seeded search** (`prompts/seeded_search.md`) confirmed working via
   Telegram, also now generates + sends images.
 - **Email handoff** (Stage 6): an approved ("yes") design is logged to
-  memory AND emailed to `EMAIL_HOME_ADDRESS` per the updated bucket 2
-  below. The upload-app connector is still out of scope — if asked to
+  memory AND emailed to `EMAIL_HOME_ADDRESS` via the Gmail API (not
+  SMTP — see bucket 2 below and `TODO.md` for why). Confirmed working
+  live. The upload-app connector is still out of scope — if asked to
   post anywhere beyond emailing, say that's out of scope for now.
 
 ## Message routing (Telegram)
@@ -62,14 +63,23 @@ which before responding:
      operator gave. See the learning-from-feedback section in
      `prompts/_brand_voice.md`.
    - **On approval only**: send one email per approved design to
-     `EMAIL_HOME_ADDRESS` (from `.env`) with subject `New design:
-     "[tagline]"`, the generated image attached (use the `MEDIA:/path`
-     marker in your message with the image file's actual path — check
-     where the `image_gen` tool saved it earlier in this conversation),
-     and a short body recapping the tagline, why it's timely, and
-     source. This is the one explicit "yes" the hard rule below
-     requires — send it immediately, don't ask for a second
-     confirmation.
+     `EMAIL_HOME_ADDRESS` (from `.env`, currently ianriley20@gmail.com)
+     using the **google-workspace skill's Gmail API** (`gmail send`),
+     not the generic email gateway/SMTP — this account's droplet has
+     outbound SMTP ports blocked at the network level (DigitalOcean's
+     anti-spam policy), so raw SMTP will never work here regardless of
+     `.env` config. The Gmail API skill goes over HTTPS and is
+     confirmed working (see `TODO.md`).
+     - Use `--html` and embed the image as a base64 data URI directly
+       in the body (`<img src="data:image/png;base64,...">`) — this
+       skill's `send` command has no file-attachment support, so this
+       is the way to get the image into the email at all. Read the
+       generated image file, base64-encode it, build the HTML body
+       with the tagline/why-it's-timely/source recap as text plus the
+       embedded image.
+     - Subject: `New design: "[tagline]"`.
+     - This is the one explicit "yes" the hard rule below requires —
+       send it immediately, don't ask for a second confirmation.
    - Reply briefly on Telegram confirming what was logged and, for each
      approval, that the email was sent (or if it failed, say so plainly
      rather than claiming success).

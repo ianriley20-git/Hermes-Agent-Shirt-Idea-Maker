@@ -144,40 +144,70 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       concept (up to 3/day, up to 6 per on-demand search) rather than
       only after a separate approval-to-generate step. Worth keeping an
       eye on actual OpenAI usage/cost after a few days.
-## Stage 6 (email handoff)
-- [x] `AGENTS.md` bucket 2 now sends one email per approved design
-      (subject `New design: "[tagline]"`, image attached via the
-      `MEDIA:/path` marker, body recaps why-it's-timely/source) to
-      `EMAIL_HOME_ADDRESS`, in addition to logging to memory. Uses
-      Hermes's built-in email gateway/send-message tool — no custom
-      connector code needed.
-- [ ] **Sender account setup in progress**: a dedicated Gmail account
-      for outbound send, with an app password (2FA required first).
-      Recipient confirmed as ianriley20@gmail.com. Once the app
-      password exists, add to `~/.hermes/.env` on the server:
-      `EMAIL_ADDRESS`, `EMAIL_PASSWORD` (the app password, not the
-      regular login), `EMAIL_SMTP_HOST=smtp.gmail.com`,
-      `EMAIL_SMTP_PORT=587`, `EMAIL_IMAP_HOST=imap.gmail.com`,
-      `EMAIL_IMAP_PORT=993`, `EMAIL_HOME_ADDRESS=ianriley20@gmail.com`
-      — then `hermes gateway setup` again to add the Email platform,
-      restart the gateway, `/new --yes`, and retest.
-- [ ] Hermes had a known bug (now closed/fixed upstream, per GitHub
-      issue #15160) where outbound emails were accepted by SMTP but
-      silently bounced downstream due to a missing Date header. Our
-      version (0.19.0) should postdate the fix, but **verify by
-      actually checking the inbox** after the first real test — don't
-      just trust the bot's "email sent" confirmation.
-- [ ] Not yet tested live — first real test happens once the Gmail app
-      password is in place.
-- [ ] **Blocked on DigitalOcean**: outbound SMTP ports 465/587 are
-      blocked by default on all droplets (confirmed via direct TCP
-      test — port 443 works, 465/587 both fail to even complete a TCP
-      handshake). This is DO's standard anti-spam policy, not a config
-      bug. Fix: file a support ticket at cloud.digitalocean.com/support
-      requesting ports 465/587 be unblocked for low-volume transactional
-      email; not instant or 100% guaranteed. Fallback if denied/slow:
-      switch to a transactional email provider that supports port 2525
-      (e.g. Mailjet), which DO does not block.
+## Stage 6 (email handoff) — SOLVED via Gmail OAuth API, confirmed live
+- [x] **Root cause, fully confirmed**: DigitalOcean blocks outbound SMTP
+      ports 465/587 on all droplets by default (anti-spam policy).
+      Verified three independent ways: Hermes's own SMTP attempt timed
+      out; a raw `bash -c "echo > /dev/tcp/smtp.gmail.com/587"` TCP test
+      (bypassing Hermes/SMTP entirely) timed out on 465/587 while
+      succeeding instantly on 443; and a local `ufw`/`iptables` check
+      ruled out a self-inflicted local firewall (default outgoing
+      policy is allow-everything, no local rule blocks mail ports).
+      This means **no SMTP-based approach will ever work on this
+      droplet** — not our original setup, not the "himalaya" skill, not
+      a different Gmail account. It's not a credentials or config
+      issue. Filing a DO support ticket to unblock the ports remains a
+      valid future option but was **not needed** in the end.
+- [x] **Fix that worked**: the `google-workspace` skill's Gmail
+      integration uses OAuth2 over the Gmail API (HTTPS/443), which
+      completely bypasses the SMTP port block. Setup: created a Google
+      Cloud project ("My First Project" is fine, no need for a new
+      one), enabled the Gmail API (Calendar/Drive/Docs/Sheets/People
+      were also enabled while debugging but turned out unnecessary —
+      harmless to leave enabled), configured the OAuth consent screen
+      (External, test user = designmakerbot@gmail.com), created a
+      Desktop-app OAuth client, downloaded the client secret JSON.
+- [x] **The `invalid_grant` wall, and how it actually got resolved**:
+      the documented `--services email` / `--format json` flags don't
+      exist on the installed script version, so early attempts
+      requested the full scope list (Gmail + Calendar + Drive + Docs +
+      Sheets + Contacts) via `--auth-url` with no way to narrow it —
+      exchange consistently failed with `invalid_grant` even on
+      fresh, fast (<1 min) codes, which ruled out simple expiration.
+      **What actually fixed it**: asked Hermes itself (via Telegram) to
+      set up its own Gmail OAuth using its terminal/file tools — it
+      read `setup.py`'s source directly and patched the skill to
+      support a narrower Gmail-only scope request. The very next
+      `--auth-url` requested only `gmail.readonly`/`gmail.send`/
+      `gmail.modify` (no Calendar/Drive/etc.), and the code exchange
+      succeeded immediately. We never fully isolated whether the root
+      cause was the broader scope request itself or something else the
+      patch also touched — but the practical fix is confirmed and
+      reproducible: **have Hermes run/patch its own OAuth setup via
+      Telegram rather than relaying raw shell commands through the
+      DigitalOcean console** — this also sidesteps that console's
+      paste-corruption bug entirely, since Telegram's copy/paste is
+      reliable and Hermes can read a pasted redirect URL as a normal
+      message instead of a human retyping/relaying it.
+- [x] **Confirmed working live**: asked the bot to send a real test
+      email (to ianriley20@gmail.com) via the Gmail API — arrived,
+      verified by actually checking the inbox (not just trusting the
+      bot's claim).
+- [x] `AGENTS.md` bucket 2 updated to send approved designs via
+      `gmail send --html` (google-workspace skill) instead of the
+      generic SMTP email gateway. **Real limitation**: this skill's
+      `send` command has no file-attachment support (confirmed via its
+      actual source, not just docs) — worked around by embedding the
+      image as a base64 data URI directly in the HTML body instead of
+      a true attachment. Viewable/right-click-saveable in most email
+      clients, not a clean downloadable attachment.
+- [ ] Not yet tested end-to-end with an actual approved-design email
+      (image embedded, real tagline/subject) — only a plain test email
+      confirmed so far. Test this the next time a design gets a "yes."
+- [ ] Credentials for this now live at `~/.hermes/google_client_secret.json`
+      and `~/.hermes/google_token.json` on the server (not in git,
+      analogous to `.env`) — if the droplet is ever rebuilt, this whole
+      OAuth setup needs to be redone from scratch.
 
 ## Content quality (creative feedback after first real daily-scan-quality
 concepts, 2026-09-03)
