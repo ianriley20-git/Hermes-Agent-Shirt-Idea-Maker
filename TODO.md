@@ -285,6 +285,32 @@ concepts, 2026-09-03)
       batch size and the reuse-phrase path (may take a few runs before
       a "verified widely-circulated" phrase actually turns up).
 
+## Research quality improvements (2026-09-06)
+- [x] **Vision, not just text**: research was reading titles/descriptions
+      about reference designs, never actually looking at them. Added
+      explicit instruction to use the `vision` tool on a handful (3-5)
+      of product thumbnail images per run via the `browser` tool, in
+      `config/reference_sites.md`. Kept intentionally limited — this is
+      the highest-cost part of research, use selectively.
+- [x] **Bestseller marketplaces as a source**: added Amazon (novelty
+      t-shirts, sorted by Best Sellers Rank) and Etsy (sorted by "Best
+      selling") as additional format sources beyond the curated 10-site
+      list, weighted by actual sales/review signal rather than just
+      "this exists somewhere."
+- [x] **Persistent format library**: found that Hermes's built-in Memory
+      (MEMORY.md) has a hard 2200-character limit — far too small for a
+      growing catalog, it's meant for a handful of always-in-context
+      facts, not accumulated data. Instead, the agent now maintains a
+      plain file at `~/format_library.md` on the server, deliberately
+      **outside** this git repo so it never conflicts with a `git pull`.
+      Checked before fresh browsing, appended to when something new
+      turns up. Should compound in usefulness over time and reduce
+      research tool-call volume (helps with the rate-limit issue too).
+- [ ] Not yet tested live. `~/format_library.md` doesn't exist yet — the
+      first run that reaches Step 3/4 should create it from scratch.
+      Worth checking after a few runs that it's actually accumulating
+      entries, not getting recreated empty each time.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

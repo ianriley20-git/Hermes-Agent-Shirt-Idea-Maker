@@ -38,10 +38,15 @@ a clear upward spike, not just steady baseline interest. Same as Step 1
 
 ## Step 3 — Reference site format match (primary creative source)
 
-Read `config/reference_sites.md`. This is where concepts actually get
-drafted — the main creative step, not a style check. For each topic
-flagged as hot in Steps 1-2, browse the reference sites and use one of
-the two paths documented there:
+Read `config/reference_sites.md` in full — it covers the fixed
+reference sites, Amazon/Etsy bestseller checks, using `vision` on
+product images (not just text), and the persistent `~/format_library.md`
+catalog. This is where concepts actually get drafted — the main
+creative step, not a style check. Check the format library first for
+anything already-catalogued relevant to today's hot topics before
+browsing fresh, and append anything new/notable you find. For each
+topic flagged as hot in Steps 1-2, use one of the two paths documented
+there:
 
 1. **Format inspiration (most concepts)**: note the underlying
    format/structure of a design that fits (e.g. "historical figure

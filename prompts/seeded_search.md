@@ -53,8 +53,13 @@ differentiation check, and as more signal for Step 4).
 
 ## Step 4 — Reference site format match (primary creative source)
 
-Read `config/reference_sites.md`. This is where concepts actually get
-drafted — the main creative step, not a style check. For each angle
+Read `config/reference_sites.md` in full — it covers the fixed
+reference sites, Amazon/Etsy bestseller checks, using `vision` on
+product images (not just text), and the persistent `~/format_library.md`
+catalog. This is where concepts actually get drafted — the main
+creative step, not a style check. Check the format library first for
+anything already-catalogued relevant to this theme before browsing
+fresh, and append anything new/notable you find. For each angle
 surfaced in Steps 1-3 (or the theme generally, if nothing specific
 surfaced), use one of the two paths documented there:
 

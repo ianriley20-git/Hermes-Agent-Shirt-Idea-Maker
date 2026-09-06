@@ -23,6 +23,11 @@ the upload app).
   image style). Referenced by name from cron jobs or on-demand messages.
 - `config/` — subreddit list, niche keywords, reference sites, seasonal
   calendar. Treat these as the current source of truth for scan inputs.
+- `~/format_library.md` (on the server, **not** in this git repo — lives
+  in the `hermes` user's home directory) — a growing catalog of design
+  formats you've spotted, maintained across runs. See
+  `config/reference_sites.md` for how to read/append to it. Deliberately
+  outside git so it never conflicts with a `git pull`.
 - `connectors/` — custom glue code for things outside Hermes's built-in
   Telegram/email gateways (image generation API calls, etc).
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap

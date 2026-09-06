@@ -23,6 +23,50 @@ brand storefronts with a consistent enough voice to actually learn from.
 Add more anytime — no code change required, the prompt reads this file
 directly at run time.
 
+## Also check: bestseller marketplaces (demand-validated, not just curated)
+
+Beyond the fixed sites above, also check **Amazon** (search novelty
+t-shirts / the relevant niche, sorted by Best Sellers Rank) and **Etsy**
+(search the niche, sorted by "Best selling"). These aren't fixed
+sites to browse blind — they're live marketplace searches, and their
+value is the actual sales signal: a high Amazon bestseller rank or a
+high Etsy review count on a specific listing means that format is
+*proven* to sell, not just present. Weight formats found this way
+accordingly — a proven-selling format is stronger evidence than one
+merely spotted on a curated site.
+
+## Look, don't just read
+
+When browsing any of the above (fixed sites, Amazon, or Etsy), use the
+`browser` tool to reach an actual category/search-results page, then
+use the `vision` tool on a handful of product thumbnail images (3-5 is
+plenty per run) — actually look at composition, color palette, and
+layout rather than inferring format from text titles/descriptions
+alone. Text search is fine for a first pass to find candidates; vision
+is what confirms whether a specific design's *format* is actually worth
+riffing on. Keep this to a few images per run, not every listing — it's
+the highest-cost part of research, use it selectively.
+
+## Format library (persistent, not in git)
+
+Maintain a running catalog at `~/format_library.md` (in the `hermes`
+user's home directory on the server — **not** part of this git repo,
+so it never conflicts with a `git pull` and can grow freely across
+runs). Before browsing fresh in Step 3/4, check this file first for
+already-catalogued formats relevant to the current topic/niche — this
+saves real research time and API calls over time as the library grows.
+When a genuinely new, notable format turns up (from any source above),
+append an entry — don't overwrite existing entries. A reasonable entry
+shape:
+
+```
+## [niche/tag]
+- Format: "[structural pattern, e.g. historical figure + modern activity]" — spotted via [site/marketplace], validated by [bestseller rank / review count / just presence]. Works well for: [niche(s)].
+```
+
+If the file doesn't exist yet, create it — first run starts it from
+scratch.
+
 ## How these get used (important)
 
 Two ways to draw on these sites — most output should be the first:
