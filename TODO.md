@@ -33,6 +33,13 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       `loginctl enable-linger hermes` (as root) run *first*, and the
       session may need `export XDG_RUNTIME_DIR=/run/user/1000` set
       manually before `systemctl --user` commands work.
+- [x] Heavier tasks (deep seeded searches with many web searches back to
+      back) can trip OpenAI's rate limit faster than Hermes's default
+      retry budget (3 retries/4 attempts) absorbs, surfacing "please
+      wait and try again" to the operator. Fixed by raising
+      `agent.api_max_retries` to 10 (`hermes config set
+      agent.api_max_retries 10`) — now in the install guide's Part 8b
+      as a standard setup step, not something to hit and fix later.
 
 ## Stage 2 (daily trend scan)
 - [ ] `config/subreddits.md` ships with placeholder subreddit names — needs

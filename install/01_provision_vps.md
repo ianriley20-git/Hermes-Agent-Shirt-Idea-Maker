@@ -218,6 +218,22 @@ systemctl --user restart hermes-gateway.service
 
 ---
 
+## Part 8b — Make the agent more patient with API rate limits
+
+Heavier tasks (a deep seeded search can fire off 8+ web searches in
+quick succession) can trip the model provider's rate limit. Hermes
+already auto-retries with backoff, but the default is only 3 retries (4
+attempts) before it gives up and asks you to manually say "try again."
+Raise that so it absorbs bursts on its own:
+
+```bash
+hermes config set agent.api_max_retries 10
+```
+
+Takes effect immediately, no restart needed.
+
+---
+
 ## Part 9 — Create your Telegram bot
 
 From the Telegram app (phone or desktop), not the server:
