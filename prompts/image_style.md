@@ -15,26 +15,53 @@ requested, default to Style A.
 ### Fixed header (always include, exactly as written)
 
 ```
-Vintage retro t-shirt illustration, mid-high detail screen print graphic, simulate a 3-to-5-color ink print on a dark shirt, use multiple distinct light ink colors across the design — for example cream/off-white, orange or red, and navy or blue, plus a warm skin-tone ink where a face or figure appears — rather than a single accent color, no black or dark ink in the design itself, all shadows, outlines, and depth within the design are created using negative space where the dark shirt color shows through, do not fill dark areas of the design with color, forms must be defined by cutout shapes and negative space instead of strokes or outlines, layered flat ink shapes with internal detail, balanced detail not overly simplified, slightly distressed vintage texture, 70s 80s retro athletic aesthetic, print-ready design, centered composition, solid black background filling the entire image (this represents the dark shirt itself — not a transparent or white background, the design must be immediately readable against it), avoid sticker style, avoid patch style, avoid logo outline style, no gradients, no glow, no 3D, no realism, no soft shading, no drop shadows, no thick outlines, avoid monochrome or two-tone results — vary the ink colors meaningfully across different elements of the design rather than rendering everything in one tan/gold ink.
+Vintage retro t-shirt illustration, mid-high detail screen print graphic, simulate a 3-to-5-color ink print on a dark shirt, use multiple distinct light ink colors across the design — for example cream/off-white, orange or red, and navy or blue, plus a warm skin-tone ink where a face or figure appears — rather than a single accent color, no black or dark ink in the design itself, all shadows, outlines, and depth within the design are created using negative space where the dark shirt color shows through, do not fill dark areas of the design with color, forms must be defined by cutout shapes and negative space instead of strokes or outlines, layered flat ink shapes with internal detail, slightly distressed vintage texture, 70s 80s retro athletic aesthetic, print-ready design, centered composition, exactly ONE central subject and nothing else — no crowd, no bystanders, no second or third character unless the joke is specifically and only about two people interacting closely, set against a plain flat background with no implied room, aisle, store, or physical environment of any kind, no perspective or vanishing-point depth, no receding background elements, at most one or two small simple graphic accents (a star, a stripe, a simple badge shape) rather than scattered props, icons, or background objects, one single unified text lockup rather than multiple separate text blocks, side banners, hanging tags, or arched marquee-style text, all detail lives inside the one subject itself (linework, texture, cross-hatching) rather than being spread across additional elements or a populated scene, solid black background filling the entire image (this represents the dark shirt itself — not a transparent or white background, the design must be immediately readable against it), avoid sticker style, avoid patch style, avoid logo outline style, avoid movie-poster or album-cover composition, no gradients, no glow, no 3D, no realism, no soft shading, no drop shadows, no thick outlines, avoid monochrome or two-tone results — vary the ink colors meaningfully across different elements of the design rather than rendering everything in one tan/gold ink.
 ```
 
-### Real reference designs (rileyink.com — ground truth for the color fix above)
+### Real reference designs (rileyink.com — ground truth for both color and simplicity)
 
-- **"Safety Third"**: cream script text, orange accent text, blue/red star details, full-color face/figure — on black.
-- **"Did Someone Say Oil?"**: cream Uncle Sam figure, red bow tie and lettering, white outline text — on black.
-- **"USA"** (Washington dunking): red bold lettering, white outline, navy uniform details — on red.
-- **"Spilling the Tea Since '73"**: cream figures, orange script text, multicolor striped accent bar — on black.
+- **"Safety Third"**: one figure, no background environment, one text lockup — on black.
+- **"Did Someone Say Oil?"**: one figure, small background icons (oil derricks) but no implied room/scene, one text lockup — on black.
+- **"USA"** (Washington dunking): one figure, no background at all beyond the shirt color, one bold text lockup — on red.
+- **"Spilling the Tea Since '73"**: two figures in one tight grouping (not a scene — no room, no other characters), one text lockup — on black.
 
-None of these are one-tone-plus-negative-space — every one uses at least 3 distinct inks. Match this density of color, not the flatter look from earlier tests.
+Every one of these is a subject (or two, tightly grouped) directly against the shirt color — never a populated environment. Match this level of restraint, not a movie-poster or album-cover composition.
+
+### Compositional simplicity (critical — this is the current #1 failure mode)
+
+Test output has looked "AI generated" specifically when the composition
+tries to do too much — the fix isn't the rendering style (which has been
+right), it's restraint in what gets included:
+
+- **Reject the instinct to build a scene.** A grocery store aisle with
+  receding shelves, a throne room with courtiers, a doctor's office with
+  an exam table — these are movie-poster/illustration thinking, not
+  t-shirt-graphic thinking. There is no "set," no implied room, no
+  perspective depth. Just the subject against the shirt color.
+- **Reject the instinct to add a cast.** One subject doing one thing.
+  Not a hero plus reacting bystanders, not a player plus a doctor. If
+  the concept technically involves two roles (e.g. "coach blaming
+  someone"), either pick the single stronger image or keep both figures
+  tightly grouped as one unit — never a scene with several people placed
+  around a space.
+- **Reject the instinct to fill empty space with props.** No shelves of
+  bottles, no scattered small icons, no hanging price tags, no
+  side-banner decorations. If the composition feels "empty," that's
+  correct — real screen-print tees are mostly negative space around one
+  bold subject.
+- **One text lockup, not several.** No arched marquee text plus a
+  separate subtitle plus a separate tag — one tagline treatment.
 
 ### Per-design fields
 
 Unlike Style B, the style/mood here is fixed by the header above — only
 two things vary per design:
 
-- **Scene**: the illustrated subject/action, concrete and specific
-  (subject, pose, key details) — comes from the concept's "Visual
-  concept" line, expanded into a real description.
+- **Scene**: the single subject/action only, concrete and specific
+  (one subject, its pose, key details) — comes from the concept's
+  "Visual concept" line, expanded into a real description. Not a
+  populated scene — see "Compositional simplicity" above before writing
+  this.
 - **Text treatment**: the exact text (usually the tagline or a short
   excerpt of it) plus a font/style note when it matters to the joke
   (e.g. a knight motif wants a medieval-style font; a monster wants a
@@ -66,14 +93,18 @@ text treatment (same shape as the worked examples above).
 ### Fixed header (always include, exactly as written)
 
 ```
-Please generate a graphic. A vintage-style graphic t-shirt design. Style: flat graphic illustration, screen-print aesthetic, limited color palette of 3–5 colors, no photorealism. The design should read clearly as a standalone centered chest graphic suitable for a t-shirt. White background, isolated design only, no model or shirt mockup. Distressed or clean retro look depending on the design. Bold typography integrated into the graphic. The overall feel should match classic American novelty, vintage sports, or pop culture humor tees. The output should be the graphic design element only — no shirt, no fabric, no clothing shape. Render it as a standalone logo/graphic on a plain white background, as if it were a vector art file ready for printing.
+Please generate a graphic. A vintage-style graphic t-shirt design. Style: flat graphic illustration, screen-print aesthetic, limited color palette of 3–5 colors, no photorealism. The design should read clearly as a standalone centered chest graphic suitable for a t-shirt. White background, isolated design only, no model or shirt mockup. Distressed or clean retro look depending on the design. Bold typography integrated into the graphic. The overall feel should match classic American novelty, vintage sports, or pop culture humor tees. Exactly one central subject and nothing else — no crowd, no bystanders, no background environment, no implied room or setting, no perspective depth, no scattered background props or icons, one single text lockup only. The output should be the graphic design element only — no shirt, no fabric, no clothing shape. Render it as a standalone logo/graphic on a plain white background, as if it were a vector art file ready for printing.
 ```
+
+See "Compositional simplicity" under Style A above — the same rule
+applies here: one subject, no scene, no cast, no clutter. That's the
+current #1 failure mode across both styles.
 
 ### Per-design fields
 
-- **Main graphic**: the central illustrated scene/subject. Expand the
-  concept's "Visual concept" line into a concrete illustrated
-  description (subject, pose, expression, key props).
+- **Main graphic**: the single central subject only — not a populated
+  scene. Expand the concept's "Visual concept" line into a concrete
+  illustrated description (subject, pose, expression, key props).
 - **Main text**: text/lettering integrated into the graphic (often
   shorter than the full tagline — a number, phrase, or word treated as
   a graphic element).
