@@ -54,7 +54,7 @@ each one:
 
 0. Repo scaffold (this commit)
 1. Hermes install + Telegram wired up, no research/image logic yet
-2. Daily trend scan → 3 concepts/day on Telegram
+2. Daily trend scan → 4-6 concepts/day on Telegram
 3. On-demand seeded search on a theme you message the bot
 4. Seasonal calendar nudges (opt-in via yes/no)
 5. Image generation from approved concepts, sent to Telegram for approval

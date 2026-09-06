@@ -1,7 +1,7 @@
 # Daily trend scan
 
-Run via a scheduled cron job. Produces at most 3 shirt design concepts
-and sends them to the operator on Telegram. This file is the full
+Run via a scheduled cron job. Produces 4 to 6 shirt design concepts and
+sends them to the operator on Telegram. This file is the full
 instruction set — the cron job itself just points here.
 
 Before doing anything else, read `prompts/_brand_voice.md` in full,
@@ -40,12 +40,20 @@ a clear upward spike, not just steady baseline interest. Same as Step 1
 
 Read `config/reference_sites.md`. This is where concepts actually get
 drafted — the main creative step, not a style check. For each topic
-flagged as hot in Steps 1-2, browse the reference sites for a design
-whose underlying **format/structure** fits (e.g. "historical figure
-doing a modern activity," "a name turned into a pun," "a single deadpan
-word standalone"), then draft an original concept applying that format
-to the current topic — entirely new wording/subject, never another
-shop's specific tagline or artwork.
+flagged as hot in Steps 1-2, browse the reference sites and use one of
+the two paths documented there:
+
+1. **Format inspiration (most concepts)**: note the underlying
+   format/structure of a design that fits (e.g. "historical figure
+   doing a modern activity," "a name turned into a pun"), then draft an
+   original concept in that pattern — entirely new wording/subject.
+2. **Verified-generic phrase reuse (at most 1-2 of the day's batch)**:
+   if a phrase you find is confirmed (via the verification check in
+   `config/reference_sites.md`) to be a widely-circulated generic
+   meme/joke rather than one shop's specific invention, it's fair game
+   to reuse the exact wording paired with fully original Riley Ink
+   artwork. Mark these with `Origin: reused phrase` in Step 7's output;
+   everything else is `Origin: original`.
 
 If Steps 1-2 turned up little topical signal, it's fine to draft a
 concept straight from a strong reference-site format applied to one of
@@ -82,10 +90,11 @@ Riley Ink's voice, that's an expected outcome, not a failure to fix.
 
 ## Step 7 — Finalize concepts
 
-Settle on **at most 3** ideas, each with:
+Settle on **4 to 6** ideas, each with:
 
 ```
 Tagline: "..."
+Origin: original | reused phrase (verified widely-circulated)
 Visual concept: [one line]
 Why it's timely: [one line, cite the actual signal — subreddit post,
   trends spike, reference-site format, or Etsy gap]
@@ -94,13 +103,16 @@ Source: [subreddit name / trends keyword / reference site / etsy search]
 
 The tagline itself should be short and stand alone (see
 `_brand_voice.md`'s "not a news caption" rule) — the "why it's timely"
-line is where the specific fact/citation belongs, not the tagline.
+line is where the specific fact/citation belongs, not the tagline. At
+most 1-2 of the batch should be `Origin: reused phrase` — the rest must
+be original (see Step 3 and `config/reference_sites.md` for the reuse
+verification requirement).
 
-If fewer than 3 ideas clear the bar, use fewer — never pad with weaker
-ideas to hit 3. If nothing clears the bar at all, skip straight to
-Step 9 and send only the "nothing cleared the bar" message — don't run
-Step 8 (image generation costs money and time; don't spend either on
-a concept that didn't earn it).
+If fewer than 4 ideas clear the bar, use fewer — never pad with weaker
+ideas to hit the range. If nothing clears the bar at all, skip straight
+to Step 9 and send only the "nothing cleared the bar" message — don't
+run Step 8 (image generation costs money and time; don't spend either
+on a concept that didn't earn it).
 
 ## Step 8 — Generate images
 
@@ -122,6 +134,7 @@ caption:
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / reference site / etsy search]
+[Origin: reused phrase, verified widely-circulated — only include this line for reused-phrase concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
 to more than one).

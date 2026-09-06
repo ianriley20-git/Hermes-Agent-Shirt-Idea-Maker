@@ -238,9 +238,13 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       rendering vs. flat iconic shapes, not "any background at all."
       Also broadened "subject" to include objects (cards) and
       typography-only designs, not just illustrated characters.
-- [ ] Not yet tested live — next test should specifically check whether
-      compositions now land in between (simple + iconic, not empty and
-      not overcomplicated).
+- [x] **Confirmed working live** — operator called the resulting designs
+      "perfect." Two more small refinements landed after this: emblem
+      backgrounds were showing up in every design (should be occasional,
+      most designs have none — fixed by making "no background" the
+      explicit default), and trailing periods on rendered text were
+      visually unbalancing bold display lettering (fixed by stripping
+      unnecessary punctuation).
 
 ## Content quality (creative feedback after first real daily-scan-quality
 concepts, 2026-09-03)
@@ -261,6 +265,25 @@ concepts, 2026-09-03)
       Reddit/Trends checks, not just a style check.
 - [ ] Not yet tested live — next daily scan or seeded search will be the
       first to reflect both fixes.
+
+## Daily batch size + phrase reuse policy (2026-09-06)
+- [x] Daily scan raised from "at most 3" to "4 to 6" concepts, matching
+      seeded_search.md's range. Updated `daily_scan.md` and README.md.
+- [x] Added a second, capped path for drawing on reference sites: if a
+      phrase is *verified* (via a cross-shop search, not just spotted
+      once) to be a widely-circulated generic meme rather than one
+      shop's specific invention, it's fair game to reuse the exact
+      wording paired with 100% original Riley Ink artwork — short
+      phrases aren't copyrightable, and this is standard novelty-tee
+      practice. Capped at 1-2 of any batch; the rest stay original.
+      Every concept now carries an `Origin: original` or
+      `Origin: reused phrase` label so the operator can always tell
+      which is which. Documented the verification requirement in
+      `config/reference_sites.md`, wired into both `daily_scan.md` and
+      `seeded_search.md`.
+- [ ] Not yet tested live — next run is the first to reflect the larger
+      batch size and the reuse-phrase path (may take a few runs before
+      a "verified widely-circulated" phrase actually turns up).
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

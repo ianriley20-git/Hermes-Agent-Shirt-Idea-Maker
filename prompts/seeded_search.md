@@ -56,14 +56,21 @@ differentiation check, and as more signal for Step 4).
 Read `config/reference_sites.md`. This is where concepts actually get
 drafted — the main creative step, not a style check. For each angle
 surfaced in Steps 1-3 (or the theme generally, if nothing specific
-surfaced), browse the reference sites for a design whose underlying
-**format/structure** fits (e.g. "historical figure doing a modern
-activity," "a name turned into a pun," "a single deadpan word
-standalone"), then draft an original concept applying that format to
-this theme — entirely new wording/subject, never another shop's
-specific tagline or artwork. Aim for enough concepts here across
-different formats to comfortably reach Step 8's 4-6 target after
-filtering.
+surfaced), use one of the two paths documented there:
+
+1. **Format inspiration (most concepts)**: note the underlying
+   format/structure of a design that fits (e.g. "historical figure
+   doing a modern activity," "a name turned into a pun"), then draft an
+   original concept in that pattern for this theme.
+2. **Verified-generic phrase reuse (at most 1-2 of the batch)**: if a
+   phrase is confirmed (via the verification check in
+   `config/reference_sites.md`) to be a widely-circulated generic
+   meme/joke, it's fair game to reuse the exact wording with fully
+   original Riley Ink artwork. Mark these `Origin: reused phrase` in
+   Step 8's output; everything else is `Origin: original`.
+
+Aim for enough concepts here across different formats to comfortably
+reach Step 8's 4-6 target after filtering.
 
 ## Step 5 — Etsy cross-check
 
@@ -96,6 +103,7 @@ each with:
 
 ```
 Tagline: "..."
+Origin: original | reused phrase (verified widely-circulated)
 Visual concept: [one line]
 Why it's timely: [one line, cite the actual signal]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
@@ -103,7 +111,9 @@ Source: [subreddit / trends phrase / reference site / web result / etsy search]
 
 The tagline itself should be short and stand alone (see
 `_brand_voice.md`'s "not a news caption" rule) — the "why it's timely"
-line is where the specific fact/citation belongs, not the tagline.
+line is where the specific fact/citation belongs, not the tagline. At
+most 1-2 of the batch should be `Origin: reused phrase` — the rest must
+be original.
 
 If nothing on this theme clears the bar, skip straight to Step 10 and
 send only the "nothing cleared the bar" message — don't run Step 9.
@@ -129,6 +139,7 @@ caption:
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
+[Origin: reused phrase, verified widely-circulated — only include this line for reused-phrase concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
 to more than one).
