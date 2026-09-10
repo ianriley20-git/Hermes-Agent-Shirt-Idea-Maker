@@ -83,23 +83,37 @@ that pattern with its own wording and subject.
 
 **2. Direct reuse.** Take an existing design's tagline/text and concept
 directly as the basis for a new Riley Ink design — no cross-shop
-verification needed, no tight cap. Label it `Origin: reused` (vs.
-`Origin: original`) so the operator can always see the mix, but it's
-fine for reused concepts to be most or all of a batch if that's where
-the strongest material is.
+verification needed, no tight cap, no requirement that it be "generic."
+A phrase is fair game even when it's associated with a specific seller,
+artist, song, campaign, or existing piece of merchandise. Label it
+`Origin: reused` (vs. `Origin: original`) so the operator can always
+see the mix, but it's fine for reused concepts to be most or all of a
+batch if that's where the strongest material is. Saturation/marketplace
+checks (Step 4/5 of `daily_scan.md`/`seeded_search.md`) inform demand
+and how to make the illustration distinctive — they never disqualify or
+down-rank a phrase.
 
 **The one rule that still matters: always independently illustrate the
-artwork.** Copyright protects specific *expression*, not ideas or
-short text — so the text/concept is unrestricted, but the actual
-composition should be Riley Ink's own creative execution, not a close
-trace of a specific existing image. In practice this is barely a
-constraint: a generic/stock pose or layout (a person raising a mug, a
-character in an action pose) is totally fine to riff on since it isn't
-distinctively protectable to begin with. The only case worth pausing
-on is a reference design with an unusually specific, distinctive
-composition (an unusual pose, an unusual arrangement of elements) —
-for those, design a genuinely different composition around the same
-text/concept rather than mirroring it closely, even with new
-rendering. This almost never comes up with the generic joke formats
-this pipeline works with, but it's the one thing to actually think
-about rather than reuse verbatim.
+artwork.** Text/concept reuse is unrestricted, but every generated
+image must be Riley Ink's own original creative execution:
+
+- Never copy or closely mimic another product's actual artwork or
+  composition — see the "generic pose vs. distinctive composition"
+  distinction below.
+- Never reproduce a **logo** or **branded trade dress** (a brand's
+  distinctive overall look/packaging/presentation) — this is a
+  trademark/unfair-competition concern, separate from and in addition
+  to the copyright point below.
+- Never depict a **recognizable character** (someone else's IP) or a
+  **real person's likeness** (celebrity, athlete, etc.) without
+  rights to do so — this is a right-of-publicity concern, also
+  separate from copyright.
+
+On the composition point specifically: copyright protects specific
+*expression*, not ideas — so a generic/stock pose or layout (a person
+raising a mug, a character in an action pose) is fine to riff on since
+it isn't distinctively protectable to begin with. The only case worth
+pausing on is a reference design with an unusually specific,
+distinctive composition — for those, design a genuinely different
+composition around the same text/concept rather than mirroring it
+closely, even with new rendering.

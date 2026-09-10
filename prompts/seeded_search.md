@@ -85,12 +85,17 @@ Search Etsy for the theme + "shirt" / "t-shirt". Note how saturated it
 is and what angles are already overdone — this directly informs which
 concepts in Step 8 should lean toward a less-obvious take.
 
-## Step 6 — Riley Ink catalog check (avoid duplicates)
+## Step 6 — Riley Ink catalog check (awareness, not a phrase blocker)
 
-Search rileyink.com for anything close to each surviving concept (by
-topic and by similar tagline wording). Drop concepts that genuinely
-overlap an existing product's joke/angle — being in the same general
-niche as an existing product is fine, being the same joke isn't.
+Search rileyink.com for anything close to each surviving concept, so
+the run knows what's already live. Don't drop or rewrite a concept's
+wording just because it (or something similar) already appears in the
+catalog — reusing the same or similar phrasing with a materially
+different, original illustration is allowed under the current reuse
+policy (see `config/reference_sites.md`). What to actually avoid:
+accidentally regenerating the *same finished visual treatment* Riley
+Ink already sells — same phrase AND same illustration/composition.
+That's a real duplicate; a fresh illustration of familiar wording isn't.
 
 ## Step 7 — Filter for brand voice
 

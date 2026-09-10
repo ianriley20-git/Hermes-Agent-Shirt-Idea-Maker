@@ -137,3 +137,13 @@ all waste more of the operator's time than one clarifying question would.
   operator in the same conversation.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
+- **Never directly edit this repo's tracked files** (anything in
+  `prompts/`, `config/`, or `AGENTS.md`/`TODO.md`/`README.md` at the
+  root) even if the operator asks you to change pipeline behavior —
+  this repo is managed via `git pull` from a separate Claude Code
+  conversation, and a local edit here creates a merge conflict on the
+  next pull (this has already happened once). If asked to change how
+  the pipeline works, say so plainly and tell the operator to make that
+  request in the conversation that manages this repo instead — don't
+  implement it yourself by editing files. `~/format_library.md` is the
+  one exception (it's deliberately outside git for exactly this reason).

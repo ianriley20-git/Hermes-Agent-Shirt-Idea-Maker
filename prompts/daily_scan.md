@@ -73,14 +73,17 @@ saturated/generic they look. This is a sense check, not a blocker — a
 crowded niche isn't automatically disqualifying if Riley Ink's angle on
 it is genuinely different, but flag it either way.
 
-## Step 5 — Riley Ink catalog check (avoid duplicates)
+## Step 5 — Riley Ink catalog check (awareness, not a phrase blocker)
 
-Search rileyink.com for anything close to each surviving concept (by
-topic and by similar tagline wording). If something very close already
-exists in the catalog, drop that concept — the goal is new ideas, not
-reskins of what's already for sale. A concept that's merely in the same
-general niche as an existing product (e.g. another fantasy football
-shirt) is fine; only drop it for genuine overlap in the actual joke/angle.
+Search rileyink.com for anything close to each surviving concept, so
+the run knows what's already live. Don't drop or rewrite a concept's
+wording just because it (or something similar) already appears in the
+catalog — reusing the same or similar phrasing with a materially
+different, original illustration is allowed under the current reuse
+policy (see `config/reference_sites.md`). What to actually avoid:
+accidentally regenerating the *same finished visual treatment* Riley
+Ink already sells — same phrase AND same illustration/composition.
+That's a real duplicate; a fresh illustration of familiar wording isn't.
 
 ## Step 6 — Filter for brand voice
 

@@ -356,6 +356,37 @@ concepts, 2026-09-03)
       request (does it find the right prior concept and actually
       change style convincingly?).
 
+## Incident: bot directly edited tracked repo files (2026-09-09)
+- [x] **What happened**: the operator asked the bot directly (via
+      Telegram) to remove the phrase-reuse verification/cap — the same
+      change already made in this conversation and pushed as commit
+      `2daa081`. The bot, having full file-edit tools, implemented it
+      by directly editing `TODO.md`, `config/reference_sites.md`,
+      `daily_scan.md`, and `seeded_search.md` on the server's local
+      clone — uncommitted. This caused the next `git pull` to fail with
+      "local changes would be overwritten."
+- [x] The bot's version was actually good, in one way better than mine:
+      explicit callouts for logos, branded trade dress, and
+      celebrity/player likeness (trademark and right-of-publicity
+      concerns, distinct from the copyright/composition point I'd
+      written) — folded into `config/reference_sites.md` properly. Also
+      folded in a cleaner rewrite of the Riley Ink catalog check step
+      (awareness, not a wording blocker; only a literal same-phrase
+      same-illustration repeat is a real duplicate).
+- [x] **Fix**: added a hard rule to `AGENTS.md` — the agent must never
+      directly edit tracked repo files (`prompts/`, `config/`,
+      `AGENTS.md`/`TODO.md`/`README.md`), even when asked to change
+      pipeline behavior; it should tell the operator to make that
+      request through the conversation that manages this repo instead.
+      `~/format_library.md` remains the one exception, since it's
+      deliberately outside git for exactly this reason.
+- [ ] **Operator action needed going forward**: route pipeline-behavior
+      change requests through the Claude Code conversation (not
+      directly to the bot) where practical — the bot can still explain
+      *what* the pipeline does if asked, just shouldn't edit it. Once
+      the local server changes are discarded (see console session) and
+      this commit is pulled, things should be back in sync.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.
