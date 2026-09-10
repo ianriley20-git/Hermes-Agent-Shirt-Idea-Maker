@@ -12,6 +12,11 @@ independently of any script.
   in) instead of text-only output.
 - `seeded_search.md` — Stage 3. On-demand deep-dive on a theme you
   name. Same image treatment as the daily scan.
+- `text_iterations.md` — On-demand, triggered by exact text + the word
+  "iterations" (e.g. "Parlay or Nothing - iterations") rather than a
+  theme. Skips topic research entirely — the wording is fixed by the
+  operator, this is pure visual ideation: 4-6 different illustration
+  concepts for that exact text, spread across designers.
 - `image_style.md` — Stage 5. Three named house "designers," each a
   distinct visual lane: Duke (retro vintage), Nova (modern & simple),
   Ash (edgy). Picked per-concept by `daily_scan.md`/`seeded_search.md`

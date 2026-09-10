@@ -387,6 +387,22 @@ concepts, 2026-09-03)
       the local server changes are discarded (see console session) and
       this commit is pulled, things should be back in sync.
 
+## New trigger: exact-text iterations (2026-09-09)
+- [x] Added `prompts/text_iterations.md` — a third on-demand trigger,
+      distinct from "- collection" (theme research): the operator gives
+      exact wording plus "iterations" (e.g. "Parlay or Nothing -
+      iterations"), and the pipeline skips topic research entirely,
+      generating 4-6 different illustration concepts for that exact
+      text, spread across Duke/Nova/Ash for real style variety (not
+      just one designer). Wired into `AGENTS.md` as new bucket 2,
+      renumbering the rest of the message-routing list (yes/no is now
+      bucket 3, designer variant request is bucket 4, etc).
+- [ ] Not yet tested live — first test should check both that the
+      trigger phrase is correctly distinguished from a "- collection"
+      theme request, and that the resulting batch actually has distinct
+      visual concepts (not just the same illustration re-rendered) and
+      genuine designer variety.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

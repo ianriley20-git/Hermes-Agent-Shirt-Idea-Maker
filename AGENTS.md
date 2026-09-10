@@ -20,7 +20,8 @@ the upload app).
   Read this before generating or filtering any concept. Never soften or
   skip this check.
 - `prompts/` — task-specific instructions (daily scan, seeded search,
-  image style). Referenced by name from cron jobs or on-demand messages.
+  exact-text iterations, image style). Referenced by name from cron
+  jobs or on-demand messages.
 - `config/` — subreddit list, niche keywords, reference sites, seasonal
   calendar. Treat these as the current source of truth for scan inputs.
 - `~/format_library.md` (on the server, **not** in this git repo — lives
@@ -45,7 +46,7 @@ now, see `TODO.md`). What's actually live:
   Telegram, also now generates + sends images.
 - **Email handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND emailed to `EMAIL_HOME_ADDRESS` via the Gmail API (not
-  SMTP — see bucket 2 below and `TODO.md` for why). Confirmed working
+  SMTP — see bucket 3 below and `TODO.md` for why). Confirmed working
   live. The upload-app connector is still out of scope — if asked to
   post anywhere beyond emailing, say that's out of scope for now.
 
@@ -55,11 +56,18 @@ Every incoming operator message falls into one of these buckets — decide
 which before responding:
 
 1. **Names a theme or collection idea** (e.g. "gambling collection", "do
-   a scan on ugly sweaters", "seeded search: back to school") — read and
-   follow `prompts/seeded_search.md` in full, using the named theme as
-   Step 0's input. This is the normal case for a message that's clearly
-   proposing a design topic rather than asking or chatting.
-2. **A yes/no/approval reply to a previously sent design image** (e.g.
+   a scan on ugly sweaters", "seeded search: back to school") — a broad
+   *topic*, not exact wording. Read and follow `prompts/seeded_search.md`
+   in full, using the named theme as Step 0's input.
+2. **Gives exact text and asks for iterations** (e.g. "Parlay or Nothing
+   - iterations", "do some iterations on this: [phrase]") — the operator
+   has already decided the wording and wants visual variations on it,
+   not topic research. Distinguish from bucket 1 by whether the message
+   reads as a *topic* (route to 1) or as *specific words to use as-is*
+   plus the word "iterations" (route here). Read and follow
+   `prompts/text_iterations.md` in full, using the exact text as Step
+   0's input.
+3. **A yes/no/approval reply to a previously sent design image** (e.g.
    "yes", "no", "yes on the Uncle Sam one", "reject the second one") —
    a message can approve/reject more than one design at once; handle
    each individually:
@@ -100,7 +108,7 @@ which before responding:
    - Reply briefly on Telegram confirming what was logged and, for each
      approval, that the email was sent (or if it failed, say so plainly
      rather than claiming success).
-3. **A designer variant request** (e.g. "I'd like to see Ash's version
+4. **A designer variant request** (e.g. "I'd like to see Ash's version
    of the fantasy football one," "show me Nova's take on that," "redo
    the knight one but edgy") — the operator wants a previously-shown
    concept re-illustrated by a different named designer (Duke, Nova, or
@@ -118,10 +126,10 @@ which before responding:
      designer, why it's timely/source if known, yes/no prompt).
    - This is a new candidate design like any other — it still needs its
      own explicit "yes" before anything happens beyond showing it.
-4. **A general question about the project, its state, or how something
+5. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-5. **Anything else** (small talk, unclear intent, something that doesn't
+6. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
    clarifying question if genuinely unsure which bucket applies.
 
