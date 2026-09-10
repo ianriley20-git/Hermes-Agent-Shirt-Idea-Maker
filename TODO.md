@@ -466,6 +466,22 @@ concepts, 2026-09-03)
       compositional fixes and may need further iteration; the
       reference-site-mirroring approach in particular is unproven.
 
+## Direct reuse is now the default, not one of two equal options (2026-09-09)
+- [x] Operator confirmed intent: the daily/seeded research's primary job
+      is to find real existing shirt designs worth taking and recreate
+      them with original Riley Ink artwork — not to treat "reuse" and
+      "invent new wording" as co-equal options to mix freely. Flipped
+      the framing in `config/reference_sites.md`, `daily_scan.md`, and
+      `seeded_search.md`: direct reuse is now explicitly the default to
+      actively look for first; format inspiration (inventing new
+      wording) is the fallback for when nothing suitable turns up to
+      reuse for a given topic/angle, not the default starting point.
+      The underlying rules (no verification search, no cap, always
+      independently illustrate) are unchanged — this is purely an
+      emphasis/ordering change in how the two paths get used.
+- [ ] Not yet tested live — next run should show most/all of the batch
+      as `Origin: reused` rather than a roughly even mix.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

@@ -49,20 +49,22 @@ models render unreliably" step later, so you're mirroring a proven
 solution instead of inventing one. Check the format library first for
 anything already-catalogued relevant to today's hot topics before
 browsing fresh, and append anything new/notable you find. For each
-topic flagged as hot in Steps 1-2, use one of the two paths documented
-there:
+topic flagged as hot in Steps 1-2, actively look for a real existing
+design worth taking directly — that's the primary goal of this step,
+not a fallback:
 
-1. **Format inspiration**: note the underlying format/structure of a
-   design that fits (e.g. "historical figure doing a modern activity,"
-   "a name turned into a pun"), then draft an original concept in that
-   pattern — entirely new wording/subject.
-2. **Direct reuse**: take an existing design's tagline/text and concept
-   directly, paired with fully original Riley Ink artwork (see the
-   "one rule that still matters" in `config/reference_sites.md` about
-   independently illustrating rather than tracing an unusually
-   distinctive composition). No verification search needed, no tight
-   cap — mark these `Origin: reused` in Step 7's output; everything
-   else is `Origin: original`.
+1. **Direct reuse (default — look for this first)**: take an existing
+   design's tagline/text and concept directly, paired with fully
+   original Riley Ink artwork (see the "one rule that still matters" in
+   `config/reference_sites.md` about independently illustrating rather
+   than tracing an unusually distinctive composition). No verification
+   search needed, no cap — expect most or all of the batch to be
+   `Origin: reused`. Mark these `Origin: reused` in Step 7's output.
+2. **Format inspiration (fallback)**: only when nothing suitable turned
+   up to reuse directly for a given topic — note the underlying
+   format/structure of a design that fits (e.g. "historical figure
+   doing a modern activity," "a name turned into a pun"), then draft an
+   original concept in that pattern. Mark these `Origin: original`.
 
 If Steps 1-2 turned up little topical signal, it's fine to draft a
 concept straight from a strong reference-site format applied to one of

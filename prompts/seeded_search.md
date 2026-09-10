@@ -66,19 +66,22 @@ solution instead of inventing one. Check the format library first for
 anything already-catalogued relevant to this theme before browsing
 fresh, and append anything new/notable you find. For each angle
 surfaced in Steps 1-3 (or the theme generally, if nothing specific
-surfaced), use one of the two paths documented there:
+surfaced), actively look for a real existing design worth taking
+directly — that's the primary goal of this step, not a fallback:
 
-1. **Format inspiration**: note the underlying format/structure of a
-   design that fits (e.g. "historical figure doing a modern activity,"
-   "a name turned into a pun"), then draft an original concept in that
-   pattern for this theme.
-2. **Direct reuse**: take an existing design's tagline/text and concept
-   directly, paired with fully original Riley Ink artwork (see the
-   "one rule that still matters" in `config/reference_sites.md` about
-   independently illustrating rather than tracing an unusually
-   distinctive composition). No verification search needed, no tight
-   cap — mark these `Origin: reused` in Step 8's output; everything
-   else is `Origin: original`.
+1. **Direct reuse (default — look for this first)**: take an existing
+   design's tagline/text and concept directly, paired with fully
+   original Riley Ink artwork (see the "one rule that still matters" in
+   `config/reference_sites.md` about independently illustrating rather
+   than tracing an unusually distinctive composition). No verification
+   search needed, no cap — expect most or all of the batch to be
+   `Origin: reused`. Mark these `Origin: reused` in Step 8's output.
+2. **Format inspiration (fallback)**: only when nothing suitable turned
+   up to reuse directly for a given angle — note the underlying
+   format/structure of a design that fits (e.g. "historical figure
+   doing a modern activity," "a name turned into a pun"), then draft an
+   original concept in that pattern for this theme. Mark these
+   `Origin: original`.
 
 Aim for enough concepts here across different formats to comfortably
 reach Step 8's 4-6 target after filtering.

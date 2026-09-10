@@ -69,29 +69,34 @@ scratch.
 
 ## How these get used (important) — updated policy, 2026-09-09
 
-Operator decision: no verification search required and no tight cap.
-Short phrases/slogans aren't protected by copyright, and the text/joke
-of an existing commercial design is fair game to reuse directly —
+**The primary job of this research is to find existing shirt designs
+that would work well for Riley Ink and recreate them with original
+artwork.** Direct reuse is the default mode, not one of two equal
+options — actively look for real designs (from the fixed sites,
+Amazon, or Etsy) worth taking as-is, before falling back to inventing
+new wording. Short phrases/slogans aren't protected by copyright, and
 uniqueness comes from Riley Ink's own artwork, not from inventing new
-words for their own sake. Two ways to draw on these sites, both fully
-in bounds, mix freely within a batch:
+words for their own sake.
 
-**1. Format inspiration.** Note the underlying format/structure of a
-design that lands well (e.g. "historical figure doing a modern
-activity," "a name turned into a pun"), then draft a new concept in
-that pattern with its own wording and subject.
+**1. Direct reuse (the default — actively look for this first).** Take
+an existing design's tagline/text and concept directly as the basis for
+a new Riley Ink design — no cross-shop verification needed, no tight
+cap, no requirement that it be "generic." A phrase is fair game even
+when it's associated with a specific seller, artist, song, campaign, or
+existing piece of merchandise. Label it `Origin: reused` (vs.
+`Origin: original`) so the operator can always see the mix, but it's
+expected and fine for reused concepts to be most or all of a batch.
+Saturation/marketplace checks (Step 4/5 of
+`daily_scan.md`/`seeded_search.md`) inform demand and how to make the
+illustration distinctive — they never disqualify or down-rank a phrase.
 
-**2. Direct reuse.** Take an existing design's tagline/text and concept
-directly as the basis for a new Riley Ink design — no cross-shop
-verification needed, no tight cap, no requirement that it be "generic."
-A phrase is fair game even when it's associated with a specific seller,
-artist, song, campaign, or existing piece of merchandise. Label it
-`Origin: reused` (vs. `Origin: original`) so the operator can always
-see the mix, but it's fine for reused concepts to be most or all of a
-batch if that's where the strongest material is. Saturation/marketplace
-checks (Step 4/5 of `daily_scan.md`/`seeded_search.md`) inform demand
-and how to make the illustration distinctive — they never disqualify or
-down-rank a phrase.
+**2. Format inspiration (fallback, when nothing suitable turns up to
+reuse directly).** Note the underlying format/structure of a design
+that lands well (e.g. "historical figure doing a modern activity," "a
+name turned into a pun"), then draft a new concept in that pattern with
+its own wording and subject. Use this when the research genuinely
+didn't surface a specific existing design worth taking as-is for the
+topic at hand — not as the default starting point.
 
 **The one rule that still matters: always independently illustrate the
 artwork.** Text/concept reuse is unrestricted, but every generated
