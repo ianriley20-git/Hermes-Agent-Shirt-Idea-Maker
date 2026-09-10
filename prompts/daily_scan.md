@@ -48,17 +48,17 @@ browsing fresh, and append anything new/notable you find. For each
 topic flagged as hot in Steps 1-2, use one of the two paths documented
 there:
 
-1. **Format inspiration (most concepts)**: note the underlying
-   format/structure of a design that fits (e.g. "historical figure
-   doing a modern activity," "a name turned into a pun"), then draft an
-   original concept in that pattern — entirely new wording/subject.
-2. **Verified-generic phrase reuse (at most 1-2 of the day's batch)**:
-   if a phrase you find is confirmed (via the verification check in
-   `config/reference_sites.md`) to be a widely-circulated generic
-   meme/joke rather than one shop's specific invention, it's fair game
-   to reuse the exact wording paired with fully original Riley Ink
-   artwork. Mark these with `Origin: reused phrase` in Step 7's output;
-   everything else is `Origin: original`.
+1. **Format inspiration**: note the underlying format/structure of a
+   design that fits (e.g. "historical figure doing a modern activity,"
+   "a name turned into a pun"), then draft an original concept in that
+   pattern — entirely new wording/subject.
+2. **Direct reuse**: take an existing design's tagline/text and concept
+   directly, paired with fully original Riley Ink artwork (see the
+   "one rule that still matters" in `config/reference_sites.md` about
+   independently illustrating rather than tracing an unusually
+   distinctive composition). No verification search needed, no tight
+   cap — mark these `Origin: reused` in Step 7's output; everything
+   else is `Origin: original`.
 
 If Steps 1-2 turned up little topical signal, it's fine to draft a
 concept straight from a strong reference-site format applied to one of
@@ -99,7 +99,7 @@ Settle on **4 to 6** ideas, each with:
 
 ```
 Tagline: "..."
-Origin: original | reused phrase (verified widely-circulated)
+Origin: original | reused
 Visual concept: [one line]
 Why it's timely: [one line, cite the actual signal — subreddit post,
   trends spike, reference-site format, or Etsy gap]
@@ -108,10 +108,11 @@ Source: [subreddit name / trends keyword / reference site / etsy search]
 
 The tagline itself should be short and stand alone (see
 `_brand_voice.md`'s "not a news caption" rule) — the "why it's timely"
-line is where the specific fact/citation belongs, not the tagline. At
-most 1-2 of the batch should be `Origin: reused phrase` — the rest must
-be original (see Step 3 and `config/reference_sites.md` for the reuse
-verification requirement).
+line is where the specific fact/citation belongs, not the tagline.
+`Origin: reused` concepts can be any share of the batch, including all
+of it, if that's where the strongest material is — just label them
+accurately so the operator can see the mix (see `config/reference_sites.md`
+for the current reuse policy).
 
 If fewer than 4 ideas clear the bar, use fewer — never pad with weaker
 ideas to hit the range. If nothing clears the bar at all, skip straight
@@ -139,7 +140,7 @@ caption:
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / reference site / etsy search]
-[Origin: reused phrase, verified widely-circulated — only include this line for reused-phrase concepts, omit it for original ones]
+[Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
 to more than one).

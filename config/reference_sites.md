@@ -1,9 +1,9 @@
 # Reference sites for creative inspiration
 
-Not competitors to copy — sources of proven joke/design *formats* to riff
-into wholly new, original Riley Ink concepts. Used by
-`prompts/daily_scan.md` and `prompts/seeded_search.md`'s reference-site
-scan step.
+Sources of proven joke text/concepts and design formats — see "How
+these get used" below for the current policy on reuse vs. new
+concepts. Used by `prompts/daily_scan.md` and
+`prompts/seeded_search.md`'s reference-site scan step.
 
 - m00nshot.com
 - awesometees.co
@@ -67,36 +67,39 @@ shape:
 If the file doesn't exist yet, create it — first run starts it from
 scratch.
 
-## How these get used (important)
+## How these get used (important) — updated policy, 2026-09-09
 
-Two ways to draw on these sites — most output should be the first:
+Operator decision: no verification search required and no tight cap.
+Short phrases/slogans aren't protected by copyright, and the text/joke
+of an existing commercial design is fair game to reuse directly —
+uniqueness comes from Riley Ink's own artwork, not from inventing new
+words for their own sake. Two ways to draw on these sites, both fully
+in bounds, mix freely within a batch:
 
-**1. Format inspiration (the default).** Browse categories/designs that
-match Riley Ink's niches and voice, and note the underlying
-**format/structure** of ones that land well — e.g. "historical figure
-doing a modern activity," "a name turned into a pun," "a single
-deadpan word on its own." Generate a **new, original** concept in that
-structural pattern, with its own wording and subject — never reproduce
-another shop's specific wording verbatim under this path.
+**1. Format inspiration.** Note the underlying format/structure of a
+design that lands well (e.g. "historical figure doing a modern
+activity," "a name turned into a pun"), then draft a new concept in
+that pattern with its own wording and subject.
 
-**2. Verified-generic phrase reuse (occasional, capped).** Short
-phrases/slogans aren't protected by copyright, and plenty of novelty-tee
-jokes are generic memes that already circulate across many unrelated
-shops ("I'd Hit That," "Deez Nuts," etc.) — reusing one of those,
-paired with **100% original artwork**, is fair game and standard
-practice in this space. The line that matters isn't legal, it's
-generic-meme vs. one-shop's-invention:
+**2. Direct reuse.** Take an existing design's tagline/text and concept
+directly as the basis for a new Riley Ink design — no cross-shop
+verification needed, no tight cap. Label it `Origin: reused` (vs.
+`Origin: original`) so the operator can always see the mix, but it's
+fine for reused concepts to be most or all of a batch if that's where
+the strongest material is.
 
-- Before reusing any exact phrase, verify it independently — search for
-  that exact wording and confirm it shows up across **multiple
-  unrelated sellers**, not just the one reference site where it was
-  spotted. If confirmed widely-circulated, it's reusable.
-- If a phrase looks distinctive/specific to one shop rather than a
-  spread-around meme, don't reuse the wording — fall back to path 1
-  (format inspiration, new wording) instead.
-- Always pair a reused phrase with original Riley Ink artwork — never
-  reuse or closely mimic another shop's actual visual design.
-- Reused-phrase concepts should be a minority of any batch, not the
-  majority — see `prompts/daily_scan.md`/`seeded_search.md` for the cap.
-- Label these clearly in output (e.g. "Origin: reused phrase, verified
-  widely-circulated") so the operator can always tell which is which.
+**The one rule that still matters: always independently illustrate the
+artwork.** Copyright protects specific *expression*, not ideas or
+short text — so the text/concept is unrestricted, but the actual
+composition should be Riley Ink's own creative execution, not a close
+trace of a specific existing image. In practice this is barely a
+constraint: a generic/stock pose or layout (a person raising a mug, a
+character in an action pose) is totally fine to riff on since it isn't
+distinctively protectable to begin with. The only case worth pausing
+on is a reference design with an unusually specific, distinctive
+composition (an unusual pose, an unusual arrangement of elements) —
+for those, design a genuinely different composition around the same
+text/concept rather than mirroring it closely, even with new
+rendering. This almost never comes up with the generic joke formats
+this pipeline works with, but it's the one thing to actually think
+about rather than reuse verbatim.

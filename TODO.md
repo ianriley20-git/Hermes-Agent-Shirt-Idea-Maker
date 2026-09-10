@@ -311,6 +311,25 @@ concepts, 2026-09-03)
       Worth checking after a few runs that it's actually accumulating
       entries, not getting recreated empty each time.
 
+## Reuse policy loosened further (2026-09-09, supersedes the 09-06 cap)
+- [x] Operator explicitly asked to remove the verification-search
+      requirement and the 1-2-per-batch cap on reusing existing
+      commercial designs' text/concepts entirely — reasoning: short
+      phrases aren't copyrightable, uniqueness comes from Riley Ink's
+      own artwork, not from insisting on new words. Agreed on the legal
+      point; flagged one nuance (copyright protects specific
+      *expression*, so an unusually distinctive *composition*, not
+      just text, is the one thing worth redesigning around rather than
+      tracing, even with new rendering) and kept only that as guidance,
+      not a gate.
+- [x] `config/reference_sites.md`, `daily_scan.md`, and
+      `seeded_search.md` updated: no verification search, no cap —
+      `Origin: reused` concepts can be any share of a batch, including
+      all of it. Simplified the label from "reused phrase (verified
+      widely-circulated)" to just "reused".
+- [ ] Not yet tested live — next run is the first under the loosened
+      policy.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.
