@@ -403,6 +403,44 @@ concepts, 2026-09-03)
       visual concepts (not just the same illustration re-rendered) and
       genuine designer variety.
 
+## Image generation still looked "AI" after round 2 (2026-09-09)
+- [x] Diagnosed three new, more specific failure modes from real output
+      ("Parlay Construction," "The First Leg Was Informational," etc.),
+      distinct from the round-1/round-2 scene/emblem-frequency fixes:
+      1. **Gradients/soft shading creeping in** despite an explicit ban
+         — directional lighting appeared on "wood beam" shapes, giving
+         them false 3D volume.
+      2. **Decorative accent pile-up** — one design stacked a sunburst +
+         circular badge + corner flourishes + stars + lightning bolts
+         simultaneously, when the rule was "one or two."
+      3. **Over-literal detail** — a concept about "adding legs" got
+         rendered as an actually complex multi-beam structure instead
+         of a simple iconic shape; detail should be surface
+         texture/linework, not multiplying structural parts.
+      Also tried an experimental fix for a harder, more fundamental
+      tell: AI output defaults to mathematically perfect vector
+      symmetry, while real screen-print art has slightly imperfect
+      hand-inked linework. Added "hand-drawn, not vector-perfect"
+      language to Duke and Ash (not Nova, where crisp vector precision
+      is the intended look).
+- [x] Rewrote all three designer headers in `image_style.md`: broke the
+      single giant run-on sentence into shorter paragraphs (likely
+      improves instruction-following on its own, since key constraints
+      were previously buried mid-sentence in ~300-word blocks), made
+      "one accent maximum, never combine" and "flat color, zero
+      shading" into hard, explicitly-flagged rules rather than one
+      clause among many, and added the literal-multiplication/detail
+      distinction. Added matching bullets to the shared "Compositional
+      simplicity" section.
+- [ ] Not yet re-tested against these specific fixes. Also unclear
+      whether the batch that surfaced these issues was actually a
+      "- collection" (seeded_search) run or a "- iterations"
+      (text_iterations) run — the 5 results had 5 different taglines,
+      which reads like seeded_search behavior, not iterations (same
+      text, different visuals). Worth confirming which path was
+      actually exercised, since text_iterations itself still hasn't
+      been confirmed working correctly.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.
