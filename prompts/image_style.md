@@ -73,6 +73,50 @@ designer is generating:
   Construction": an actual dense multi-beam scaffold instead of a
   simple iconic table). Detail belongs in linework/texture quality
   *within* a simple shape, not in how many sub-parts the shape has.
+
+## Avoid content that image models render unreliably (a different failure mode than composition)
+
+This is a separate, harder problem than the ones above: image models
+routinely *invent* illogical geometry for certain content types — not
+because the prompt asked for too much, but because the model is
+approximating structure it doesn't actually understand. Real output
+has shown a mismatched, incoherent assortment of support-post types on
+a "scaffold" (not a real single structural object), an interlocking
+knot shape where the over/under weaving doesn't logically resolve, and
+a skeletal hand with off proportions and invented joint structure.
+Steer away from these content types rather than trying to prompt your
+way to a correct render of them:
+
+- **Complex interlocking/woven shapes** (knots, braids, chain links
+  woven through something) — these reliably come out topologically
+  wrong. If a concept suggests "interlocking" or "tied together," use a
+  much simpler version instead: two or three overlapping simple shapes
+  with an obvious, unambiguous over/under (like a simple two-ring
+  overlap), not an intricate braid or trinity-knot.
+- **Detailed hand/finger poses**, especially unusual grips or gestures —
+  hands are a well-known weak point. If a hand is genuinely central to
+  the joke, keep it simple (a flat silhouette, a simple closed fist, an
+  open flat palm) rather than a detailed grasping or multi-finger
+  gesture pose.
+- **Invented compound/mechanical objects** with many interacting parts
+  (scaffolds, machinery, multi-piece assemblies) — instead of the
+  literal complex object, use the simplest single real object that
+  still carries the idea (e.g. one sawhorse or one ladder instead of a
+  multi-post scaffold).
+- **The general test**: could you name the exact real-world object in
+  one or two words ("a beer mug," "a football," "a closed fist")? If
+  the honest answer requires a hedge ("like a scaffold but with extra
+  legs," "a knot but with a football woven in"), that's the signal to
+  simplify to something you *can* name cleanly, even if it's a slightly
+  less literal match to the joke — a slightly-less-literal but
+  correctly-rendered object beats a literal but visually broken one.
+- **Use reference-site research for this too, not just format/phrases.**
+  When Step 3/4's reference-site browsing (`config/reference_sites.md`)
+  turns up a real design solving a similar visual problem — "tied
+  together," "many of something," a hand gesture — look at the actual
+  simple object choice it made and mirror that, rather than inventing
+  a compound object from scratch. A proven, already-rendered-by-someone
+  simple solution beats an original but structurally-invented one.
 - **Flat color is not negotiable.** Every shape is one single flat,
   unmodulated color — no gradient, no highlight, no shadow, no
   suggestion of rounded 3D form within a shape, even subtly. If you
@@ -86,7 +130,12 @@ designer is generating:
 - **Scene**: the single subject/action only, concrete and specific —
   comes from the concept's "Visual concept" line, expanded into a real
   description. Not a populated scene. Explicitly decide whether a
-  background emblem fits (default: no) per the section above.
+  background emblem fits (default: no) per the section above. Run it
+  through "Avoid content that image models render unreliably" above
+  before finalizing — if the concept involves interlocking shapes,
+  hands, or a compound object, simplify to something cleanly nameable,
+  ideally mirroring how an actual reference-site design solved the same
+  visual problem.
 - **Text treatment**: the exact text (usually the tagline or a short
   excerpt) plus a font/style note when it matters to the joke. Strip
   trailing periods and unnecessary punctuation first.

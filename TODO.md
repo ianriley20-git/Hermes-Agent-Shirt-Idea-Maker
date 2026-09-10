@@ -441,6 +441,31 @@ concepts, 2026-09-03)
       actually exercised, since text_iterations itself still hasn't
       been confirmed working correctly.
 
+## Root cause corrected: invented geometry, not style (2026-09-09)
+- [x] Operator corrected the diagnosis: the "looks AI" complaint isn't
+      about composition/style (already fixed in earlier rounds) but
+      about the model *inventing* illogical shapes/objects/proportions
+      — a mismatched assortment of support-post types on a "scaffold"
+      that doesn't cohere as one real object, a trinity-knot whose
+      over/under weaving doesn't logically resolve, a skeletal hand
+      with off proportions. This is a known, harder image-model
+      limitation (approximating structure it doesn't understand) for
+      specific content types: complex interlocking/woven shapes, hand/
+      finger poses, and invented compound/mechanical assemblies.
+- [x] Added a new `image_style.md` section ("avoid content that image
+      models render unreliably") steering away from these content types
+      — simplify to the closest cleanly-nameable real object rather
+      than attempting the literal complex version. Wired a connection
+      to the existing reference-site research: when it turns up how a
+      real design solved the same visual problem (e.g. "many of
+      something," "tied together"), mirror that proven simple choice
+      instead of inventing one from scratch — noted in
+      `daily_scan.md`/`seeded_search.md`/`text_iterations.md`'s
+      research steps and in the Scene per-design field instructions.
+- [ ] Not yet tested live — this is a harder problem than the earlier
+      compositional fixes and may need further iteration; the
+      reference-site-mirroring approach in particular is unproven.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

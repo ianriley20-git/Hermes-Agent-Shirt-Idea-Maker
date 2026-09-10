@@ -36,7 +36,12 @@ minor pose variations on one idea. Optionally draw on
 `config/reference_sites.md`'s reference sites for illustration/format
 inspiration (browsing for compositional ideas this time, not phrases —
 the text is already fixed); the "look, don't just read" vision guidance
-there still applies if you do.
+there still applies if you do. Before finalizing each idea, run it
+through `image_style.md`'s "avoid content that image models render
+unreliably" section — if a concept involves interlocking shapes, hands,
+or an invented compound object, simplify to something cleanly nameable,
+ideally mirroring how a real reference-site design solved the same
+visual problem.
 
 ## Step 2 — Riley Ink catalog check (awareness only)
 

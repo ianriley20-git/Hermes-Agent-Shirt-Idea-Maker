@@ -42,7 +42,11 @@ Read `config/reference_sites.md` in full — it covers the fixed
 reference sites, Amazon/Etsy bestseller checks, using `vision` on
 product images (not just text), and the persistent `~/format_library.md`
 catalog. This is where concepts actually get drafted — the main
-creative step, not a style check. Check the format library first for
+creative step, not a style check. Also note *how* real designs render
+tricky visual ideas (hands, "many of something," interlocking shapes) —
+this feeds directly into `image_style.md`'s "avoid content that image
+models render unreliably" step later, so you're mirroring a proven
+solution instead of inventing one. Check the format library first for
 anything already-catalogued relevant to today's hot topics before
 browsing fresh, and append anything new/notable you find. For each
 topic flagged as hot in Steps 1-2, use one of the two paths documented
