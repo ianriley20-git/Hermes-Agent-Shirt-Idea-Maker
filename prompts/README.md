@@ -12,12 +12,12 @@ independently of any script.
   in) instead of text-only output.
 - `seeded_search.md` — Stage 3. On-demand deep-dive on a theme you
   name. Same image treatment as the daily scan.
-- `image_style.md` — Stage 5. Two Riley Ink image-generation style
-  templates: Style A (negative-space retro screen print, default) and
-  Style B (flat vector/white background, on request only), each
-  assembled per-concept by `daily_scan.md`/`seeded_search.md`. A later
-  yes/no reply is handled by `AGENTS.md`'s message routing, not by this
-  file.
+- `image_style.md` — Stage 5. Three named house "designers," each a
+  distinct visual lane: Duke (retro vintage), Nova (modern & simple),
+  Ash (edgy). Picked per-concept by `daily_scan.md`/`seeded_search.md`
+  (aiming for a mix), or by name if the operator asks for a specific
+  one. A later "show me the Ash version" request or yes/no reply is
+  handled by `AGENTS.md`'s message routing, not by this file.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

@@ -330,6 +330,32 @@ concepts, 2026-09-03)
 - [ ] Not yet tested live — next run is the first under the loosened
       policy.
 
+## Three named designers (2026-09-09)
+- [x] Replaced the anonymous "Style A / Style B" system with three
+      named house designers in `image_style.md`: **Duke** (retro
+      vintage — was Style A, unchanged, proven default), **Nova**
+      (modern & simple — revised from Style B, reframed away from
+      "vintage sports" toward clean/contemporary/minimal), **Ash**
+      (edgy — brand new: punk/skate/tattoo-flash inspired, high
+      contrast, the one lane where grunge/texture is a feature).
+      Unified all three onto the same Scene + Text treatment per-design
+      field structure (previously Style A and B used different shapes).
+- [x] `daily_scan.md`/`seeded_search.md` now pick a designer per
+      concept (aiming for a mix across a batch) unless a designer/style
+      is named/implied in an on-demand message. Every image caption now
+      includes a `Designer:` line.
+- [x] Added a new `AGENTS.md` message-routing bucket (3) for "designer
+      variant requests" (e.g. "show me Ash's version of the fantasy
+      football one") — finds the referenced prior concept (recent
+      context first, `session_search` if needed), regenerates just the
+      image with the requested designer's style, same tagline/joke,
+      and sends it through the normal approval flow like any other
+      candidate.
+- [ ] Not yet tested live — next test should check both a normal batch
+      (does the designer mix feel right?) and an explicit variant
+      request (does it find the right prior concept and actually
+      change style convincingly?).
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

@@ -100,18 +100,35 @@ which before responding:
    - Reply briefly on Telegram confirming what was logged and, for each
      approval, that the email was sent (or if it failed, say so plainly
      rather than claiming success).
-3. **A general question about the project, its state, or how something
+3. **A designer variant request** (e.g. "I'd like to see Ash's version
+   of the fantasy football one," "show me Nova's take on that," "redo
+   the knight one but edgy") — the operator wants a previously-shown
+   concept re-illustrated by a different named designer (Duke, Nova, or
+   Ash — see `prompts/image_style.md`), same tagline/joke, new style:
+   - Identify which prior concept is meant. If it's in this
+     conversation's recent context, use that. If not, use
+     `session_search` to find it (the tagline/description) from earlier
+     sessions before asking the operator to clarify.
+   - If genuinely unclear which concept or which designer is meant, ask
+     — don't guess and generate the wrong thing.
+   - Re-assemble the image prompt for that same tagline/visual concept
+     using the requested designer's section in `prompts/image_style.md`,
+     generate one new image, and send it to Telegram with the same
+     caption format `daily_scan.md`/`seeded_search.md` use (tagline,
+     designer, why it's timely/source if known, yes/no prompt).
+   - This is a new candidate design like any other — it still needs its
+     own explicit "yes" before anything happens beyond showing it.
+4. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-4. **Anything else** (small talk, unclear intent, something that doesn't
+5. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
-   clarifying question if genuinely unsure whether it's meant to trigger
-   bucket 1 or 2.
+   clarifying question if genuinely unsure which bucket applies.
 
 If genuinely ambiguous which bucket applies, ask rather than guessing —
-running a full research pass (or worse, logging the wrong design as
-approved/rejected) on a misread message wastes more of the operator's
-time than one clarifying question would.
+running a full research pass, logging the wrong design as
+approved/rejected, or regenerating the wrong concept in the wrong style
+all waste more of the operator's time than one clarifying question would.
 
 ## Hard rules
 

@@ -1,16 +1,83 @@
-# Riley Ink image generation templates
+# Riley Ink image generation templates — three designers
 
 Used in Stage 5 to turn a finalized concept (from `daily_scan.md` or
 `seeded_search.md`) into an actual image generation prompt. There are
-two style templates below — **use Style A by default** for every
-concept unless the operator has explicitly requested the other style
-for this run (only possible for an on-demand seeded search message,
-since the daily cron scan has no one to ask). If in doubt which was
-requested, default to Style A.
+three named house "designers" below, each a distinct visual lane:
+
+- **Duke** — retro vintage (negative-space screen print, proven default)
+- **Nova** — modern & simple (clean flat shapes, crisp edges, minimal)
+- **Ash** — edgy (punk/skate/tattoo-flash inspired, high contrast)
+
+**Picking a designer per concept**: for daily scans and seeded searches,
+pick whichever designer's lane genuinely fits each specific concept
+best (a patriotic/nostalgic joke suits Duke; a clean minimal wordplay
+bit suits Nova; a darker/aggressive joke suits Ash) — aim for a mix
+across a batch rather than defaulting to one designer for everything.
+If a seeded-search message names a designer directly, or describes a
+style that clearly maps to one (see each section's "requested via"
+notes), use that one instead of picking freely. If genuinely unsure,
+default to Duke.
+
+**Designer variant requests** (e.g. "I'd like to see Ash's version of
+the fantasy football one") are handled in `AGENTS.md`'s message
+routing, not here — this file only covers how to actually build the
+prompt once a designer is chosen.
+
+**Every generated image is labeled with its designer** in the output
+caption (see `daily_scan.md`/`seeded_search.md`'s Send step) — this is
+what makes variant requests possible, so never skip the label.
 
 ---
 
-## Style A — Negative-space retro screen print (DEFAULT)
+## Compositional simplicity (applies to all three designers)
+
+Test output has looked "AI generated" specifically when the composition
+tries to do too much — the fix isn't the rendering style, it's
+restraint in what gets included. This applies regardless of which
+designer is generating:
+
+- **Realistic/perspective scenes are the failure mode. Flat iconic
+  emblems are not — but they're also not the default.** A grocery store
+  aisle with receding shelves, a throne room with courtiers — reject
+  those outright. A badge/crest arch, a sunburst behind the subject, or
+  a flat silhouette skyline are *allowed*, but only when the specific
+  concept calls for it (a radiant/triumphant pose, an actual
+  outdoor/landscape joke). **Default to no background element at all.**
+  Reaching for a sunburst or badge shape on every design is itself a
+  failure mode, just a different one than the scene problem.
+- **Reject the instinct to add a cast.** One subject doing one thing.
+  If a concept technically involves two roles, either pick the single
+  stronger image or keep both figures tightly grouped as one unit.
+- **Reject the instinct to fill empty space with unrelated props.** No
+  shelves of bottles, no scattered small icons, no hanging price tags.
+- **Bold text integrated with the subject is good, not a failure mode.**
+  Large display lettering (arced, stacked, or straight depending on the
+  designer) as one lockup — text can be as visually dominant as the
+  illustration. What to avoid is *multiple separate* text treatments.
+- **The subject doesn't have to be a character.** Objects or a
+  mostly-typographic design are equally valid.
+- **No unnecessary punctuation in the rendered text.** Trailing periods
+  especially — drop them; keep a question mark or exclamation point
+  only when the joke genuinely needs it.
+
+## Shared per-design fields (same shape for all three designers)
+
+- **Scene**: the single subject/action only, concrete and specific —
+  comes from the concept's "Visual concept" line, expanded into a real
+  description. Not a populated scene. Explicitly decide whether a
+  background emblem fits (default: no) per the section above.
+- **Text treatment**: the exact text (usually the tagline or a short
+  excerpt) plus a font/style note when it matters to the joke. Strip
+  trailing periods and unnecessary punctuation first.
+
+**Full prompt assembly** (all three designers): the designer's fixed
+header, followed by a blank line, followed by Scene + Text treatment.
+
+---
+
+## Duke — Retro vintage (negative-space screen print)
+
+Requested via: "vintage," "retro," "Duke," or no preference stated.
 
 ### Fixed header (always include, exactly as written)
 
@@ -20,86 +87,13 @@ Vintage retro t-shirt illustration, mid-high detail screen print graphic, simula
 
 ### Real reference designs (rileyink.com + m00nshot — ground truth for color, simplicity, and text weight)
 
-**No background element at all (this is the majority — default to this):**
-- **"Deez Nuts"** (nutcracker): one figure, plain shirt color behind it, nothing else.
-- **"USA"** (Washington dunking): one figure, no background at all beyond the shirt color.
-- **"I'd Hit That"**: no character — two playing cards, plain background. Proof the "subject" doesn't need to be a person.
-- **"Forget Lab Safety"**: one figure, plain background, text is the dominant element.
-- **"Ask Me About My Butthole"** (UFO): one scene-ish element (beam + silhouette) but no badge/emblem framing — just the subject on plain shirt color, with trees rendered flat and small, not a "scene."
-- **"Suck It England"**, **"'Merica"**: one figure, plain background, no emblem treatment.
-- **"Safety Third"**, **"Spilling the Tea Since '73"**: one or two figures, no background environment.
+**No background element at all (the majority — default to this):**
+- **"Deez Nuts"**, **"USA"** (Washington dunking), **"Forget Lab Safety"**, **"Suck It England"**, **"'Merica"**, **"Safety Third"**, **"Spilling the Tea Since '73"**: one figure (or two tightly grouped), plain shirt color behind it, nothing else.
+- **"I'd Hit That"**: no character at all — two playing cards, plain background.
 
-**Flat iconic emblem background (occasional exception, not the default):**
-- **"Call Me Sir Veza"**: one figure (knight), sunburst rays behind it — fits because the pose is triumphant/radiant.
-- **"Disappointments, All of You"**: sunburst behind the head — fits the deity-pose joke specifically.
-- **"High On Life / And Also Drugs"**: a flat silhouette badge (sun, mountains, trees) — fits because the joke *is* a landscape/outdoor scene.
-
-The emblem treatment shows up because the specific joke called for radiance or an outdoor/landscape setting — it is not a generic decoration to reach for by default. **Most designs should have no background element at all.** Bold arced text integrated directly with the subject, independent of whether there's a background emblem, is the actual recurring feature of this style.
-
-### Compositional simplicity (critical — this is the current #1 failure mode)
-
-Test output has looked "AI generated" specifically when the composition
-tries to do too much — the fix isn't the rendering style (which has been
-right), it's restraint in what gets included. Two things look similar
-but are not the same — know the difference:
-
-- **Realistic/perspective scenes are the failure mode. Flat iconic
-  emblems are not — but they're also not the default.** A grocery store
-  aisle with receding shelves, a throne room with courtiers, a doctor's
-  office with an exam table — these are movie-poster/illustration
-  thinking, rendered with depth and photorealistic detail. Reject those
-  outright. A badge/crest arch, a sunburst behind the subject, or a flat
-  silhouette mountain-and-tree skyline — these are *allowed*, but only
-  when the specific concept calls for it (a radiant/triumphant pose, an
-  actual outdoor/landscape joke). **Default to no background element at
-  all** — most real examples (see reference list above) have nothing
-  behind the subject but the plain shirt color. Reaching for a sunburst
-  or badge shape on every design is itself a failure mode, just a
-  different one than the scene problem.
-- **Reject the instinct to add a cast.** One subject doing one thing.
-  Not a hero plus reacting bystanders, not a player plus a doctor. If
-  the concept technically involves two roles, either pick the single
-  stronger image or keep both figures tightly grouped as one unit —
-  never a scene with several people placed around a space.
-- **Reject the instinct to fill empty space with unrelated props.** No
-  shelves of bottles, no scattered small icons, no hanging price tags,
-  no side-banner decorations unrelated to the subject. Sunburst rays,
-  a badge arch, or an emblem's own flat background elements don't count
-  as clutter — they're part of the one composition.
-- **Bold arced text is good, not a failure mode.** Large display
-  lettering curved around the subject (above, below, or both) as one
-  integrated lockup is a core convention of this style — text can be as
-  visually dominant as the illustration. What to avoid is *multiple
-  separate* text treatments (an arc plus an unrelated subtitle plus a
-  hanging tag), not the arc itself.
-- **The subject doesn't have to be a character.** Objects (playing
-  cards, a document) or a mostly-typographic design with a small
-  graphic accent are equally valid — don't force an illustrated person
-  into every concept.
-- **No unnecessary punctuation in the rendered text.** Trailing periods
-  especially — they visually unbalance bold display lettering that's
-  meant to read as a clean word/phrase, not a punctuated sentence. Drop
-  periods entirely; keep a question mark or exclamation point only when
-  the joke genuinely needs it.
-
-### Per-design fields
-
-Unlike Style B, the style/mood here is fixed by the header above — only
-two things vary per design:
-
-- **Scene**: the single subject/action only, concrete and specific
-  (one subject, its pose, key details) — comes from the concept's
-  "Visual concept" line, expanded into a real description. Not a
-  populated scene — see "Compositional simplicity" above before writing
-  this. Explicitly decide per concept whether a background emblem
-  (sunburst, badge arch, landscape silhouette) actually fits — default
-  to none, and only include one when the specific pose/theme calls for
-  it (see the reference list above for the actual ratio).
-- **Text treatment**: the exact text (usually the tagline or a short
-  excerpt of it) plus a font/style note when it matters to the joke
-  (e.g. a knight motif wants a medieval-style font; a monster wants a
-  horror-movie font). Strip trailing periods and unnecessary
-  punctuation from the text itself before writing this field.
+**Flat iconic emblem background (occasional exception):**
+- **"Call Me Sir Veza"**, **"Disappointments, All of You"**: sunburst rays — fits because the pose is triumphant/radiant.
+- **"High On Life / And Also Drugs"**: a flat silhouette badge (sun, mountains, trees) — fits because the joke *is* a landscape scene.
 
 ### Worked examples
 
@@ -115,49 +109,60 @@ George Washington dunking a basketball in this exact pose. He's wearing his icon
 An enormous hotdog rampaging through a city. Text says "GLIZZILA" in old school monster font
 ```
 
-### Full prompt assembly
-
-The fixed header, followed by a blank line, followed by the scene +
-text treatment (same shape as the worked examples above).
-
 ---
 
-## Style B — Flat vector / white background (on request only)
+## Nova — Modern & simple (clean flat design)
+
+Requested via: "modern," "simple," "clean," "minimal," "Nova," or (from
+the old naming) "flat vector"/"white background."
 
 ### Fixed header (always include, exactly as written)
 
 ```
-Please generate a graphic. A vintage-style graphic t-shirt design. Style: flat graphic illustration, screen-print aesthetic, limited color palette of 3–5 colors, no photorealism. The design should read clearly as a standalone centered chest graphic suitable for a t-shirt. White background, isolated design only, no model or shirt mockup. Distressed or clean retro look depending on the design. Bold typography integrated into the graphic, often curved or arced around the subject as a badge/crest-style lockup and as visually dominant as the illustration itself, rendered clean with no trailing periods or unnecessary punctuation (a question mark or exclamation point only if truly essential to the joke) since punctuation visually unbalances bold display lettering. The overall feel should match classic American novelty, vintage sports, or pop culture humor tees. Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Default to no background element at all, just the subject on the plain background; only occasionally, when the specific concept calls for it, use a flat iconic emblem (badge arch, sunburst, simplified silhouette skyline) — never a rendered scene with depth. The subject can be a character, a simple object, or mostly typographic. No scattered unrelated background props or icons. The output should be the graphic design element only — no shirt, no fabric, no clothing shape. Render it as a standalone logo/graphic on a plain white background, as if it were a vector art file ready for printing.
+Modern minimalist graphic t-shirt design, flat contemporary illustration, bold simple shapes with crisp clean edges — no distressing, no vintage texture, no grunge, nothing worn-in. Limited flat color palette of 2-3 colors, no gradients, no photorealism. Generous negative space around the subject rather than a filled composition. Clean modern sans-serif or simple geometric display lettering, not a vintage script or condensed athletic font — the overall feel is a current-day independent streetwear/design-studio brand, not a retro throwback. Render the text with no trailing periods or unnecessary punctuation. Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Default to no background element at all, just the subject on a plain flat background color; only occasionally, when the concept specifically calls for it, use one simple flat geometric accent (a circle, a simple line, a basic shape) behind the subject — never an emblem, sunburst, or badge arch, and never a rendered scene with depth. The subject can be a character rendered in simplified/geometric form, a simple object, or a mostly-typographic design. No scattered background props or icons. The output should be the graphic design element only — no shirt, no fabric, no clothing shape, isolated on a plain white or single flat color background, as if it were a vector art file ready for printing.
 ```
 
-See "Compositional simplicity" under Style A above — the same rule
-applies here: one subject (or none — an object or typographic design is
-fine), no realistic scene, no cast, no unrelated clutter. Bold arced
-text and flat iconic emblem backgrounds (sunbursts, badge arches) are
-good, not the failure mode.
+### What makes this different from Duke
 
-### Per-design fields
-
-- **Main graphic**: the single central subject only — not a populated
-  scene. Expand the concept's "Visual concept" line into a concrete
-  illustrated description (subject, pose, expression, key props).
-- **Main text**: text/lettering integrated into the graphic (often
-  shorter than the full tagline — a number, phrase, or word treated as
-  a graphic element). Strip trailing periods and unnecessary
-  punctuation before writing this field.
-- **Style direction**: a short line steering palette and mood for this
-  specific design. Default to something consistent with
-  `_brand_voice.md` if the concept doesn't obviously suggest a palette.
+Same compositional rules (one subject, no scene, no clutter, no
+unnecessary punctuation), but the *finish* is opposite: crisp instead
+of distressed, minimal 2-3 flat colors instead of Duke's layered
+3-to-5-ink look, generous white/plain space instead of a dark
+negative-space-driven composition, clean geometric type instead of
+vintage script/athletic lettering. If a design comes out looking
+distressed, textured, or vintage-Americana, that's Duke's lane, not
+Nova's — regenerate with cleaner, simpler shapes.
 
 ### Worked example
 
 ```
-Main graphic: Uncle Sam wearing a birthday party hat instead of his tall top hat, grinning broadly and raising a foamy pint of beer in a cheers gesture. Illustrated in a classic vintage caricature style with exaggerated expression.
-Main text: "250"
-Style direction: Patriotic vintage Americana, red/white/blue palette, distressed retro feel, celebratory and irreverent
+A simplified, geometric side-profile of a person mid-sprint, rendered as flat bold shapes with no internal detail beyond the silhouette. Text says "STILL RUNNING" in clean bold sans-serif stacked below.
 ```
 
-### Full prompt assembly
+---
 
-The fixed header, followed by a blank line, followed by the three
-per-design fields (same shape as the worked example above).
+## Ash — Edgy (punk/skate/tattoo-flash inspired)
+
+Requested via: "edgy," "dark," "aggressive," "punk," "grungy," "Ash."
+
+### Fixed header (always include, exactly as written)
+
+```
+Bold high-contrast graphic t-shirt design inspired by punk, skate, and tattoo-flash aesthetics. Stark palette dominated by black with one or two sharp accent colors (blood red, acid green, or stark white) — high contrast, not soft or muted. Aggressive bold linework with hard, jagged, or angular edges rather than soft curves. Halftone dot texture or scratchy hand-cut grunge distress is welcome here (this is the one designer lane where texture/grit is a feature, not something to avoid). Aggressive display lettering — blackletter, stencil, spray-paint stencil, or a jagged hand-cut look — bold and graphic, never a soft script. Render the text with no trailing periods or unnecessary punctuation. Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Default to no background element at all, just the subject against a stark black or single flat color background; only occasionally, when the concept specifically calls for it, use a rough graphic accent in this genre (a burst of jagged spray-paint splatter, a barbed-wire or chain-link fragment, a crack or scratch texture) — never a soft sunburst or delicate badge arch (that's Duke's lane), and never a rendered scene with depth. The subject can be a character rendered with hard graphic contrast, a simple object, or a mostly-typographic design. No scattered background props or icons beyond one graphic accent. Print-ready design, solid black or single flat color background filling the entire image, no gradients, no glow, no soft shading, no 3D, no realism, no photorealistic rendering.
+```
+
+### What makes this different from Duke and Nova
+
+Duke is warm/nostalgic with soft negative-space shading; Nova is
+crisp/minimal with generous white space; Ash is stark/aggressive with
+hard edges and permitted grit/texture. If in doubt whether a concept
+calls for Ash: does the joke have an edge of aggression, rebellion, or
+darkness to it (not just "vintage" or "clean")? If yes, Ash. If a
+result comes out soft, pastel, or delicate, that's not this lane —
+push the contrast and angularity harder.
+
+### Worked example
+
+```
+A snarling wolf's head rendered in hard graphic linework with halftone shading, jaws open. Text says "BITE BACK" in jagged spray-paint stencil lettering above.
+```

@@ -122,10 +122,11 @@ on a concept that didn't earn it).
 
 ## Step 8 — Generate images
 
-For each finalized concept, assemble an image prompt using **Style A**
-(the default) from `prompts/image_style.md` — there's no operator to ask
-for a style preference on an automatic cron run, so always use the
-default here. Generate one image per finalized concept.
+For each finalized concept, pick whichever designer (Duke, Nova, or
+Ash) from `prompts/image_style.md` genuinely fits that concept best —
+aim for a mix across the batch rather than defaulting to one designer
+for everything. Assemble the image prompt per that designer's section
+and generate one image per finalized concept.
 
 ## Step 9 — Send to Telegram
 
@@ -138,12 +139,14 @@ caption:
 
 ```
 Tagline: "..."
+Designer: [Duke | Nova | Ash]
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / reference site / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one).
+to more than one). Want to see it in a different style? Just ask, e.g.
+"show me the Ash version of this one."
 ```
 
 This is the actual delivered output — write captions as the final

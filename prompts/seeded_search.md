@@ -17,11 +17,12 @@ Take the theme from the operator's message (e.g. "gambling collection",
 it's genuinely ambiguous what the theme is, ask a clarifying question
 instead of guessing.
 
-Also check whether the message requests a specific image style (e.g.
-"...in the white background style", "...flat vector this one"). If so,
-use **Style B** from `prompts/image_style.md` for this run instead of
-the default. If no style is mentioned, use **Style A** (default) — don't
-ask, just proceed with the default.
+Also check whether the message names a designer or describes a style
+that maps to one (e.g. "Nova," "modern/clean," "Ash," "edgy/dark,"
+"Duke," "vintage") — see each designer's "Requested via" line in
+`prompts/image_style.md`. If one is named/implied, use that designer
+for every concept in this run instead of picking freely per concept. If
+none is mentioned, pick per concept in Step 9 as normal (aim for a mix).
 
 ## Step 1 — Reddit check (angle/timing signal only — not content)
 
@@ -128,11 +129,12 @@ send only the "nothing cleared the bar" message — don't run Step 9.
 
 ## Step 9 — Generate images
 
-For each finalized concept, assemble an image prompt using whichever
-style was identified in Step 0 (Style A by default, Style B if
-requested) from `prompts/image_style.md`. Generate one image per
-finalized concept — with 4-6 concepts this means several images; that's
-expected for an on-demand deep dive.
+If a designer was named/implied in Step 0, use that one for every
+concept. Otherwise, pick whichever designer (Duke, Nova, or Ash) from
+`prompts/image_style.md` genuinely fits each concept best, aiming for a
+mix across the batch. Generate one image per finalized concept — with
+4-6 concepts this means several images; that's expected for an
+on-demand deep dive.
 
 ## Step 10 — Send to Telegram
 
@@ -145,12 +147,14 @@ caption:
 
 ```
 Tagline: "..."
+Designer: [Duke | Nova | Ash]
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one).
+to more than one). Want to see it in a different style? Just ask, e.g.
+"show me the Ash version of this one."
 ```
 
 This is the actual delivered output — write captions as the final
