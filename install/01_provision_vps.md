@@ -135,16 +135,31 @@ so pushing needs its own credential:
    one repository (`Hermes-Agent-Shirt-Idea-Maker`), permission
    **Contents: Read and write** only — nothing broader. Copy the token
    (starts with `github_pat_...`), it's only shown once.
-2. As `hermes` (`sudo -i -u hermes`), store it via git's credential
-   helper so it's never embedded in `.git/config` or logged in shell
+2. As `hermes` (`sudo -i -u hermes`), turn on git's credential helper
+   so the token is never embedded in `.git/config` or logged in shell
    history:
    ```bash
    cd ~/riley-ink-pipeline
    git config credential.helper store
-   git fetch  # prompts for username (your GitHub username) and password (paste the token) once, then caches it
    ```
-3. Confirm with a harmless no-op push test (e.g. push a throwaway
-   branch and delete it) rather than trusting silence.
+   This repo is public, so `git fetch`/`git pull` work anonymously and
+   won't prompt for anything — don't use fetch to test this. Only a
+   **push** actually needs the credential, so test with one directly:
+   ```bash
+   git checkout -b test-push-access
+   git commit --allow-empty -m "test push access"
+   git push origin test-push-access
+   ```
+   This is what prompts for username (your GitHub username) and
+   password (paste the token) — once, then caches it in
+   `~/.git-credentials` for every future push.
+3. Confirm the branch actually landed on GitHub (don't just trust a
+   silent success), then clean up:
+   ```bash
+   git checkout main
+   git branch -D test-push-access
+   git push origin --delete test-push-access
+   ```
 
 If the token is ever revoked/rotated, delete
 `~/.git-credentials` and repeat step 2.
