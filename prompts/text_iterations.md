@@ -60,16 +60,17 @@ specific visual concept, but make sure at least two different designers
 appear across the batch (unless the operator requested one specific
 designer for all of them — see Step 0).
 
-## Step 4 — Generate images
+## Step 4 — Send concepts to Telegram (text only, no image yet)
 
-Assemble an image prompt per concept using its assigned designer's
-section from `prompts/image_style.md`. The text treatment is always
-the exact phrase from Step 0, unchanged, in every iteration. Generate
-one image per concept.
+Image generation costs real money per image, so it only happens after
+the operator approves a concept description in text first (see
+`AGENTS.md` message routing, bucket 3, Stage A) — the same gate used by
+`daily_scan.md`/`seeded_search.md`. Yes, this means judging a visual
+idea from a one-line description rather than the rendered image itself
+— coarser, but it still stops obviously-wrong concepts (wrong subject,
+wrong designer feel) from ever getting rendered.
 
-## Step 5 — Send to Telegram
-
-Send each image as its own message with a caption:
+Send each concept as its own message:
 
 ```
 "[exact text]"
@@ -77,11 +78,10 @@ Concept: [one line describing this iteration's visual idea]
 Designer: [Duke | Nova | Ash]
 
 Reply "yes" or "no" on this one (or reference it by concept/designer if
-replying to more than one).
+replying to more than one). "yes" generates the image for your
+approval next.
 ```
 
-This is the actual delivered output — write captions as the final
-message content, not as a report to summarize afterward. A later
-"yes"/"no" reply is handled the same as any other design (see
-`AGENTS.md` message routing) — this prompt's job ends once the images
-are sent.
+This is the actual delivered output for this run — this prompt's job
+ends once the concepts are sent. A later "yes"/"no" reply triggers
+image generation, handled by `AGENTS.md` bucket 3, not by this file.

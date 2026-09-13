@@ -120,6 +120,37 @@ cd ~/riley-ink-pipeline
 
 ---
 
+## Part 6b — Let the bot propose pipeline changes back to git (optional)
+
+Skip this unless you want the bot to be able to draft pipeline-behavior
+changes on the go (via Telegram) as a branch it pushes to GitHub, for
+you to review/merge later from the Claude Code conversation — see
+`AGENTS.md`'s hard rules. Without this, the bot can still explain the
+pipeline, it just has to tell you to request changes from that
+conversation instead. Plain `git clone` above is anonymous/read-only,
+so pushing needs its own credential:
+
+1. On GitHub: **Settings → Developer settings → Personal access tokens
+   → Fine-grained tokens → Generate new token**. Scope it to just this
+   one repository (`Hermes-Agent-Shirt-Idea-Maker`), permission
+   **Contents: Read and write** only — nothing broader. Copy the token
+   (starts with `github_pat_...`), it's only shown once.
+2. As `hermes` (`sudo -i -u hermes`), store it via git's credential
+   helper so it's never embedded in `.git/config` or logged in shell
+   history:
+   ```bash
+   cd ~/riley-ink-pipeline
+   git config credential.helper store
+   git fetch  # prompts for username (your GitHub username) and password (paste the token) once, then caches it
+   ```
+3. Confirm with a harmless no-op push test (e.g. push a throwaway
+   branch and delete it) rather than trusting silence.
+
+If the token is ever revoked/rotated, delete
+`~/.git-credentials` and repeat step 2.
+
+---
+
 ## Part 7 — Get an AI model API key
 
 You need at least one:

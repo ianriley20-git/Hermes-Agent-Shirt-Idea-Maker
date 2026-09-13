@@ -67,10 +67,33 @@ which before responding:
    plus the word "iterations" (route here). Read and follow
    `prompts/text_iterations.md` in full, using the exact text as Step
    0's input.
-3. **A yes/no/approval reply to a previously sent design image** (e.g.
-   "yes", "no", "yes on the Uncle Sam one", "reject the second one") —
-   a message can approve/reject more than one design at once; handle
-   each individually:
+3. **A yes/no/approval reply to a previously sent concept or design**
+   (e.g. "yes", "no", "yes on the Uncle Sam one", "reject the second
+   one") — a message can approve/reject more than one item at once;
+   handle each individually. Image generation is a separate, explicit
+   gate from final approval (added after image spend got away from
+   budget — see `TODO.md`, 2026-09-13), so first check which stage the
+   item being replied to is at — was it sent as a text-only concept
+   card (from `daily_scan.md`/`seeded_search.md`/`text_iterations.md`,
+   no image), or as an already-rendered image?
+
+   **Stage A — replying to a text-only concept (no image sent yet):**
+   - **On "yes"**: generate the image now, using the designer noted on
+     that concept card, per that designer's section in
+     `prompts/image_style.md`. Send it as its own Telegram message
+     using the same caption format the concept card used, plus a fresh
+     "Reply yes or no" prompt — this becomes Stage B below. Don't email
+     anything yet; a concept's "yes" only approves rendering it, not
+     shipping it.
+   - **On "no"**: log the rejection to memory (tagline/text, register,
+     reason if given — see the learning-from-feedback section in
+     `prompts/_brand_voice.md`) and reply briefly confirming it was
+     logged. No image is ever generated for a rejected concept — that's
+     the entire point of gating here.
+
+   **Stage B — replying to an already-generated image** (sent by Stage
+   A above, a designer-variant regeneration, or any other
+   already-rendered design):
    - **Always**: log the decision to memory — tagline, register
      (deadpan/wordplay), approved or rejected, and any reason the
      operator gave. See the learning-from-feedback section in
@@ -124,8 +147,10 @@ which before responding:
      generate one new image, and send it to Telegram with the same
      caption format `daily_scan.md`/`seeded_search.md` use (tagline,
      designer, why it's timely/source if known, yes/no prompt).
-   - This is a new candidate design like any other — it still needs its
-     own explicit "yes" before anything happens beyond showing it.
+   - This is a new candidate design like any other — since it's already
+     a rendered image, a reply to it goes through bucket 3's Stage B
+     (not Stage A) and still needs its own explicit "yes" before
+     anything happens beyond showing it.
 5. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
@@ -145,13 +170,36 @@ all waste more of the operator's time than one clarifying question would.
   operator in the same conversation.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
-- **Never directly edit this repo's tracked files** (anything in
-  `prompts/`, `config/`, or `AGENTS.md`/`TODO.md`/`README.md` at the
-  root) even if the operator asks you to change pipeline behavior —
-  this repo is managed via `git pull` from a separate Claude Code
-  conversation, and a local edit here creates a merge conflict on the
-  next pull (this has already happened once). If asked to change how
-  the pipeline works, say so plainly and tell the operator to make that
-  request in the conversation that manages this repo instead — don't
-  implement it yourself by editing files. `~/format_library.md` is the
-  one exception (it's deliberately outside git for exactly this reason).
+- **Pipeline-behavior changes go through a proposal branch, never
+  straight onto `main`.** If the operator asks (via Telegram, on the
+  go) to change how the pipeline works — anything in `prompts/`,
+  `config/`, or `AGENTS.md`/`TODO.md`/`README.md` at the root — you may
+  make the edit, but only through this exact sequence, so the
+  operator's `main` checkout (and the Claude Code conversation that
+  manages this repo) is never disturbed without a deliberate choice to
+  adopt it:
+  1. `git switch -c hermes-proposed/<short-slug>-<YYYY-MM-DD>` off the
+     current `main` (e.g. `hermes-proposed/remove-etsy-step-2026-09-13`).
+  2. Make the edit(s) on that branch, `git commit` with a clear message
+     describing what changed and why — quote the operator's actual
+     request — then `git push origin <branch>`.
+  3. **Immediately `git switch main`** so your own local working copy —
+     the one you actually run from — goes right back to unmodified
+     `main`. Never leave your working copy sitting on a branch or with
+     an uncommitted diff; that's what caused a real merge-conflict
+     incident before (see `TODO.md`, 2026-09-09).
+  4. Tell the operator on Telegram, plainly: what you changed, the
+     branch name, and that it's a proposal, not yet live — they review
+     and merge it (or ask you to keep running as-is) from the Claude
+     Code conversation whenever they're back at that console. Never
+     merge your own branch into `main`, and never push directly to
+     `main` — adopting a change is always the operator's explicit call,
+     made from the console, not something decided over Telegram.
+  - Needs a push-capable git credential configured on the server first
+    (plain `git clone` is anonymous/read-only) — see `install/`
+    (Part 6b) and `TODO.md` for setup status; until that's done, fall
+    back to the old behavior: say so plainly and tell the operator to
+    make the request in the conversation that manages this repo
+    instead.
+  - `~/format_library.md` remains the one exception (deliberately
+    outside git, no branch needed).

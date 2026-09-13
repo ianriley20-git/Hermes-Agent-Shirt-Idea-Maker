@@ -146,11 +146,12 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       fine to ignore). Restart the gateway after
       (`systemctl --user restart hermes-gateway.service`, with
       `XDG_RUNTIME_DIR` set first as usual).
-- [ ] Image generation costs real money per image (`gpt-image-2-medium`,
+- [x] Image generation costs real money per image (`gpt-image-2-medium`,
       ~40s each) and now happens automatically for every surviving
       concept (up to 3/day, up to 6 per on-demand search) rather than
       only after a separate approval-to-generate step. Worth keeping an
-      eye on actual OpenAI usage/cost after a few days.
+      eye on actual OpenAI usage/cost after a few days. **This risk
+      materialized — see 2026-09-13 entry below.**
 ## Stage 6 (email handoff) — SOLVED via Gmail OAuth API, confirmed live
 - [x] **Root cause, fully confirmed**: DigitalOcean blocks outbound SMTP
       ports 465/587 on all droplets by default (anti-spam policy).
@@ -481,6 +482,72 @@ concepts, 2026-09-03)
       emphasis/ordering change in how the two paths get used.
 - [ ] Not yet tested live — next run should show most/all of the batch
       as `Origin: reused` rather than a roughly even mix.
+
+## Incident: image-gen cost overrun, two-step approval restored (2026-09-13)
+- [x] **What happened**: the 2026-09-06 risk noted above materialized —
+      OpenAI's monthly budget ($100) was blown through ($140.64 spent)
+      after about a week, since every surviving concept from
+      `daily_scan.md`/`seeded_search.md`/`text_iterations.md` got an
+      image generated and sent automatically, with no cost gate. Once
+      the budget cap hit, *all* OpenAI calls failed (chat model
+      included), which is why the bot could only reply with a generic
+      "model provider failed after retries" message on Telegram — the
+      model doing the replying was itself unreachable, so there was no
+      agent turn available to explain the real cause. Confirmed via
+      OpenAI's Usage dashboard (Personal plan: $140.64 / $100.00 for
+      September).
+- [x] **Fix**: restored the original two-step design (see README.md's
+      build-stage list) — `daily_scan.md`, `seeded_search.md`, and
+      `text_iterations.md` now send concepts as **text only** first
+      (tagline/concept + noted designer, no image). `AGENTS.md` bucket
+      3 was split into Stage A (yes/no on a text-only concept — "yes"
+      now triggers image generation, not email) and Stage B (yes/no on
+      an already-rendered image — "yes" triggers email, as before).
+      Rejected concepts at Stage A never get an image generated at all,
+      which is the actual cost saving.
+      - Applied uniformly including `text_iterations.md`, even though
+        judging a designer's illustration idea from a one-line text
+        description is coarser than seeing the rendered image (the
+        whole point of "iterations" is comparing renders) — still
+        stops obviously-wrong concepts from being rendered. Revisit if
+        this feels like it's filtering out ideas that would have looked
+        fine rendered.
+      - Operator action: raise the OpenAI budget limit (or wait for the
+        September reset) to get the bot working again in the meantime —
+        this fix only prevents future overruns, doesn't restore access
+        to the already-exhausted budget.
+- [ ] Not yet tested live — next daily scan / seeded search / iterations
+      run is the first under the two-step gate. Confirm Stage A → yes →
+      image-generated → Stage B → yes → email actually chains correctly
+      end to end, and that a Stage A "no" really produces zero image
+      spend.
+
+## Bot can now propose pipeline changes via git branch (2026-09-13)
+- [x] **Why**: operator wants to be able to ask the bot for pipeline
+      changes over Telegram while away from this Claude Code console,
+      without recreating the 2026-09-09 incident (bot's uncommitted
+      edit blocked a `git pull`) and without those changes silently
+      becoming live without a deliberate choice to adopt them.
+- [x] **Design**: `AGENTS.md`'s hard rule was changed from "never edit
+      tracked files" to "propose via a `hermes-proposed/*` branch, push
+      it, then switch the local working copy straight back to `main`"
+      — the bot's own live behavior never actually changes until the
+      operator merges the branch from this conversation. Setup
+      instructions (fine-grained GitHub PAT, scoped to this repo,
+      Contents: Read and write, stored via `git config
+      credential.helper store`) added as `install/01_provision_vps.md`
+      Part 6b.
+- [ ] **Operator action needed**: Part 6b hasn't been run on the actual
+      droplet yet — until it is, `git push` from the `hermes` user will
+      fail (plain clone is anonymous/read-only), and the bot should
+      fall back to the old "ask the operator to make this request in
+      the Claude Code conversation" behavior per the hard rule's
+      fallback note.
+- [ ] Not yet tested live — first real test should be a small,
+      low-stakes pipeline tweak requested purely over Telegram, then
+      confirming the resulting branch/commit shows up on GitHub and
+      that `main` (and the bot's own working copy) stayed clean
+      throughout.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

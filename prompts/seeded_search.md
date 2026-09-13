@@ -136,26 +136,24 @@ of it, if that's where the strongest material is — just label them
 accurately (see `config/reference_sites.md` for the current reuse
 policy).
 
-If nothing on this theme clears the bar, skip straight to Step 10 and
-send only the "nothing cleared the bar" message — don't run Step 9.
+If nothing on this theme clears the bar, skip straight to Step 9 and
+send only the "nothing cleared the bar" message.
 
-## Step 9 — Generate images
+## Step 9 — Send concepts to Telegram (text only, no image yet)
 
 If a designer was named/implied in Step 0, use that one for every
 concept. Otherwise, pick whichever designer (Duke, Nova, or Ash) from
 `prompts/image_style.md` genuinely fits each concept best, aiming for a
-mix across the batch. Generate one image per finalized concept — with
-4-6 concepts this means several images; that's expected for an
-on-demand deep dive.
-
-## Step 10 — Send to Telegram
+mix across the batch. Note the chosen designer on each concept, but
+**don't generate an image yet** — image generation costs real money
+per image, so it only happens after the operator approves the concept
+in text first (see `AGENTS.md` message routing, bucket 3, Stage A).
 
 If nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
-lowering the standard to produce an image anyway.
+lowering the standard to produce a concept anyway.
 
-Otherwise, for each generated image, send it as its own message with a
-caption:
+Otherwise, send each concept as its own message:
 
 ```
 Tagline: "..."
@@ -165,11 +163,10 @@ Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). Want to see it in a different style? Just ask, e.g.
-"show me the Ash version of this one."
+to more than one). "yes" generates the image for your approval next —
+nothing is emailed yet.
 ```
 
-This is the actual delivered output — write captions as the final
-message content, not as a report to summarize afterward. A later
-"yes"/"no" reply is handled separately (see `AGENTS.md` message
-routing) — this prompt's job ends once the images are sent.
+This is the actual delivered output for this run — this prompt's job
+ends once the concepts are sent. A later "yes"/"no" reply triggers
+image generation, handled by `AGENTS.md` bucket 3, not by this file.
