@@ -537,17 +537,40 @@ concepts, 2026-09-03)
       Contents: Read and write, stored via `git config
       credential.helper store`) added as `install/01_provision_vps.md`
       Part 6b.
-- [ ] **Operator action needed**: Part 6b hasn't been run on the actual
-      droplet yet — until it is, `git push` from the `hermes` user will
-      fail (plain clone is anonymous/read-only), and the bot should
-      fall back to the old "ask the operator to make this request in
-      the Claude Code conversation" behavior per the hard rule's
-      fallback note.
+- [x] **Simplified (2026-09-14)**: attempted Part 6b setup ran into
+      repeated friction — the DigitalOcean console's known
+      bracketed-paste bug corrupted a token paste at least once; a
+      `git config credential.helper store` + interactive `git push`
+      prompt didn't render/accept input in the console at all; routed
+      the setup through Hermes itself via Telegram instead (same trick
+      that solved the Stage 6 Gmail OAuth wall), which got
+      `~/.git-credentials` written correctly (0600, right format,
+      confirmed via `ls -la`/`wc -c`) — but the actual push still
+      failed with GitHub's "Invalid username or token," most likely
+      because the token used was a stale/already-revoked one rather
+      than a fresh one, and this wasn't fully run to ground.
+      **Decision**: not worth the friction for what's a nice-to-have.
+      `AGENTS.md`'s hard rule now only requires the bot to *commit*
+      locally to a `hermes-proposed/*` branch (no credential needed —
+      pure local git, always works) — pushing that branch to GitHub is
+      now explicitly the operator's manual job, done whenever they
+      choose, either from the console or by relaying it to the Claude
+      Code conversation. The push-credential setup remains available as
+      an optional future convenience (Part 6b is still valid if someone
+      wants to retry it with a guaranteed-fresh token), just no longer
+      required for the core workflow to work.
+- [ ] **Cleanup needed on the server**: a leftover local
+      `test-push-access` branch and a `~/.git-credentials` file (with a
+      likely-invalid token) may still exist from this troubleshooting —
+      harmless to leave (the credential just won't authenticate
+      anything), but worth deleting next time you're in the console:
+      `git branch -D test-push-access` and `rm ~/.git-credentials` (as
+      `hermes`, in `~/riley-ink-pipeline`).
 - [ ] Not yet tested live — first real test should be a small,
       low-stakes pipeline tweak requested purely over Telegram, then
-      confirming the resulting branch/commit shows up on GitHub and
-      that `main` (and the bot's own working copy) stayed clean
-      throughout.
+      confirming the branch/commit exists locally on the server
+      (`git log hermes-proposed/... `) and that `main` (and the bot's
+      own working copy) stayed clean throughout.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

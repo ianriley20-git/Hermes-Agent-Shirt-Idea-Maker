@@ -171,35 +171,33 @@ all waste more of the operator's time than one clarifying question would.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
 - **Pipeline-behavior changes go through a proposal branch, never
-  straight onto `main`.** If the operator asks (via Telegram, on the
-  go) to change how the pipeline works — anything in `prompts/`,
+  straight onto `main` — and pushing that branch to GitHub is the
+  operator's job, not yours.** If the operator asks (via Telegram, on
+  the go) to change how the pipeline works — anything in `prompts/`,
   `config/`, or `AGENTS.md`/`TODO.md`/`README.md` at the root — you may
-  make the edit, but only through this exact sequence, so the
-  operator's `main` checkout (and the Claude Code conversation that
-  manages this repo) is never disturbed without a deliberate choice to
-  adopt it:
+  make the edit, but only through this exact sequence:
   1. `git switch -c hermes-proposed/<short-slug>-<YYYY-MM-DD>` off the
      current `main` (e.g. `hermes-proposed/remove-etsy-step-2026-09-13`).
-  2. Make the edit(s) on that branch, `git commit` with a clear message
-     describing what changed and why — quote the operator's actual
-     request — then `git push origin <branch>`.
+  2. Make the edit(s) on that branch and `git commit` with a clear
+     message describing what changed and why — quote the operator's
+     actual request.
   3. **Immediately `git switch main`** so your own local working copy —
      the one you actually run from — goes right back to unmodified
      `main`. Never leave your working copy sitting on a branch or with
      an uncommitted diff; that's what caused a real merge-conflict
      incident before (see `TODO.md`, 2026-09-09).
-  4. Tell the operator on Telegram, plainly: what you changed, the
-     branch name, and that it's a proposal, not yet live — they review
-     and merge it (or ask you to keep running as-is) from the Claude
-     Code conversation whenever they're back at that console. Never
-     merge your own branch into `main`, and never push directly to
-     `main` — adopting a change is always the operator's explicit call,
-     made from the console, not something decided over Telegram.
-  - Needs a push-capable git credential configured on the server first
-    (plain `git clone` is anonymous/read-only) — see `install/`
-    (Part 6b) and `TODO.md` for setup status; until that's done, fall
-    back to the old behavior: say so plainly and tell the operator to
-    make the request in the conversation that manages this repo
-    instead.
+  4. Tell the operator on Telegram, plainly: what you changed and the
+     branch name — and that it's sitting locally on the server only,
+     not on GitHub yet and not reviewed. **Don't attempt `git push`
+     yourself.** The operator pushes/reviews/merges it themselves,
+     whenever they're next at the console or the Claude Code
+     conversation, on their own schedule — that's a deliberate choice
+     to adopt, not something decided over Telegram.
+  - A push-capable git credential *can* be set up on the server (see
+    `install/` Part 6b) to let you push the branch yourself as a
+    convenience — but this is optional, not required, and has proven
+    fiddly to get working (see `TODO.md`, 2026-09-14). Local-commit-only
+    is the baseline: never let getting push to work block making or
+    keeping an edit.
   - `~/format_library.md` remains the one exception (deliberately
     outside git, no branch needed).
