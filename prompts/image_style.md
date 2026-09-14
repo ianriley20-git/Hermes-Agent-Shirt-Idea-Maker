@@ -5,7 +5,7 @@ Used in Stage 5 to turn a finalized concept (from `daily_scan.md` or
 three named house "designers" below, each a distinct visual lane:
 
 - **Duke** — retro vintage (negative-space screen print, proven default)
-- **Nova** — modern & simple (clean flat shapes, crisp edges, minimal)
+- **Nova** — contemporary designer minimalism (art-directed composition, typography-driven, crisp flat color)
 - **Ash** — edgy (punk/skate/tattoo-flash inspired, high contrast)
 
 **Picking a designer per concept**: for daily scans and seeded searches,
@@ -54,6 +54,17 @@ designer is generating:
   Large display lettering (arced, stacked, or straight depending on the
   designer) as one lockup — text can be as visually dominant as the
   illustration. What to avoid is *multiple separate* text treatments.
+- **Typography must be art-directed, not merely added.** When text is
+  present, think of the type and illustration as one graphic
+  composition. Avoid the default layout of "picture centered above +
+  slogan centered below" unless that specific concept genuinely
+  benefits from it. Scale, placement, spacing, font character, and
+  interaction with the subject are part of the design itself.
+- **Do not let a designer collapse into one recurring template.** The
+  designer defines a visual philosophy, not a fixed composition. Vary
+  typography, scale relationships, subject placement, and layout from
+  concept to concept while remaining inside that designer's visual
+  lane.
 - **The subject doesn't have to be a character.** Objects or a
   mostly-typographic design are equally valid.
 - **No unnecessary punctuation in the rendered text.** Trailing periods
@@ -189,7 +200,7 @@ An enormous hotdog rampaging through a city. Text says "GLIZZILA" in old school 
 
 ---
 
-## Nova — Modern & simple (clean flat design)
+## Nova — Contemporary designer minimalism
 
 Requested via: "modern," "simple," "clean," "minimal," "Nova," or (from
 the old naming) "flat vector"/"white background."
@@ -197,30 +208,59 @@ the old naming) "flat vector"/"white background."
 ### Fixed header (always include, exactly as written)
 
 ```
-Modern minimalist graphic t-shirt design, flat contemporary illustration, bold simple shapes with crisp clean edges — no distressing, no vintage texture, no grunge, nothing worn-in. Every shape is one single flat, unmodulated color — no gradient, no highlight, no shadow, no suggestion of rounded 3D form within any shape, even subtly. Limited flat color palette of 2-3 colors, no photorealism. Generous negative space around the subject rather than a filled composition. Clean modern sans-serif or simple geometric display lettering, not a vintage script or condensed athletic font — the overall feel is a current-day independent streetwear/design-studio brand, not a retro throwback. Render the text with no trailing periods or unnecessary punctuation.
+Modern premium graphic t-shirt design with the restraint of a contemporary independent apparel brand, design studio, or editorial poster. Clean and minimal, but unmistakably art-directed. The result should feel intentionally designed by a professional graphic designer — never like generic flat vector art, corporate illustration, clip art, an app icon, a PowerPoint graphic, or a simple object with plain text underneath it.
 
-Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Represent the subject as a simple, iconic shape: if the underlying idea literally involves "many" of something, depict it with 2-3 stylized elements, never a busy, structurally-complex assembly with many realistic parts.
+Use a limited palette of 2-4 flat colors with crisp edges and confident shapes. Every shape is one single flat, unmodulated color — no gradients, highlights, shadows, glow, realistic lighting, or faux-3D effects. No vintage distress, grunge, worn texture, retro Americana, or nostalgic screen-print styling. Shapes may be geometric, simplified, abstracted, cropped, oversized, or intentionally exaggerated rather than simply tracing the literal real-world object.
 
-Default to no background element at all, just the subject on a plain flat background color. Only occasionally, when the concept specifically calls for it, add exactly ONE simple flat geometric accent (a circle, a simple line, a basic shape) behind the subject — never combine more than one accent, never an emblem/sunburst/badge arch (that's Duke's lane), and never a rendered scene with depth.
+Minimal does NOT mean empty, basic, or unfinished. Create visual interest through strong composition: unexpected scale relationships, deliberate cropping, asymmetry, overlap, negative space, controlled repetition of a single simple form, or a clever interaction between typography and illustration. Use only the fewest elements necessary, but make those elements feel deliberately art-directed.
 
-The subject can be a character rendered in simplified/geometric form, a simple object, or a mostly-typographic design. No scattered background props or icons. The output should be the graphic design element only — no shirt, no fabric, no clothing shape, isolated on a plain white or single flat color background, as if it were a vector art file ready for printing.
+Exactly ONE primary visual idea. No realistic/perspective environment, no room, no scenery, no crowd, and no collection of unrelated decorative props. The main subject may be a simplified character, object, symbol, abstract graphic form, or typography itself. If the underlying idea involves multiple items, reduce it to 2-3 bold graphic forms rather than a complex assembly.
+
+Typography is a major design element, not an afterthought. Do NOT default to ordinary centered sans-serif text underneath the illustration. Select typography based on the concept. Possible treatments include oversized geometric grotesk, wide modern sans-serif, narrow editorial sans-serif, heavy lowercase type, clean contemporary serif, custom block lettering, intentionally spaced capitals, vertically arranged text, tightly stacked type, dramatically oversized words, or text that interacts directly with the subject.
+
+The typography treatment should vary substantially from design to design. Do not repeatedly use the same generic bold sans-serif. Typography may overlap the illustration, disappear behind portions of the subject, create the visual container for the subject, be intentionally cropped, or become part of the joke itself.
+
+Avoid generic Microsoft Word, Canva-template, corporate-presentation, or stock-vector aesthetics. Specifically avoid: a centered icon with a caption underneath; default-looking Arial/Helvetica-style text; generic line icons; stock-vector character poses; soft rounded corporate illustration shapes; perfectly symmetrical logo layouts unless the concept clearly benefits from symmetry; large unused empty areas that make the design look unfinished rather than intentionally restrained.
+
+Favor ONE memorable graphic move per design. For example: the subject breaks through oversized lettering; one word becomes part of the illustration; an object is radically simplified into an elegant silhouette; an oversized crop creates tension; typography forms the container for the image; a mundane object is presented with fashion-editorial seriousness; an unexpected geometric relationship delivers the joke.
+
+Default to no background element at all. If the concept benefits from one, use at most ONE simple contemporary graphic device such as a solid rectangle, circle, line, frame, crop, or color block. Never use Duke-style sunbursts, badge arches, vintage crests, nostalgic flourishes, or rendered scenery.
+
+The finished graphic should feel at home on a premium modern streetwear tee, museum-store shirt, independent design label, boutique lifestyle brand, or contemporary editorial poster: understated from a distance, clever and intentional up close, simple enough to print cleanly, but never simplistic.
+
+The output should be the graphic design element only — no shirt, no fabric, no clothing shape, no product mockup, and no photographic setting. Isolated on a plain white or single flat-color background as if it were a finished vector art file ready for printing.
+
+Render text with no trailing periods or unnecessary punctuation.
 ```
 
 ### What makes this different from Duke
 
-Same compositional rules (one subject, no scene, no clutter, no
-unnecessary punctuation), but the *finish* is opposite: crisp instead
-of distressed, minimal 2-3 flat colors instead of Duke's layered
-3-to-5-ink look, generous white/plain space instead of a dark
-negative-space-driven composition, clean geometric type instead of
-vintage script/athletic lettering. If a design comes out looking
-distressed, textured, or vintage-Americana, that's Duke's lane, not
-Nova's — regenerate with cleaner, simpler shapes.
+Duke creates interest through retro illustration, hand-inked character,
+layered ink colors, negative-space shading, and vintage display
+lettering. Nova creates interest through contemporary composition,
+proportion, typography, abstraction, cropping, spacing, and visual
+relationships. Nova should NOT merely be "Duke with less detail" — it
+should look like a completely different designer solved the same
+concept using modern graphic-design thinking. A successful Nova design
+may actually contain fewer elements than Duke, but every element should
+feel more deliberately placed. If the design resembles generic clip art
+with text underneath it, a corporate vector illustration, a simple logo
+template, or something assembled in Microsoft Word, regenerate it with
+stronger composition and a more distinctive relationship between
+typography and subject.
 
-### Worked example
+### Worked examples
 
 ```
-A simplified, geometric side-profile of a person mid-sprint, rendered as flat bold shapes with no internal detail beyond the silhouette. Text says "STILL RUNNING" in clean bold sans-serif stacked below.
+A clean contemporary design built around the phrase "STILL RUNNING." The word RUNNING is enormous and tightly spaced, occupying most of the composition. A simplified runner silhouette crosses through the letters so portions of the figure disappear behind the typography and reappear through the negative spaces. Use a distinctive wide geometric sans-serif and only three flat colors. The typography and runner should read as one graphic composition, not an illustration with a caption.
+```
+
+```
+A minimalist martini glass reduced to two or three elegant geometric shapes. Text says "POOR DECISIONS." Set POOR very small with wide letter spacing while DECISIONS is dramatically oversized and slightly cropped by the composition. Use sophisticated editorial typography and an asymmetrical layout with controlled negative space. It should feel like boutique apparel artwork rather than an icon with a slogan.
+```
+
+```
+A single simplified hot dog depicted absurdly long, stretching horizontally across most of the composition. Text says "ATHLETIC BUILD." Integrate the words tightly above and below the hot dog using refined condensed contemporary typography so the image and type create one rectangular visual lockup. Clean, deliberate, slightly fashion-editorial, and humorous without adding extra decoration.
 ```
 
 ---
@@ -232,7 +272,17 @@ Requested via: "edgy," "dark," "aggressive," "punk," "grungy," "Ash."
 ### Fixed header (always include, exactly as written)
 
 ```
-Bold high-contrast graphic t-shirt design inspired by punk, skate, and tattoo-flash aesthetics. Stark palette dominated by black with one or two sharp accent colors (blood red, acid green, or stark white) — high contrast, not soft or muted. Every shape is one single flat, unmodulated color — no gradient, no highlight, no shadow, no suggestion of rounded 3D form within any shape, even subtly. Aggressive bold linework with hard, jagged, or angular edges rather than soft curves; line quality should read as hand-cut/hand-inked, not computer-vector-perfect — allow slight natural irregularity rather than exact symmetry. Halftone dot texture or scratchy hand-cut grunge distress is welcome here on the surface itself (this is the one designer lane where texture/grit is a feature) — but this is a surface treatment, not an excuse to add extra structural elements. Aggressive display lettering — blackletter, stencil, spray-paint stencil, or a jagged hand-cut look — bold and graphic, never a soft script. Render the text with no trailing periods or unnecessary punctuation.
+Bold high-contrast graphic t-shirt design inspired by punk, skate, and tattoo-flash aesthetics. Stark palette dominated by black with one or two sharp accent colors (blood red, acid green, or stark white) — high contrast, not soft or muted. Every shape is one single flat, unmodulated color — no gradient, no highlight, no shadow, no suggestion of rounded 3D form within any shape, even subtly. Aggressive bold linework with hard, jagged, or angular edges rather than soft curves; line quality should read as hand-cut/hand-inked, not computer-vector-perfect — allow slight natural irregularity rather than exact symmetry. Halftone dot texture or scratchy hand-cut grunge distress is welcome here on the surface itself (this is the one designer lane where texture/grit is a feature) — but this is a surface treatment, not an excuse to add extra structural elements.
+
+Typography should feel expressive, concept-specific, and intentionally selected rather than using a recurring "Ash font." Vary the lettering substantially from design to design.
+
+Possible typography directions include aggressive blackletter, crude hand-painted capitals, xerox-zine lettering, chunky skate-video typography, warped heavy serif, angular racing lettering, ransom-note-inspired cut lettering, hand-scrawled marker type, compressed industrial grotesk, tattoo-flash serif, brutalist all-caps sans-serif, uneven hand-cut block letters, distressed collegiate lettering, or other typography appropriate to punk/skate/tattoo culture.
+
+Choose ONE typography direction that best fits the specific joke. Do not combine multiple font genres in one design. Avoid repeatedly defaulting to blackletter, stencil, or spray-paint lettering simply because the design is assigned to Ash. Two consecutive Ash concepts should rarely use the same general typography family.
+
+Typography should be composed together with the illustration rather than placed underneath as a caption. Depending on the concept, lettering may be oversized, tightly stacked, arced, skewed, compressed, stretched, partially obscured by the subject, wrapped tightly around it, positioned on an intentionally uneven baseline, or integrated directly into the illustration.
+
+Controlled imperfection is encouraged — uneven character widths, rough edges, hand-cut forms, imperfect baselines — but it must still look intentional and professionally designed rather than randomly distorted. Render the text with no trailing periods or unnecessary punctuation.
 
 Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Represent the subject as a simple, iconic shape: if the underlying idea literally involves "many" of something, depict it with 2-3 stylized elements, never a busy, structurally-complex assembly with many realistic parts.
 
