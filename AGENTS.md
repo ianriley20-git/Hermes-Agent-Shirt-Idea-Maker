@@ -78,13 +78,21 @@ which before responding:
    no image), or as an already-rendered image?
 
    **Stage A — replying to a text-only concept (no image sent yet):**
-   - **On "yes"**: generate the image now, using the designer noted on
-     that concept card, per that designer's section in
-     `prompts/image_style.md`. Send it as its own Telegram message
-     using the same caption format the concept card used, plus a fresh
-     "Reply yes or no" prompt — this becomes Stage B below. Don't email
-     anything yet; a concept's "yes" only approves rendering it, not
-     shipping it.
+   - **On "yes"**: if the concept card includes a `Designer:` line
+     (only present when the operator requested one designer for the
+     whole run, or for a `text_iterations.md` concept, which is always
+     pre-assigned a designer for variety across the batch), generate
+     just that one image. Otherwise — the normal case — generate
+     **three images for this one concept, one from each designer**
+     (Duke, Nova, Ash — see `prompts/image_style.md`), all using the
+     same tagline/visual concept, so the operator can compare designer
+     treatments of the same idea side by side. Send each rendered
+     image as its own Telegram message using the same caption format
+     the concept card used (labeled with its actual designer), plus a
+     fresh "Reply yes or no" prompt on each — every rendered image
+     becomes its own Stage B item below (approve any number of them,
+     or none). Don't email anything yet; a concept's "yes" only
+     approves rendering it, not shipping it.
    - **On "no"**: log the rejection to memory (tagline/text, register,
      reason if given — see the learning-from-feedback section in
      `prompts/_brand_voice.md`) and reply briefly confirming it was

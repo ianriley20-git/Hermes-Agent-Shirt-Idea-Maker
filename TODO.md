@@ -572,6 +572,74 @@ concepts, 2026-09-03)
       (`git log hermes-proposed/... `) and that `main` (and the bot's
       own working copy) stayed clean throughout.
 
+## Designer prompt rework: Nova, Ash typography, invented objects (2026-09-14)
+- [x] Operator workshopped the three designer prompts externally (with
+      real reference images per designer) and brought back concrete
+      rewrites for two of the three, plus one cross-cutting fix:
+      - **Nova** renamed/rewritten from "modern & simple" (a rendering
+        finish — flat shapes, clean sans-serif) to "contemporary
+        designer minimalism," defined through composition, scale,
+        cropping, and art-directed typography instead — diagnosis was
+        that the old spec's finish-only definition was producing
+        generic clip-art-with-a-caption-underneath results. New worked
+        examples show typography integrated into the composition
+        (breaking through/behind the subject, dramatic scale contrast)
+        rather than centered above/below it.
+      - **Ash's** fixed lettering menu (blackletter/stencil/spray-paint/
+        hand-cut, repeated on every design) replaced with a much wider
+        set of concept-driven typography directions and an explicit
+        instruction that two consecutive Ash concepts should rarely
+        share a typography family.
+      - Two new rules added to the shared compositional section
+        (applies to all three designers): typography must be
+        art-directed as part of the composition, not a default
+        caption-under-the-image layout; and a designer defines a
+        visual *philosophy*, not one fixed recurring composition.
+      - Duke deliberately left unchanged — still the proven benchmark.
+- [x] **Separate fix, operator-flagged**: distinct from the existing
+      "avoid content that image models render unreliably" section
+      (which is about broken *geometry* on real objects — scaffolds,
+      knots, hands), added a new hard rule that the model must never
+      *invent* an object that doesn't exist in reality at all, even
+      one that would render with clean, coherent geometry — every
+      subject/prop/accent must be something real, nameable, and
+      actually existing. Applies across all three designers.
+- [ ] Not yet tested live — next batch across all three designers is
+      the first real test of both the Nova/Ash rework and the
+      invented-object rule. Worth deliberately requesting one of each
+      designer to see the variety/typography changes in practice.
+
+## Approving a concept now renders all three designers, not one (2026-09-14)
+- [x] Operator wants to compare designer treatments of the same joke
+      side by side rather than committing to one designer sight-unseen
+      from a text-only concept card. Changed `AGENTS.md` bucket 3 Stage
+      A: a "yes" on a text-only concept now generates **three images**
+      (one per designer — Duke, Nova, Ash) instead of one, *unless* the
+      concept card already carries a `Designer:` line — which only
+      happens when the operator named a specific designer for a whole
+      seeded-search run, or for any `text_iterations.md` concept (those
+      are always pre-assigned a designer intentionally, for variety
+      across the batch) — in which case it stays single-image as
+      before.
+      - `daily_scan.md` and `seeded_search.md` no longer pick/note a
+        designer during concept finalization for the normal case —
+        removed, since there's nothing to decide in advance anymore.
+      - `text_iterations.md` unchanged — its concepts already carry a
+        pre-assigned designer for exactly this reason.
+- [ ] **Cost note**: this triples image spend on every concept the
+      operator actually approves (still zero spend on rejected
+      concepts — the point of the Stage A gate is unaffected). Worth
+      keeping an eye on OpenAI usage the same way the original
+      auto-generate-everything problem was (see the 2026-09-13 entry
+      above) — this is a smaller, deliberately-opted-into version of
+      the same lever, not the same failure mode, but still worth
+      watching.
+- [ ] Not yet tested live — first real test should confirm a "yes" on
+      a plain daily-scan/seeded-search concept actually produces three
+      distinctly-labeled images (not just three renders of the same
+      designer), and that a `text_iterations.md`/named-designer
+      concept still correctly produces only one.
+
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.

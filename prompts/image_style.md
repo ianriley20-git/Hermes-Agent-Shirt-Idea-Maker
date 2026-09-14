@@ -121,6 +121,19 @@ way to a correct render of them:
   simplify to something you *can* name cleanly, even if it's a slightly
   less literal match to the joke — a slightly-less-literal but
   correctly-rendered object beats a literal but visually broken one.
+- **Never invent an object that doesn't exist in reality, even one
+  that would render cleanly.** This is a separate, harder rule than the
+  one above — it's not about avoiding broken geometry, it's about the
+  subject matter itself. Every element in the design — the main
+  subject, any prop, any accent — must be something real that actually
+  exists and that you could point to and name, not a fabricated
+  device, creature, tool, or hybrid object invented because it seems
+  to conceptually fit the joke. If the literal idea has no direct
+  real-world object, translate it into the closest thing that *does*
+  exist, or build the joke from a combination of real, existing things
+  — never fabricate something new to fill the gap. An invented,
+  not-real object is a worse failure than an overly simple real one,
+  even if the invented one renders with perfect, coherent geometry.
 - **Use reference-site research for this too, not just format/phrases.**
   When Step 3/4's reference-site browsing (`config/reference_sites.md`)
   turns up a real design solving a similar visual problem — "tied

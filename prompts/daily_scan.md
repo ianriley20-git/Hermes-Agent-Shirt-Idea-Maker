@@ -129,13 +129,12 @@ to Step 8 and send only the "nothing cleared the bar" message.
 
 ## Step 8 — Send concepts to Telegram (text only, no image yet)
 
-For each finalized concept, pick whichever designer (Duke, Nova, or
-Ash) from `prompts/image_style.md` genuinely fits that concept best —
-aim for a mix across the batch rather than defaulting to one designer
-for everything. Note the chosen designer on the concept, but **don't
-generate an image yet** — image generation costs real money per image,
-so it only happens after the operator approves the concept in text
-first (see `AGENTS.md` message routing, bucket 3, Stage A).
+**Don't pick a designer or generate an image yet** — image generation
+costs real money per image, so it only happens after the operator
+approves the concept in text first (see `AGENTS.md` message routing,
+bucket 3, Stage A). A "yes" there generates one version from **each**
+of the three designers (Duke, Nova, Ash) for comparison, not just one,
+so there's nothing to pick or note in advance here.
 
 If nothing cleared the bar in Step 7: send exactly that ("Nothing
 cleared the bar today") and briefly note what was closest, rather than
@@ -145,14 +144,13 @@ Otherwise, send each concept as its own message:
 
 ```
 Tagline: "..."
-Designer: [Duke | Nova | Ash]
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / reference site / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" generates the image for your approval next —
-nothing is emailed yet.
+to more than one). "yes" generates one version from each designer
+(Duke, Nova, Ash) for your approval next — nothing is emailed yet.
 ```
 
 This is the actual delivered output for this run — this prompt's job

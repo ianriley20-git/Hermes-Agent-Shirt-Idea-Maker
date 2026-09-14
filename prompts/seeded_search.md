@@ -141,13 +141,17 @@ send only the "nothing cleared the bar" message.
 
 ## Step 9 — Send concepts to Telegram (text only, no image yet)
 
-If a designer was named/implied in Step 0, use that one for every
-concept. Otherwise, pick whichever designer (Duke, Nova, or Ash) from
-`prompts/image_style.md` genuinely fits each concept best, aiming for a
-mix across the batch. Note the chosen designer on each concept, but
-**don't generate an image yet** — image generation costs real money
+**Don't generate an image yet** — image generation costs real money
 per image, so it only happens after the operator approves the concept
 in text first (see `AGENTS.md` message routing, bucket 3, Stage A).
+
+If a designer was named/implied in Step 0, note that one designer on
+every concept card — Stage A approval will then generate just that
+designer's version, since the operator already chose the style for
+this run. Otherwise, don't note a designer at all — Stage A approval
+will generate one version from **each** of the three designers (Duke,
+Nova, Ash) so the operator can compare treatments side by side;
+there's nothing to pick in advance.
 
 If nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
@@ -157,14 +161,15 @@ Otherwise, send each concept as its own message:
 
 ```
 Tagline: "..."
-Designer: [Duke | Nova | Ash]
+[Designer: [Duke | Nova | Ash] — only include this line when a designer was requested for this run; omit it otherwise]
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" generates the image for your approval next —
-nothing is emailed yet.
+to more than one). "yes" generates [the image | one version from each
+designer, Duke/Nova/Ash] for your approval next — nothing is emailed
+yet.
 ```
 
 This is the actual delivered output for this run — this prompt's job
