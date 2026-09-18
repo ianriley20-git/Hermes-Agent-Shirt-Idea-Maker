@@ -153,6 +153,11 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       eye on actual OpenAI usage/cost after a few days. **This risk
       materialized — see 2026-09-13 entry below.**
 ## Stage 6 (email handoff) — SOLVED via Gmail OAuth API, confirmed live
+**Superseded 2026-09-18 — see the entry near the bottom of this file.**
+Gmail's own SMTP-is-blocked diagnosis below is still accurate and kept
+for the record, but the OAuth approach it led to has since been
+replaced entirely by a Dropbox upload. Kept for history, not as current
+setup instructions — use `install/01_provision_vps.md` Part 13 instead.
 - [x] **Root cause, fully confirmed**: DigitalOcean blocks outbound SMTP
       ports 465/587 on all droplets by default (anti-spam policy).
       Verified three independent ways: Hermes's own SMTP attempt timed
@@ -639,6 +644,49 @@ concepts, 2026-09-03)
       distinctly-labeled images (not just three renders of the same
       designer), and that a `text_iterations.md`/named-designer
       concept still correctly produces only one.
+
+## Stage 6 pivot: Gmail OAuth replaced with Dropbox upload (2026-09-18)
+- [x] **Why**: the Gmail OAuth consent screen never got published out of
+      Google's "Testing" status, so the refresh token force-expired
+      every 7 days, silently breaking the approval-email flow each time
+      (surfaced as this exact operator complaint twice — 2026-09-16 and
+      again 2026-09-17/18). Investigated publishing to Production: for
+      Gmail scopes this requires full app verification (privacy policy,
+      a verified domain, Google review) regardless of user count —
+      there's no small-app exemption. Narrowing to `gmail.send`-only
+      avoids the extra CASA security assessment (that's specific to the
+      `gmail.modify` restricted scope) but still doesn't avoid
+      sensitive-scope verification. Disproportionate for a
+      single-operator personal tool, so decided to drop Gmail entirely
+      rather than pursue verification.
+- [x] **New approach**: approved designs upload straight to a Dropbox
+      `/to-do` folder (inside this app's own Dropbox App folder) instead
+      of being emailed. Operator moves files from `to-do` to `done`
+      themselves once a design becomes a real, listed product — Hermes
+      only ever writes into `to-do`, never reads/moves/deletes.
+- [x] **Implementation**: `connectors/dropbox_upload.py` (new) uses the
+      official `dropbox` Python SDK with a long-lived refresh token
+      (`DROPBOX_APP_KEY`/`DROPBOX_APP_SECRET`/`DROPBOX_REFRESH_TOKEN` in
+      `.env`) — the SDK exchanges it for a fresh short-lived access
+      token on every call automatically, so there's no manual refresh
+      logic and, unlike the Gmail token, no expiry-on-a-schedule
+      problem. `AGENTS.md` bucket 3 Stage B rewired to call this script
+      instead of `gmail send --html`. Full setup walkthrough (Dropbox
+      App Console → app-folder scoped app → `files.content.write` only
+      → refresh-token exchange) is in `install/01_provision_vps.md`
+      Part 13, which replaced the old Gmail walkthrough there.
+- [ ] **Operator action needed**: create the Dropbox app and get the
+      app key/secret/refresh token (Part 13), add them to
+      `~/.hermes/.env` on the server, `git pull` this repo's changes,
+      `pip install -r connectors/requirements.txt` into Hermes's venv,
+      delete the now-unused `~/.hermes/google_client_secret.json` /
+      `google_token.json`, and delete any "Gmail OAuth reminder" cron
+      job if one was created while troubleshooting the old expiry issue
+      — it's moot now.
+- [ ] Not yet tested live — first real approval should confirm the
+      upload actually lands in `/to-do` with a sensible filename, and
+      that a failed upload gets reported plainly on Telegram rather than
+      silently claimed as success.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage

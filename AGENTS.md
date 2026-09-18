@@ -44,11 +44,16 @@ now, see `TODO.md`). What's actually live:
   image per surviving concept (not just text).
 - **Seeded search** (`prompts/seeded_search.md`) confirmed working via
   Telegram, also now generates + sends images.
-- **Email handoff** (Stage 6): an approved ("yes") design is logged to
-  memory AND emailed to `EMAIL_HOME_ADDRESS` via the Gmail API (not
-  SMTP — see bucket 3 below and `TODO.md` for why). Confirmed working
-  live. The upload-app connector is still out of scope — if asked to
-  post anywhere beyond emailing, say that's out of scope for now.
+- **Design handoff** (Stage 6): an approved ("yes") design is logged to
+  memory AND uploaded to a Dropbox `/to-do` folder via
+  `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`).
+  Previously emailed via Gmail OAuth — replaced because Google
+  force-expires refresh tokens every 7 days while an app stays in OAuth
+  "Testing" status, and full verification to escape that was
+  disproportionate for a single-operator tool. Not yet confirmed
+  working live with the new Dropbox path. The upload-app connector is
+  still out of scope — if asked to post anywhere beyond Dropbox, say
+  that's out of scope for now.
 
 ## Message routing (Telegram)
 
@@ -106,39 +111,26 @@ which before responding:
      (deadpan/wordplay), approved or rejected, and any reason the
      operator gave. See the learning-from-feedback section in
      `prompts/_brand_voice.md`.
-   - **On approval only**: send one email per approved design to
-     `EMAIL_HOME_ADDRESS` (from `.env`, currently ianriley20@gmail.com)
-     using the **google-workspace skill's Gmail API** (`gmail send`),
-     not the generic email gateway/SMTP — this account's droplet has
-     outbound SMTP ports blocked at the network level (DigitalOcean's
-     anti-spam policy), so raw SMTP will never work here regardless of
-     `.env` config. The Gmail API skill goes over HTTPS and is
-     confirmed working (see `TODO.md`).
-     - Use `--html` and embed the image as a base64 data URI directly
-       in the body (`<img src="data:image/png;base64,...">`) — this
-       skill's `send` command has no file-attachment support, so this
-       is the way to get the image into the email at all. Read the
-       generated image file and base64-encode it.
-     - Subject: exactly `Design Approved` (fixed text, not per-design —
-       the tagline goes in the body, not the subject).
-     - Body content, in this order:
-       1. **Title**: a short product-listing title (this can just be
-          the tagline, or a lightly cleaned-up version of it if the
-          tagline doesn't read naturally as a product name).
-       2. **Description**: 1-2 sentences of product-listing copy
-          describing the design — written the way you'd describe it to
-          a customer browsing the shop, in Riley Ink's voice, not a
-          restatement of "why it's timely." This is meant to be
-          directly usable in the operator's product builder app for the
-          listing title/description, not just an internal note.
-       3. The embedded image.
-       4. A short "for reference" line with why-it's-timely and source
-          — useful context, but secondary to the Title/Description above.
+   - **On approval only**: upload the approved design's PNG to Dropbox
+     using `connectors/dropbox_upload.py`, not email — see the Design
+     handoff note above for why email was dropped.
+     - Run it with Hermes's own venv Python (system `python3` can't
+       install packages on this box):
+       ```
+       /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/dropbox_upload.py --file <path to the generated PNG> --name "<design tagline/title>"
+       ```
+     - This uploads to `/to-do/<design name>.png` inside the app's own
+       Dropbox App folder (`Apps/<app name>/to-do/`). The operator
+       moves files from `to-do` to `done` themselves once a design
+       becomes a finished product — never move, rename, or delete
+       anything in Dropbox yourself, only ever write new files into
+       `/to-do`.
      - This is the one explicit "yes" the hard rule below requires —
-       send it immediately, don't ask for a second confirmation.
+       upload it immediately, don't ask for a second confirmation.
    - Reply briefly on Telegram confirming what was logged and, for each
-     approval, that the email was sent (or if it failed, say so plainly
-     rather than claiming success).
+     approval, that the upload succeeded (report the exact `Uploaded to
+     ...` path the script prints) — or if it failed, say so plainly
+     rather than claiming success.
 4. **A designer variant request** (e.g. "I'd like to see Ash's version
    of the fantasy football one," "show me Nova's take on that," "redo
    the knight one but edgy") — the operator wants a previously-shown

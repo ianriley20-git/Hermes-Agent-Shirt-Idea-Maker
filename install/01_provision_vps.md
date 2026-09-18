@@ -436,93 +436,90 @@ then message the bot again.
 
 ---
 
-## Part 13 — Email (Stage 6): Gmail via OAuth API, not SMTP
+## Part 13 — Design handoff (Stage 6): Dropbox upload, not email
 
-**Skip plain SMTP entirely.** DigitalOcean blocks outbound SMTP ports
-465/587 on every droplet by default (anti-spam policy) — confirmed via
-a raw TCP test that bypassed Hermes completely. No `.env` config fixes
-this; it's a network-level block. See `TODO.md` for the full diagnostic
-trail if curious. The working path is Gmail's OAuth2 API (HTTPS/443),
-via Hermes's `google-workspace` skill.
+**Superseded (2026-09-18):** this used to be Gmail via OAuth2 API. That
+worked, but Google force-expires the OAuth refresh token every 7 days
+while an app's OAuth consent screen stays in "Testing" publishing
+status — and escaping that by publishing to Production requires full
+app verification (a privacy policy, a verified domain, Google review),
+which is disproportionate for a single-operator personal tool. Rather
+than fight that, approved designs now go to a Dropbox `/to-do` folder
+instead of an inbox. (The original DigitalOcean SMTP-port-block
+diagnosis that ruled out plain email in the first place is still
+correct and still in `TODO.md` if you're curious — it just no longer
+matters, since nothing here sends email anymore.)
 
-### Google Cloud setup (in a browser, logged in as your sending Gmail account)
+### Dropbox App Console setup (in a browser, logged in as the Dropbox
+account you want the files to land in)
 
-1. `console.cloud.google.com` — the default "My First Project" is fine,
-   no need to create a new one.
-2. Search bar → **Gmail API** → **Enable**.
-3. Left sidebar → **OAuth consent screen** (may appear as "Google Auth
-   Platform") → **Get started** → fill in app name, your email for
-   support/contact, choose **External**, add your sending account as a
-   **test user**.
-4. **Credentials** → **Create Credentials** → **OAuth client ID** →
-   **Desktop app** → Create → **Download JSON**.
+1. Go to `dropbox.com/developers/apps` → **Create app**.
+2. **Choose an API**: **Scoped access**.
+3. **Choose the type of access you need**: **App folder** — this gives
+   the app its own isolated folder (`Apps/<app name>/` in your Dropbox),
+   so it can never touch anything outside it.
+4. Name the app (must be globally unique across Dropbox — e.g.
+   `riley-ink-uploads-<yourname>`) → **Create app**.
+5. On the app's **Permissions** tab, check **`files.content.write`**
+   only (upload-only — nothing needs to read, list, or delete) →
+   **Submit**.
+6. On the **Settings** tab, copy the **App key** and **App secret** —
+   you'll paste both into `.env` on the server shortly.
+
+### Get a long-lived refresh token (one-time, from your own computer —
+doesn't need to be on the server)
+
+1. Build this URL, filling in your App key, and open it in a browser:
+   ```
+   https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&token_access_type=offline&response_type=code
+   ```
+2. Log in (if needed) and click **Allow**. Dropbox shows a short
+   authorization code on the page — copy it.
+3. Exchange it for tokens. In a terminal (PowerShell or Bash, either
+   works — this is just a `curl` call, not a server command):
+   ```bash
+   curl https://api.dropboxapi.com/oauth2/token \
+     -d code=PASTE_THE_AUTH_CODE_HERE \
+     -d grant_type=authorization_code \
+     -d client_id=YOUR_APP_KEY \
+     -d client_secret=YOUR_APP_SECRET
+   ```
+4. The JSON response includes a `refresh_token` field — that's the
+   long-lived credential (it does not expire on a schedule the way the
+   Gmail one did). Save it along with the app key/secret.
 
 ### On the server (as `hermes`)
 
-Get the JSON onto the server (open it as text on your phone/computer,
-copy, paste into `nano ~/client_secret.json`), then:
-
+Add the three values to `.env`:
 ```bash
-python3 ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --client-secret ~/client_secret.json
+nano ~/.hermes/.env
+```
+```
+DROPBOX_APP_KEY=paste_app_key_here
+DROPBOX_APP_SECRET=paste_app_secret_here
+DROPBOX_REFRESH_TOKEN=paste_refresh_token_here
+```
+Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
+
+Install the official Dropbox Python SDK into Hermes's own venv (system
+`python3` can't `pip install` on this box — see Part 8a for the same
+`externally-managed-environment` issue):
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/pip install -r ~/riley-ink-pipeline/connectors/requirements.txt
 ```
 
-**Important:** don't run the rest of this with bare `python3` — the
-script tries to `pip install` its dependencies into the system Python,
-which Ubuntu 24.04 blocks (`externally-managed-environment`). Use
-Hermes's own venv Python instead for every subsequent command:
-
+Clean up the now-unused Gmail credentials, if they're still present:
 ```bash
-/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --auth-url
+rm -f ~/.hermes/google_client_secret.json ~/.hermes/google_token.json
 ```
-
-This prints a Google OAuth URL. Open it (logged in as the sending
-account), approve through the "unverified app" warning (expected — this
-app isn't published), and check only the permissions you actually need
-(for sending only: **"Send email on your behalf"**). It'll fail to load
-`http://localhost:1/?code=...` afterward — that's expected, copy the
-full failed-redirect URL and exchange it:
-
-```bash
-/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --auth-code 'PASTE_THE_FULL_URL_HERE'
-```
-
-### If you hit `invalid_grant` on the code exchange
-
-This happened during initial setup even with fresh, fast (<1 minute)
-codes — not an expiration issue. What fixed it: **don't do this part
-yourself through the console** — instead, message the bot on Telegram
-and ask it to set up its own Gmail OAuth using its terminal/file tools,
-e.g.:
-
-> I need you to set up Gmail OAuth for yourself using the
-> google-workspace skill. The client secret is already saved at
-> ~/.hermes/google_client_secret.json (or wherever you put it). Use the
-> venv python, not bare python3. Generate the auth URL and give it to me
-> directly here in Telegram — I'll open it, approve, and paste the
-> redirect URL back to you here so you can complete the token exchange
-> yourself.
-
-Hermes can read and patch its own skill code if something's actually
-broken in it, and Telegram's copy/paste is far more reliable than the
-DigitalOcean browser console (no corruption bugs). This combination —
-narrower requested scope plus Hermes handling its own exchange — is
-what actually got a clean `AUTHENTICATED` result after the manual
-console approach kept failing.
 
 ### Verify
 
+Test with any local PNG:
 ```bash
-/home/hermes/.hermes/hermes-agent/venv/bin/python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py --check
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/dropbox_upload.py --file /path/to/any.png --name "Test Upload"
 ```
-
-Then message the bot on Telegram asking it to send you a real test
-email, and **check your actual inbox** — don't just trust a "sent
-successfully" reply.
-
-### Known limitation: no attachments
-
-This skill's `gmail send` has no file-attachment support (confirmed in
-its source, not just docs) — only plain/HTML body. Design images get
-embedded as a base64 data URI inside an `<img>` tag in the HTML body
-instead of a true attachment (see `AGENTS.md` bucket 2). Viewable and
-usually right-click-saveable, but not a clean downloadable attachment.
+Should print `Uploaded to /to-do/Test Upload.png`. Check your actual
+Dropbox app folder (`Apps/<app name>/to-do/`) — don't just trust the
+printed success line. Then approve a real design via Telegram and
+confirm the same thing happens end to end.
