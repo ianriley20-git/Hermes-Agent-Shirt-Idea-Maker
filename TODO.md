@@ -675,18 +675,18 @@ concepts, 2026-09-03)
       App Console → app-folder scoped app → `files.content.write` only
       → refresh-token exchange) is in `install/01_provision_vps.md`
       Part 13, which replaced the old Gmail walkthrough there.
-- [ ] **Operator action needed**: create the Dropbox app and get the
-      app key/secret/refresh token (Part 13), add them to
-      `~/.hermes/.env` on the server, `git pull` this repo's changes,
-      `pip install -r connectors/requirements.txt` into Hermes's venv,
-      delete the now-unused `~/.hermes/google_client_secret.json` /
-      `google_token.json`, and delete any "Gmail OAuth reminder" cron
-      job if one was created while troubleshooting the old expiry issue
-      — it's moot now.
-- [ ] Not yet tested live — first real approval should confirm the
-      upload actually lands in `/to-do` with a sensible filename, and
-      that a failed upload gets reported plainly on Telegram rather than
-      silently claimed as success.
+- [x] **Operator action done (2026-09-18)**: Dropbox app created, keys
+      generated, `.env` updated, repo pulled, SDK installed. No "Gmail
+      OAuth reminder" cron was ever actually created, so nothing to
+      delete there. **Still open**: confirm
+      `~/.hermes/google_client_secret.json` / `google_token.json` were
+      actually deleted on the server — not confirmed in the Telegram
+      report back, worth a follow-up check.
+- [x] **Confirmed working live (2026-09-18)**: a real approved design
+      ("Home for Christmas in Therapy for New Year", Duke) uploaded
+      successfully to `/to-do/Home for Christmas in Therapy for New
+      Year.png`. End-to-end path (Telegram approval → connector script →
+      Dropbox) confirmed working.
 
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
