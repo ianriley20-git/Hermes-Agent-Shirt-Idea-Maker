@@ -678,10 +678,9 @@ concepts, 2026-09-03)
 - [x] **Operator action done (2026-09-18)**: Dropbox app created, keys
       generated, `.env` updated, repo pulled, SDK installed. No "Gmail
       OAuth reminder" cron was ever actually created, so nothing to
-      delete there. **Still open**: confirm
-      `~/.hermes/google_client_secret.json` / `google_token.json` were
-      actually deleted on the server — not confirmed in the Telegram
-      report back, worth a follow-up check.
+      delete there. Confirmed via Hermes: `~/.hermes/google_client_secret.json`
+      and `~/.hermes/google_token.json` are both absent from the server
+      — nothing left to clean up. Gmail OAuth migration fully closed out.
 - [x] **Confirmed working live (2026-09-18)**: a real approved design
       ("Home for Christmas in Therapy for New Year", Duke) uploaded
       successfully to `/to-do/Home for Christmas in Therapy for New
