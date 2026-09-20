@@ -93,12 +93,19 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       `daily_scan.md` and `seeded_search.md` (checks rileyink.com before
       finalizing output, drops genuine duplicates).
 
-## Stage 4 (seasonal calendar) — deliberately deferred, not skipped
-- [ ] `config/seasonal_calendar.md` ships with placeholder season/date pairs —
-      needs your real dates and nudge-window lengths.
-- [ ] Built out of order on purpose: jumped to Stage 5 first since that's
-      what you wanted to see working next, and Stage 4 doesn't block or
-      get blocked by anything else. Pick this up whenever.
+## Stage 4 (seasonal calendar) — built 2026-09-20, see also the
+category-expansion entry near the bottom of this file (built together)
+- [x] `config/seasonal_calendar.md` created with a first-draft real
+      calendar (football kickoff, MLB playoffs, Halloween, Thanksgiving/
+      Black Friday, ugly christmas sweater, New Year's, Super Bowl,
+      March Madness, tax season, MLB Opening Day, graduation, July 4th,
+      back to school) — review and adjust dates/windows freely, same as
+      any other config file.
+- [x] Wired into `daily_scan.md` Step 1, alongside (not instead of) the
+      category-discovery work — see the dated entry near the bottom of
+      this file for the full design.
+- [ ] Not yet tested live — first run should confirm it actually checks
+      the calendar and surfaces something when a nudge window is active.
 
 ## Stage 5 (image generation) — built ahead of Stage 4
 - [x] `prompts/image_style.md` now has **two** real style templates:
@@ -690,3 +697,60 @@ concepts, 2026-09-03)
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.
+
+## Category expansion: moving past the 5 fixed niches (2026-09-20)
+- [x] **Why**: after a few days of real runs, every concept was coming
+      from the same 4 niches (fantasy football, gambling, back to
+      school, and — seasonally — christmas sweaters); operator flagged
+      this as too narrow. Branching into new brand-appropriate
+      categories over time is part of the point of this pipeline, not
+      just optimizing within a fixed list. Also surfaced in the same
+      conversation: `config/seasonal_calendar.md` (Stage 4) had never
+      actually been built — not even a placeholder file existed,
+      despite `TODO.md` describing it as if it did.
+- [x] **Design** (operator's explicit direction): the 5 fixed niches
+      stay as a reliable *seed*, not a ceiling. A new mechanism should
+      actively and continuously discover new brand-appropriate
+      categories via open-ended web research (not limited to the
+      curated `config/reference_sites.md` list, though those sites
+      remain good source material), filtered through
+      `_brand_voice.md` at the category level, and accumulate findings
+      persistently across runs rather than rediscovering from scratch
+      each time. No fixed daily quota for new-territory concepts —
+      organic, whenever something good actually turns up.
+- [x] **Implementation**: `prompts/daily_scan.md` gets a new Step 1
+      ("Seasonal & category discovery") that runs before Reddit/Trends
+      (renumbered Steps 2-9 accordingly): checks
+      `config/seasonal_calendar.md` for active nudge windows, checks
+      `~/niche_library.md` (new, server-only, not in git — same
+      deliberate-outside-git pattern as `~/format_library.md`) for
+      previously-discovered niches, and runs an open-ended web search
+      for whole categories other novelty/tee brands sell that Riley Ink
+      doesn't. Qualifying discoveries get logged to `~/niche_library.md`
+      so the pool actually grows across runs. Concepts from new
+      territory get a `New territory: yes` label in both the internal
+      finalize step and the Telegram send, so the operator can spot
+      them at a glance. Full mechanics documented in
+      `config/reference_sites.md`'s new "Beyond the fixed list"
+      section. `config/niche_keywords.md` and `config/subreddits.md`
+      headers updated to frame themselves as seed lists, not the
+      definitive niche set.
+- [x] **Side fix, same conversation**: the Google Trends 429 error
+      mentioned in that day's scan note wasn't a bug — Trends
+      rate-limiting is a known risk of unofficial scraping, and the
+      pipeline already had a fallback. Made the fallback's rate-limit
+      case explicit in `daily_scan.md` Step 3 (was already implicitly
+      covered by "not practically renderable," now says so directly)
+      so it's clearly expected behavior next time it happens, not a
+      fresh diagnosis. Similarly, r/ChristmasSweaters showing zero
+      posts outside its (new) seasonal nudge window is expected, not a
+      subreddit-list problem — noted directly in `subreddits.md` and
+      `daily_scan.md`.
+- [ ] Not yet tested live — first several daily scans are the real test
+      of whether Step 1 actually surfaces genuinely new, brand-fitting
+      territory (not just noise), whether `~/niche_library.md` starts
+      accumulating real entries rather than staying empty, and whether
+      the `New territory` label shows up correctly and only when it
+      should. Worth operator review of `config/seasonal_calendar.md`'s
+      first-draft dates/windows too — they're a reasonable guess, not
+      something confirmed against Riley Ink's actual catalog/calendar.

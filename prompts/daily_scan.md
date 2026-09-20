@@ -9,7 +9,35 @@ including the memory/learning-from-feedback section and the "not a news
 caption" rule — the rules and accumulated feedback there are
 non-negotiable for every idea below, do not soften them to hit a quota.
 
-## Step 1 — Reddit check (topic/timing signal only — not content)
+## Step 1 — Seasonal & category discovery (the growth engine — do this first)
+
+The fixed lists in `config/niche_keywords.md`/`config/subreddits.md`
+are a reliable seed, not a ceiling. This step is what expands Riley
+Ink into new territory over time, rather than cycling the same 5
+niches indefinitely — do it before Steps 2-3 so anything it surfaces
+can feed into them too.
+
+1. Check `config/seasonal_calendar.md` for anything inside its current
+   nudge window (e.g. playoff baseball in October) — a date-driven
+   opportunity not covered by any fixed niche.
+2. Check `~/niche_library.md` (create it if it doesn't exist — same
+   pattern as `~/format_library.md`, see `config/reference_sites.md`)
+   for previously-discovered niches that are relevant today. Treat
+   these as additional candidate niches for Steps 2-3 below, alongside
+   the fixed config lists.
+3. Run a genuinely open-ended web search — not restricted to
+   `config/reference_sites.md`'s fixed list — for whole categories
+   other novelty/graphic-tee brands currently sell that Riley Ink
+   doesn't touch yet. Full instructions, including the brand-voice
+   category filter and how to log qualifying finds to
+   `~/niche_library.md`, are in `config/reference_sites.md`'s "Beyond
+   the fixed list" section — read that in full before doing this step.
+
+If nothing new surfaces on a given day, that's fine — this step isn't
+a quota, it's what makes the pool of niches grow *when* something good
+turns up, which won't be every single run.
+
+## Step 2 — Reddit check (topic/timing signal only — not content)
 
 Read `config/subreddits.md`. For each subreddit listed, use web search
 (and browser navigation if search results are thin) to check its current
@@ -20,23 +48,28 @@ stand out, not just any post) or a recurring theme across multiple posts.
 
 This step only identifies **what's topical right now** — a short list
 of hot topics/angles. Don't draft taglines or full concepts from Reddit
-content directly; that happens in Step 3, using the format sources
+content directly; that happens in Step 4, using the format sources
 there. Reddit content tends to produce overly specific, wordy,
 news-caption-style copy when used directly — that's why it's split out.
 
 If a subreddit turns out to be dead, tiny, or gone, say so — don't force
 a result from it, and mention it so the list can be corrected later.
+For the ugly-christmas-sweater heading specifically, near-zero posts
+outside its `config/seasonal_calendar.md` nudge window is expected, not
+a sign the config is broken.
 
-## Step 2 — Google Trends check (topic/timing signal only — not content)
+## Step 3 — Google Trends check (topic/timing signal only — not content)
 
 Read `config/niche_keywords.md`. For each keyword, check its current
 trend direction — navigate to Google Trends (trends.google.com) for the
-keyword, or if that's not practically renderable, fall back to a web
-search for recent news/spikes around that keyword. Note anything showing
-a clear upward spike, not just steady baseline interest. Same as Step 1
+keyword, or if that's not practically renderable (including a rate-limit
+/ 429 response), fall back to a web search for recent news/spikes around
+that keyword and say plainly that Trends itself was unavailable rather
+than presenting the fallback as a verified spike. Note anything showing
+a clear upward spike, not just steady baseline interest. Same as Step 2
 — this identifies *what's* timely, not the actual joke/copy.
 
-## Step 3 — Reference site format match (primary creative source)
+## Step 4 — Reference site format match (primary creative source)
 
 Read `config/reference_sites.md` in full — it covers the fixed
 reference sites, Amazon/Etsy bestseller checks, using `vision` on
@@ -49,9 +82,9 @@ models render unreliably" step later, so you're mirroring a proven
 solution instead of inventing one. Check the format library first for
 anything already-catalogued relevant to today's hot topics before
 browsing fresh, and append anything new/notable you find. For each
-topic flagged as hot in Steps 1-2, actively look for a real existing
-design worth taking directly — that's the primary goal of this step,
-not a fallback:
+topic flagged as hot in Steps 1-3 (including any new niche from Step 1's
+discovery), actively look for a real existing design worth taking
+directly — that's the primary goal of this step, not a fallback:
 
 1. **Direct reuse (default — look for this first)**: take an existing
    design's tagline/text and concept directly, paired with fully
@@ -59,27 +92,27 @@ not a fallback:
    `config/reference_sites.md` about independently illustrating rather
    than tracing an unusually distinctive composition). No verification
    search needed, no cap — expect most or all of the batch to be
-   `Origin: reused`. Mark these `Origin: reused` in Step 7's output.
+   `Origin: reused`. Mark these `Origin: reused` in Step 8's output.
 2. **Format inspiration (fallback)**: only when nothing suitable turned
    up to reuse directly for a given topic — note the underlying
    format/structure of a design that fits (e.g. "historical figure
    doing a modern activity," "a name turned into a pun"), then draft an
    original concept in that pattern. Mark these `Origin: original`.
 
-If Steps 1-2 turned up little topical signal, it's fine to draft a
+If Steps 2-3 turned up little topical signal, it's fine to draft a
 concept straight from a strong reference-site format applied to one of
 Riley Ink's core niches (`config/niche_keywords.md`) without a specific
 news hook — timeliness helps but isn't required for every concept.
 
-## Step 4 — Etsy cross-check
+## Step 5 — Etsy cross-check
 
-For any concept surviving Steps 1–3, search Etsy for that topic + "shirt"
+For any concept surviving Steps 1–4, search Etsy for that topic + "shirt"
 / "t-shirt". Look at how many existing listings there are and how
 saturated/generic they look. This is a sense check, not a blocker — a
 crowded niche isn't automatically disqualifying if Riley Ink's angle on
 it is genuinely different, but flag it either way.
 
-## Step 5 — Riley Ink catalog check (awareness, not a phrase blocker)
+## Step 6 — Riley Ink catalog check (awareness, not a phrase blocker)
 
 Search rileyink.com for anything close to each surviving concept, so
 the run knows what's already live. Don't drop or rewrite a concept's
@@ -91,10 +124,10 @@ accidentally regenerating the *same finished visual treatment* Riley
 Ink already sells — same phrase AND same illustration/composition.
 That's a real duplicate; a fresh illustration of familiar wording isn't.
 
-## Step 6 — Filter for brand voice
+## Step 7 — Filter for brand voice
 
 Apply the test in `prompts/_brand_voice.md` to everything that survived
-Steps 1–5. Both the deadpan/absurdist and wordplay/pun-driven registers
+Steps 1–6. Both the deadpan/absurdist and wordplay/pun-driven registers
 are in bounds (see that file) — the actual hard rejects are sincerity,
 soft/cutesy tone, generic gift-shop humor, and news-caption wordiness,
 not puns as such. Check memory for feedback patterns from previously
@@ -102,17 +135,23 @@ approved/rejected concepts and let that inform which ideas to lead with.
 Be honest about the reject rate — if most of what's trending doesn't fit
 Riley Ink's voice, that's an expected outcome, not a failure to fix.
 
-## Step 7 — Finalize concepts
+## Step 8 — Finalize concepts
 
 Settle on **4 to 6** ideas, each with:
 
 ```
 Tagline: "..."
 Origin: original | reused
+New territory: yes  [only include this line when the concept's niche
+  isn't one of the 5 fixed niches in config/niche_keywords.md — i.e. it
+  came from Step 1's discovery or an already-logged ~/niche_library.md
+  entry. Omit entirely for concepts from the established niches.]
 Visual concept: [one line]
 Why it's timely: [one line, cite the actual signal — subreddit post,
-  trends spike, reference-site format, or Etsy gap]
-Source: [subreddit name / trends keyword / reference site / etsy search]
+  trends spike, seasonal calendar, niche library, or reference-site
+  format]
+Source: [subreddit name / trends keyword / seasonal calendar / niche
+  library / reference site / etsy search]
 ```
 
 The tagline itself should be short and stand alone (see
@@ -125,9 +164,9 @@ for the current reuse policy).
 
 If fewer than 4 ideas clear the bar, use fewer — never pad with weaker
 ideas to hit the range. If nothing clears the bar at all, skip straight
-to Step 8 and send only the "nothing cleared the bar" message.
+to Step 9 and send only the "nothing cleared the bar" message.
 
-## Step 8 — Send concepts to Telegram (text only, no image yet)
+## Step 9 — Send concepts to Telegram (text only, no image yet)
 
 **Don't pick a designer or generate an image yet** — image generation
 costs real money per image, so it only happens after the operator
@@ -136,7 +175,7 @@ bucket 3, Stage A). A "yes" there generates one version from **each**
 of the three designers (Duke, Nova, Ash) for comparison, not just one,
 so there's nothing to pick or note in advance here.
 
-If nothing cleared the bar in Step 7: send exactly that ("Nothing
+If nothing cleared the bar in Step 8: send exactly that ("Nothing
 cleared the bar today") and briefly note what was closest, rather than
 lowering the standard to produce a concept anyway.
 
@@ -145,8 +184,9 @@ Otherwise, send each concept as its own message:
 ```
 Tagline: "..."
 Why it's timely: [one line]
-Source: [subreddit / trends keyword / reference site / etsy search]
+Source: [subreddit / trends keyword / seasonal calendar / niche library / reference site / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
+[New territory — only include this line when Step 8 flagged it as such]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
 to more than one). "yes" generates one version from each designer

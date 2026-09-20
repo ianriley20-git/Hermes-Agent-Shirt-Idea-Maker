@@ -23,12 +23,19 @@ the upload app).
   exact-text iterations, image style). Referenced by name from cron
   jobs or on-demand messages.
 - `config/` — subreddit list, niche keywords, reference sites, seasonal
-  calendar. Treat these as the current source of truth for scan inputs.
+  calendar. Treat the niche/subreddit lists as a reliable seed, not a
+  hard ceiling — `daily_scan.md` Step 1 is where the pool of niches
+  actually grows over time; see `~/niche_library.md` below.
 - `~/format_library.md` (on the server, **not** in this git repo — lives
   in the `hermes` user's home directory) — a growing catalog of design
   formats you've spotted, maintained across runs. See
   `config/reference_sites.md` for how to read/append to it. Deliberately
   outside git so it never conflicts with a `git pull`.
+- `~/niche_library.md` (same location, same reasoning — not in git) — a
+  growing catalog of *categories/niches* discovered via open-ended
+  research that Riley Ink doesn't cover yet, distinct from the format
+  library above. See `config/reference_sites.md`'s "Beyond the fixed
+  list" section.
 - `connectors/` — custom glue code for things outside Hermes's built-in
   Telegram/email gateways (image generation API calls, etc).
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap
@@ -36,12 +43,16 @@ the upload app).
 
 ## Current stage
 
-Stages 1-3 and 5 confirmed working (Stage 4 deliberately skipped for
-now, see `TODO.md`). What's actually live:
+Stages 1-3, 5, and now 4 confirmed working (see `TODO.md`). What's
+actually live:
 - **Message routing** (below) is active.
 - **Daily scan** (`prompts/daily_scan.md`) has a live cron job (8 AM
   America/New_York, delivers to Telegram) and now generates + sends an
-  image per surviving concept (not just text).
+  image per surviving concept (not just text). Step 1 now also does
+  seasonal-calendar + open-ended category discovery (Stage 4, wired in
+  2026-09-20) — not yet confirmed working live, first few runs should
+  be checked for whether it actually surfaces new territory and grows
+  `~/niche_library.md`.
 - **Seeded search** (`prompts/seeded_search.md`) confirmed working via
   Telegram, also now generates + sends images.
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to

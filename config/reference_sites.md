@@ -23,6 +23,33 @@ brand storefronts with a consistent enough voice to actually learn from.
 Add more anytime — no code change required, the prompt reads this file
 directly at run time.
 
+**This list is a starting point, not a ceiling** — see "Beyond the
+fixed list" below for how research should actively grow past it over
+time, not just cycle through the same sites/niches indefinitely.
+
+## Beyond the fixed list — open-ended category discovery
+
+The sites above and the niches in `config/niche_keywords.md` are seed
+material, not a hard boundary. Alongside the format-matching research
+below, also run a genuinely open-ended web search (not restricted to
+the fixed sites) looking for two things:
+
+1. **Whole categories/niches other novelty or graphic-tee brands sell
+   that Riley Ink's own catalog doesn't touch yet** — not just new
+   jokes within the existing 5 niches, actual new territory (a sport,
+   hobby, profession, subculture, recurring meme format, etc.).
+2. **Upcoming cultural/seasonal moments not already on
+   `config/seasonal_calendar.md`** — flag these as a possible addition
+   to that file rather than acting on them ad hoc.
+
+For each open-ended candidate, run it through `prompts/_brand_voice.md`
+at the *category* level before going any further — does this space
+plausibly support Riley Ink's deadpan/absurdist/wordplay voice, not
+just "is it popular"? Drop anything that fails this before it reaches
+later steps. Anything that passes gets logged to the niche library
+below — that log is what makes the pool of niches actually grow across
+runs instead of resetting every time.
+
 ## Also check: bestseller marketplaces (demand-validated, not just curated)
 
 Beyond the fixed sites above, also check **Amazon** (search novelty
@@ -66,6 +93,37 @@ shape:
 
 If the file doesn't exist yet, create it — first run starts it from
 scratch.
+
+## Niche library (persistent, not in git)
+
+Same pattern as the format library above, but for *categories/niches*
+discovered via the open-ended search rather than design formats within
+a known niche: maintain a running catalog at `~/niche_library.md` (also
+in the `hermes` user's home directory, also outside this git repo for
+the same reason — grows freely, never conflicts with `git pull`). This
+is the actual mechanism for expanding past the 5 fixed niches in
+`config/niche_keywords.md` over time — those stay human-curated and
+reliable; this file is where the agent's own discoveries accumulate.
+
+Before the open-ended search each run, check this file first for
+already-discovered niches that might be relevant today (e.g. still
+commercially active, or newly in-season) — treat these as additional
+candidate niches alongside the fixed config lists for that run's
+Reddit/Trends checks, not just today's fresh finds. When a new niche
+passes the brand-voice check above, append an entry — don't overwrite
+existing ones:
+
+```
+## [niche name]
+- Why it fits: [one line — how this space supports the deadpan/
+  absurdist/wordplay voice]
+- Example sites/products: [1-2 real commercial examples found, with
+  what they're selling]
+- Discovered: [date] via [how it turned up]
+```
+
+If the file doesn't exist yet, create it — first run starts it from
+scratch, same as the format library.
 
 ## How these get used (important) — updated policy, 2026-09-09
 
