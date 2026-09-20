@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Publish a blog post live to Shopify (Stage 7: weekly blog).
 
-Auth: a custom-app Admin API access token (SHOPIFY_ADMIN_ACCESS_TOKEN),
-scoped to write_content only. See install/01_provision_vps.md for how to
-create the app and get the token, and connectors/README.md for the
-required env vars.
+Auth: OAuth client credentials grant (SHOPIFY_CLIENT_ID/SHOPIFY_CLIENT_SECRET
+from a custom app scoped to write_content only) -- this fetches a fresh
+Admin API access token from Shopify on every run rather than relying on a
+static token, matching the proven pattern from Riley Ink's existing
+Printify-POD-Manager desktop app, which uses the same grant against the
+same store. See install/01_provision_vps.md for how to create the app and
+connectors/README.md for the required env vars.
 
 Creates the article as published immediately (per operator decision --
 Telegram approval is the real gate, there's no separate draft step).
@@ -41,15 +44,31 @@ def api_base() -> str:
     return f"https://{domain}/admin/api/{version}"
 
 
-def headers() -> dict:
+def get_access_token() -> str:
+    domain = os.environ["SHOPIFY_STORE_DOMAIN"]
+    resp = requests.post(
+        f"https://{domain}/admin/oauth/access_token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={
+            "grant_type": "client_credentials",
+            "client_id": os.environ["SHOPIFY_CLIENT_ID"],
+            "client_secret": os.environ["SHOPIFY_CLIENT_SECRET"],
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()["access_token"]
+
+
+def headers(token: str) -> dict:
     return {
-        "X-Shopify-Access-Token": os.environ["SHOPIFY_ADMIN_ACCESS_TOKEN"],
+        "X-Shopify-Access-Token": token,
         "Content-Type": "application/json",
     }
 
 
-def list_blogs() -> int:
-    resp = requests.get(f"{api_base()}/blogs.json", headers=headers(), timeout=30)
+def list_blogs(token: str) -> int:
+    resp = requests.get(f"{api_base()}/blogs.json", headers=headers(token), timeout=30)
     resp.raise_for_status()
     for blog in resp.json().get("blogs", []):
         print(f"id={blog['id']}  handle={blog['handle']}  title={blog['title']}")
@@ -61,7 +80,7 @@ def public_url(blog_handle: str, article_handle: str) -> str:
     return f"https://{domain}/blogs/{blog_handle}/{article_handle}"
 
 
-def publish(args: argparse.Namespace) -> str:
+def publish(args: argparse.Namespace, token: str) -> str:
     with open(args.body_file, "r", encoding="utf-8") as f:
         body_html = f.read()
 
@@ -86,7 +105,7 @@ def publish(args: argparse.Namespace) -> str:
 
     resp = requests.post(
         f"{api_base()}/blogs/{blog_id}/articles.json",
-        headers=headers(),
+        headers=headers(token),
         json={"article": article},
         timeout=30,
     )
@@ -94,12 +113,12 @@ def publish(args: argparse.Namespace) -> str:
     created = resp.json()["article"]
 
     if args.meta_title or args.meta_description:
-        set_seo_metafields(created["id"], args.meta_title, args.meta_description)
+        set_seo_metafields(created["id"], args.meta_title, args.meta_description, token)
 
     return public_url(blog_handle, created["handle"])
 
 
-def set_seo_metafields(article_id: int, meta_title: str, meta_description: str) -> None:
+def set_seo_metafields(article_id: int, meta_title: str, meta_description: str, token: str) -> None:
     fields = []
     if meta_title:
         fields.append(("title_tag", meta_title, "single_line_text_field"))
@@ -110,7 +129,7 @@ def set_seo_metafields(article_id: int, meta_title: str, meta_description: str) 
         try:
             resp = requests.post(
                 f"{api_base()}/articles/{article_id}/metafields.json",
-                headers=headers(),
+                headers=headers(token),
                 json={
                     "metafield": {
                         "namespace": "global",
@@ -140,26 +159,19 @@ def main() -> int:
     parser.add_argument("--image-alt", help="Alt text for --image-url")
     args = parser.parse_args()
 
-    if args.list_blogs:
-        try:
-            return list_blogs()
-        except KeyError as e:
-            print(f"Missing required environment variable: {e}", file=sys.stderr)
-            return 1
-        except requests.RequestException as e:
-            print(f"Shopify request failed: {e}", file=sys.stderr)
-            return 1
-
-    if not (args.title and args.body_file and args.handle):
+    if not args.list_blogs and not (args.title and args.body_file and args.handle):
         parser.error("--title, --body-file, and --handle are required unless using --list-blogs")
 
     try:
-        url = publish(args)
+        token = get_access_token()
+        if args.list_blogs:
+            return list_blogs(token)
+        url = publish(args, token)
     except KeyError as e:
         print(f"Missing required environment variable: {e}", file=sys.stderr)
         return 1
     except requests.RequestException as e:
-        print(f"Shopify publish failed: {e}", file=sys.stderr)
+        print(f"Shopify request failed: {e}", file=sys.stderr)
         return 1
 
     print(f"Published to {url}")

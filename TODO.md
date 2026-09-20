@@ -832,3 +832,55 @@ concepts, 2026-09-03)
       rather than generating one. Revisit only if the operator wants a
       more polished blog hero image badly enough to accept the added
       per-post cost.
+- [x] **Shopify auth pivoted from Admin API access token to client
+      credentials grant, 2026-09-20** (while actually setting this up
+      live). What happened: Shopify's custom-app creation has moved to
+      an org-level "Dev Dashboard" (`dev.shopify.com`), replacing the
+      single-store "Develop apps" flow this section originally assumed.
+      That newer dashboard's "Install app" flow never actually
+      registered as installed (redirected through a full OAuth
+      authorization-code grant with a placeholder `https://example.com`
+      redirect URL that has no real backend to catch/exchange the
+      code), and its separate "App automation token" turned out to be
+      meant for CI/CD deploy tooling, not Admin API calls — both dead
+      ends, confirmed via repeated 401s. **Also, separately, flagged and
+      chased down a genuine security concern mid-setup**: an
+      unexplained, alarming-looking domain
+      (`security-incidents-dont-delete-me.myshopify.com`) briefly ended
+      up in `SHOPIFY_STORE_DOMAIN` with the operator unable to explain
+      where it came from — paused everything to check the operator's
+      Shopify account/organization store list and domains for signs of
+      compromise before proceeding. Nothing turned up (the real
+      Domains page only ever showed rileyink.com and its real
+      `d7093e-ef.myshopify.com` backing domain), so treated as an
+      unresolved one-off (likely a stale clipboard paste) rather than
+      confirmed compromise, and moved forward once that risk was
+      reasonably ruled out — cause never fully identified.
+      **What actually fixed the auth problem**: found that Riley Ink's
+      separate `Printify-POD-Manager` desktop app (a different local
+      project, C:\Users\ianri\Documents\Software_Development\
+      Printify-POD-Manager) already successfully authenticates against
+      this exact store using OAuth's **client credentials grant** — a
+      single `POST /admin/oauth/access_token` with just `client_id` +
+      `client_secret` (no install step, no redirect, no code exchange)
+      returns a working Admin API access token directly. Rebuilt
+      `shopify_blog_publish.py` to fetch a fresh token this way on every
+      run instead of expecting a static `SHOPIFY_ADMIN_ACCESS_TOKEN` in
+      `.env` — env vars are now `SHOPIFY_CLIENT_ID`/
+      `SHOPIFY_CLIENT_SECRET` instead. `.env.example`,
+      `connectors/README.md`, and `install/01_provision_vps.md` Part 14
+      updated to match; Part 14 also picked up a note that
+      `~/.hermes/.env` needs `set -a; source ~/.hermes/.env; set +a` to
+      actually load into a manually-opened shell session before running
+      any connector script by hand (Hermes's own process reads it
+      directly, a raw console session does not) — this likely also
+      applies retroactively to the Dropbox connector's manual verify
+      steps in Part 13, never actually confirmed either way.
+- [ ] **Blog-Publisher's real install status is still unconfirmed** —
+      since client credentials grant doesn't require the "Install app"
+      step that kept failing, it's not yet verified whether that
+      matters (i.e. whether the grant would still work if a scope
+      change needs re-releasing later, or whether an explicit install
+      is quietly required for some Admin API endpoints even under this
+      grant). First real live publish is the actual test; revisit if
+      anything about scope/permissions behaves unexpectedly later.

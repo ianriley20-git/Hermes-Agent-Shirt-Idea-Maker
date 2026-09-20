@@ -25,8 +25,16 @@ scheduler. Code lives here only where the built-in tools fall short:
   from `AGENTS.md` bucket 3 Stage B on approval.
 - `shopify_blog_publish.py` (Stage 7) — publishes a weekly blog post
   live to Shopify via the Admin API (a custom app, `write_content`
-  scope only). Uses the `requests` library (`requirements.txt`). Full
-  setup walkthrough (custom app creation, scopes, access token, finding
+  scope only). Auth uses OAuth's client credentials grant
+  (`SHOPIFY_CLIENT_ID`/`SHOPIFY_CLIENT_SECRET`) — the script fetches a
+  fresh Admin API access token from Shopify on every run rather than
+  relying on a static token stored in `.env`. Same proven pattern as
+  Riley Ink's separate `Printify-POD-Manager` desktop app, which
+  successfully uses this same grant against this same store — worth
+  knowing about if a future connector needs Shopify Admin API access
+  again, since it skips the whole install/OAuth-redirect flow entirely.
+  Uses the `requests` library (`requirements.txt`). Full setup
+  walkthrough (custom app creation, scopes, Client ID/Secret, finding
   the blog id/handle) is in `install/01_provision_vps.md` Part 14.
   Install with the same venv pip as the other connectors:
   ```

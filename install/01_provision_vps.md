@@ -528,22 +528,42 @@ confirm the same thing happens end to end.
 
 ## Part 14 — Weekly blog post (Stage 7): Shopify custom app setup
 
-### Shopify admin setup (in a browser, logged into your Shopify admin)
+**Note (learned the hard way, 2026-09-20):** Shopify's app creation flow
+has moved to the org-level **Dev Dashboard** (`dev.shopify.com`), which
+replaced the older single-store "Develop apps" custom-app flow this
+section originally described. The Dev Dashboard's own "Install app" /
+"App automation token" paths turn out to be the wrong tool here — they
+either never registered a real install against the store (stuck
+mid-OAuth with no real redirect backend to catch it) or issued a token
+meant for CI/CD deploys, not the Admin API. **What actually works**:
+skip the install step entirely and use OAuth's **client credentials
+grant** — just a Client ID + Secret, no redirect/install dance. This is
+the same proven approach Riley Ink's separate `Printify-POD-Manager`
+desktop app already uses successfully against this same store.
 
-1. Go to **Settings → Apps and sales channels → Develop apps** (you may
-   need to click **Allow custom app development** the first time).
-2. **Create an app** → name it (e.g. `riley-ink-blog-publisher`).
-3. On the **Configuration** tab, under **Admin API integration**,
-   configure scopes → check **`write_content`** only (covers creating
-   blog articles; nothing here needs product/order/customer access) →
-   **Save**.
-4. On the **API credentials** tab, **Install app**, then **Reveal token
-   once** under Admin API access token — copy it immediately, Shopify
-   only shows it this one time. If you lose it, you'll need to reveal a
-   new one from the same tab.
-5. Note your store's `*.myshopify.com` domain (shown in the admin URL,
-   or under Settings → Domains) — this is `SHOPIFY_STORE_DOMAIN`, even
-   if your storefront also has a custom domain like `rileyink.com`.
+### Shopify Dev Dashboard setup (in a browser, logged into your Shopify account)
+
+1. Go to `dev.shopify.com`, open (or create) an app for this — name it
+   something like `Blog-Publisher`.
+2. On the app's **API access** / **Configuration** area, add
+   **`write_content`** to the required **Scopes** field (comma-separated
+   list) — nothing else needed (no product/order/customer access).
+   Leave **App URL** as any placeholder (e.g. `https://example.com`) —
+   it's never actually used, since we're not doing the redirect-based
+   install flow.
+3. Save/create a new version, then **Release** it.
+4. Go to **App settings → Credentials** and copy the **Client ID**
+   (not sensitive) and reveal + copy the **Secret** (sensitive — treat
+   like any other API secret).
+5. Note your store's real `*.myshopify.com` domain — **Settings →
+   Domains** in your actual store admin (not the Dev Dashboard), listed
+   alongside your custom domain if you have one (e.g. `rileyink.com`
+   connects to something like `d7093e-ef.myshopify.com`) — this is
+   `SHOPIFY_STORE_DOMAIN`.
+
+You do **not** need to click "Install app" anywhere, or use the "App
+automation token" section — the client credentials grant below handles
+authentication directly against the Client ID/Secret.
 
 ### On the server (as `hermes`)
 
@@ -553,16 +573,27 @@ environment` reason as the other connectors — see Part 8a):
 /home/hermes/.hermes/hermes-agent/venv/bin/pip install -r ~/riley-ink-pipeline/connectors/requirements.txt
 ```
 
-Add the access token and store domain to `.env` so the next step can
-use them:
+Add the store domain, Client ID, and Client Secret to `.env`. Since
+`~/.hermes/.env` isn't automatically loaded into a manually-opened shell
+session (only Hermes's own process reads it directly), you'll also need
+to load it into your shell each time you want to run one of these
+connector scripts by hand — same kind of per-session step as the
+`XDG_RUNTIME_DIR` export elsewhere in this guide:
 ```bash
 nano ~/.hermes/.env
 ```
 ```
 SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-SHOPIFY_ADMIN_ACCESS_TOKEN=paste_token_here
+SHOPIFY_CLIENT_ID=paste_client_id_here
+SHOPIFY_CLIENT_SECRET=paste_client_secret_here
 ```
-Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
+Save (**Ctrl+O**, Enter), exit (**Ctrl+X**), then load it into your
+current shell session:
+```bash
+set -a
+source ~/.hermes/.env
+set +a
+```
 
 Find your blog's id and handle (most stores have one default blog,
 often handle `news`):
@@ -582,7 +613,12 @@ SHOPIFY_PUBLIC_DOMAIN=rileyink.com
 
 ### Verify
 
+Reload `.env` again since it changed since the last `source` (needed
+after any edit, same per-session rule as above):
 ```bash
+set -a
+source ~/.hermes/.env
+set +a
 echo '<p>Test post -- safe to delete from Shopify admin after.</p>' > /tmp/test-post.html
 /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/shopify_blog_publish.py \
   --title "Test Post" --body-file /tmp/test-post.html --handle test-post \
