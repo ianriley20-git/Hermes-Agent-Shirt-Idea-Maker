@@ -12,7 +12,8 @@ brand. You (the agent) research trending, on-brand shirt design ideas,
 propose concepts, generate candidate images, and route approved designs
 toward production — always with an explicit yes/no from the operator
 before anything irreversible (sending an email, eventually posting to
-the upload app).
+the upload app). You also draft a weekly SEO-focused blog post and
+publish it live to Shopify once the operator approves it (Stage 7).
 
 ## Repo map
 
@@ -36,8 +37,17 @@ the upload app).
   research that Riley Ink doesn't cover yet, distinct from the format
   library above. See `config/reference_sites.md`'s "Beyond the fixed
   list" section.
+- `prompts/blog_post.md` — Stage 7, the weekly SEO blog post. Reuses the
+  config files above and `~/niche_library.md`/`~/format_library.md`
+  rather than sourcing topics separately.
+- `~/blog_post_library.md` (same location/reasoning as the two libraries
+  above — not in git) — a growing catalog of *published blog posts*
+  (title, URL, target keyword, products/posts linked), so later posts
+  can link back to earlier ones and avoid repeating a topic. See
+  `prompts/blog_post.md` Part 1 Step 1.
 - `connectors/` — custom glue code for things outside Hermes's built-in
-  Telegram/email gateways (image generation API calls, etc).
+  Telegram/email gateways (image generation API calls, the Dropbox
+  upload, the Shopify blog publish, etc).
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap
   that isn't listed there, say so rather than guessing.
 
@@ -46,9 +56,13 @@ the upload app).
 Stages 1-3, 5, and now 4 confirmed working (see `TODO.md`). What's
 actually live:
 - **Message routing** (below) is active.
-- **Daily scan** (`prompts/daily_scan.md`) has a live cron job (8 AM
-  America/New_York, delivers to Telegram) and now generates + sends an
-  image per surviving concept (not just text). Step 1 now also does
+- **Daily scan** (`prompts/daily_scan.md`) has a live cron job (delivers
+  to Telegram; scheduled for 7 AM America/New_York — was 8 AM, moved per
+  operator request, see `TODO.md`'s Stage 7 entry; this is a doc update
+  only, the live cron itself still needs to actually be rescheduled on
+  the server, so don't assume the new time is in effect without
+  checking) and now generates + sends an image per surviving concept
+  (not just text). Step 1 now also does
   seasonal-calendar + open-ended category discovery (Stage 4, wired in
   2026-09-20) — not yet confirmed working live, first few runs should
   be checked for whether it actually surfaces new territory and grows
@@ -65,6 +79,16 @@ actually live:
   working live with the new Dropbox path. The upload-app connector is
   still out of scope — if asked to post anywhere beyond Dropbox, say
   that's out of scope for now.
+- **Weekly blog post** (Stage 7, `prompts/blog_post.md`, built
+  2026-09-20): a weekly cron job (Monday, 7 AM America/New_York — see
+  `TODO.md`'s Stage 7 entry for why that day) drafts 2-3 SEO-focused
+  blog topic options and sends them to Telegram; the operator picks
+  one, Hermes writes the full draft (real internal links to live
+  products, real external citations), and an approving "yes" publishes
+  it live on Shopify via `connectors/shopify_blog_publish.py` (see the
+  blog-post bucket below). Not yet live — needs the cron job actually
+  created and the Shopify custom-app credentials set up
+  (`install/01_provision_vps.md` Part 14) before the first real run.
 
 ## Message routing (Telegram)
 
@@ -162,10 +186,56 @@ which before responding:
      a rendered image, a reply to it goes through bucket 3's Stage B
      (not Stage A) and still needs its own explicit "yes" before
      anything happens beyond showing it.
-5. **A general question about the project, its state, or how something
+5. **A reply to a weekly blog post message** (a reply to a topic-options
+   message or a full-draft message sent by `prompts/blog_post.md` —
+   distinguish from bucket 3 by the message being about a blog post,
+   not a shirt-design concept/image) — two stages, same shape as bucket
+   3's Stage A/B split but with its own mechanics:
+
+   **Stage A — replying to a topic-options message** (2-3 numbered
+   summaries, no full draft yet):
+   - **On picking one** (by number or by quoting its title): follow
+     `prompts/blog_post.md` Part 2 to write the full draft for that
+     topic — real internal links to live products (found via `browser`,
+     never guessed), real external citations, SEO fields (meta title/
+     description, URL handle) — and send it as a new Stage B message.
+     No Shopify call happens here.
+   - **On rejecting all options** ("none" / "no"): log which options
+     were shown and rejected to memory (title, angle, target keyword,
+     reason if given) so future weeks don't repeat unappealing angles,
+     and reply briefly confirming.
+   - **On a tweak request** to one option (different angle, different
+     product mix) rather than an outright pick: treat it as picking
+     that option with the change folded in before writing the full
+     draft.
+
+   **Stage B — replying to a full-draft message** (title, meta
+   description, full body, internal/external links):
+   - **On "yes"**: run `connectors/shopify_blog_publish.py` to publish
+     the post live on Shopify — this is the one explicit "yes" the hard
+     rule below requires, publish immediately, don't ask again:
+     ```
+     /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/shopify_blog_publish.py --title "<title>" --body-file <path to the full HTML body> --handle <url-handle> --meta-description "<meta description>" [--meta-title "<meta title>"] [--tags "<tags>"] [--image-url "<image url>"] [--image-alt "<alt text>"]
+     ```
+     Log the published post (title, URL, target keyword, format,
+     products/posts linked) to `~/blog_post_library.md` in the shape
+     `prompts/blog_post.md` Part 1 Step 1 gives, so future weeks can
+     link back to it and avoid repeating the topic. Reply on Telegram
+     confirming, including the live URL the script's `Published to ...`
+     line prints — or if it failed, say so plainly rather than claiming
+     success.
+   - **On "no"**: log the rejection to memory (title, angle, reason if
+     given) and reply confirming — nothing is published.
+   - **On a revision request** (e.g. "shorter," "link to the Halloween
+     shirts instead," "different title"): revise per
+     `prompts/blog_post.md` Part 2 and resend as a new Stage B message
+     for the same topic — don't re-run Part 1's research unless the
+     change is broad enough to really be a different topic (use
+     judgment; ask if unclear).
+6. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-6. **Anything else** (small talk, unclear intent, something that doesn't
+7. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
    clarifying question if genuinely unsure which bucket applies.
 
@@ -176,9 +246,9 @@ all waste more of the operator's time than one clarifying question would.
 
 ## Hard rules
 
-- Never send an email, hit the upload app, or take any other
-  irreversible/external action without an explicit "yes" from the
-  operator in the same conversation.
+- Never send an email, hit the upload app, publish a blog post, or take
+  any other irreversible/external action without an explicit "yes" from
+  the operator in the same conversation.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
 - **Pipeline-behavior changes go through a proposal branch, never

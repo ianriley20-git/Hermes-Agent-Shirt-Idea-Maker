@@ -53,6 +53,12 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       next 8 AM Eastern after creation. Not yet observed running for
       real (only the manual seeded-search test has been verified) — worth
       confirming the first automatic run actually lands.
+- [ ] **Time change requested 2026-09-20**: move this cron from `0 8 * * *`
+      to `0 7 * * *` (America/New_York), to line up with the new Stage 7
+      weekly blog cron (see below) — operator preference, no specific
+      reasoning behind the hour itself. Needs an actual edit to the live
+      cron job on the server (same Cron Jobs mechanism used to create
+      it) — not done yet, this repo change alone doesn't move it.
 
 ## Stage 3 (on-demand seeded search) — verified working
 - [x] Confirmed end-to-end on Telegram: "gambling collection" correctly
@@ -754,3 +760,75 @@ concepts, 2026-09-03)
       should. Worth operator review of `config/seasonal_calendar.md`'s
       first-draft dates/windows too — they're a reasonable guess, not
       something confirmed against Riley Ink's actual catalog/calendar.
+
+## Stage 7: weekly SEO blog post, built 2026-09-20
+- [x] **Why**: operator wants a weekly Shopify blog post aimed at SEO/
+      site traffic — internal links to real products, external
+      citations, reviewed and approved on Telegram before it goes live,
+      same approval-gate philosophy as the shirt pipeline.
+- [x] **Design decisions from workshopping with the operator**:
+      publishing is live-immediately on a Telegram "yes" (no separate
+      Shopify-side draft step — Telegram approval is the real gate,
+      matching how the operator wants this to actually work day to
+      day, a deliberate difference from the Dropbox to-do/done pattern);
+      content format (gift guide vs. culture/trend piece) is picked
+      per week by Hermes based on that week's strongest signal, no
+      fixed ratio; review happens in **two stages** — first 2-3 short
+      topic *options* to pick a direction, then a full draft of the
+      chosen one for final approval — rather than one long draft
+      dropped on Telegram cold.
+- [x] **Implementation**: new `prompts/blog_post.md` (Stage 7),
+      deliberately reusing the shirt pipeline's own research
+      (`config/seasonal_calendar.md`, `config/niche_keywords.md`,
+      `config/subreddits.md`, `~/niche_library.md`,
+      `~/format_library.md`) instead of a separate topic-sourcing step.
+      New `~/blog_post_library.md` (server-only, same outside-git
+      pattern as the other two library files) tracks published posts
+      for future internal linking and topic dedup. New
+      `connectors/shopify_blog_publish.py` publishes live via the
+      Shopify Admin API (custom app, `write_content` scope). `AGENTS.md`
+      got a new message-routing bucket (5, with buckets 5-6 renumbered
+      to 6-7) for blog-post Telegram replies, plus a repo-map/current-
+      stage/hard-rules update. Setup walkthrough for the Shopify custom
+      app is `install/01_provision_vps.md` Part 14.
+- [x] **Cron day/time decided**: Monday, 7 AM America/New_York (moved
+      from an initial 8 AM suggestion to match the daily scan's cron,
+      which is also being moved to 7 AM — see the Stage 2 entry above —
+      per operator request, no specific reasoning behind the exact
+      hour). Day reasoning stands regardless of the hour: SEO itself
+      doesn't care which weekday a post goes live, but Monday gives the
+      full week of slack for the operator to work through the two-stage
+      Telegram review at their own pace (topic pick, then draft
+      approval/revision) rather than a same-day crunch, and — if
+      reviewed promptly — gets the post crawled/indexed with a few
+      days' lead time before the Fri-Sun window when novelty-apparel
+      browsing tends to peak.
+- [ ] **Not yet tested live at all** — the cron job itself still needs
+      to actually be created on the server (mechanism decided above,
+      not yet done), and the Shopify custom-app credentials haven't
+      been created/added to `.env` yet either. First real test should
+      check the full chain: cron fires Monday 7 AM → 2-3 topic options
+      sent → pick one → full draft sent → "yes" → post actually appears
+      live on rileyink.com → `~/blog_post_library.md` gets a real entry.
+- [ ] **Shopify SEO metafield mapping unverified**: `shopify_blog_publish.py`
+      sets meta title/description via legacy `global` namespace
+      metafields (`title_tag`/`description_tag`) on the article — this
+      is Shopify's long-standing convention for blog-article SEO fields,
+      but hasn't been confirmed against the operator's actual theme/
+      store. Check the Shopify admin's "Search engine listing" section
+      on the first real published post to confirm it actually picked
+      these up; if not, the fix is likely theme-specific and will need
+      investigating live rather than guessed at here.
+- [ ] **Keyword research is deliberately lightweight**: no paid keyword
+      tool (Ahrefs/SEMrush/etc.) is wired up — `blog_post.md` uses
+      Google Trends direction, web-search autocomplete/"people also
+      ask" signal, and saturation sense-checks instead. Revisit if post
+      performance suggests real keyword-volume data would change topic
+      selection meaningfully; out of scope for this first build.
+- [ ] **Featured images default to real product photos, not generated
+      art** — a deliberate cost-safety choice given the 2026-09-13
+      image-spend incident above; a pure culture-piece post with no
+      fitting product photo just publishes with no featured image
+      rather than generating one. Revisit only if the operator wants a
+      more polished blog hero image badly enough to accept the added
+      per-post cost.

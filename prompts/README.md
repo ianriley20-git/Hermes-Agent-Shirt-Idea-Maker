@@ -23,6 +23,12 @@ independently of any script.
   (aiming for a mix), or by name if the operator asks for a specific
   one. A later "show me the Ash version" request or yes/no reply is
   handled by `AGENTS.md`'s message routing, not by this file.
+- `blog_post.md` — Stage 7. Scheduled weekly blog post for SEO/internal
+  linking, published live to Shopify. Two Telegram approval gates: a
+  pick between 2-3 topic options, then a full-draft approve/reject/
+  revise. Reuses the shirt pipeline's own research (seasonal calendar,
+  niche/format libraries, Reddit/Trends) rather than separate topic
+  sourcing. Handled by `AGENTS.md`'s blog-post message-routing bucket.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

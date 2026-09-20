@@ -4,7 +4,8 @@ An always-on agent (running on [Hermes Agent](https://hermes-agent.nousresearch.
 NousResearch's open-source self-hosted agent runtime) that scans for
 trending, on-brand shirt design ideas, generates candidate images, and
 routes anything approved into a Dropbox `/to-do` folder for production —
-with a human approval step before every irreversible action.
+plus a weekly SEO-focused blog post published live to Shopify — with a
+human approval step before every irreversible action.
 
 Riley Ink's voice is deadpan, absurdist, ironic — never sincere, cutesy,
 or generic gift-shop humor. That standard is enforced in every prompt via
@@ -30,6 +31,21 @@ Telegram (you) <---> Hermes Agent gateway <---> model (Claude and/or GPT-4)
                     Dropbox upload (connectors/) --> /to-do folder
 ```
 
+A second, weekly flow runs the same shape for SEO content:
+
+```
+cron scheduler (weekly) --> prompts/blog_post.md, reusing the same
+                             research (config/, ~/niche_library.md, etc.)
+                             |
+                    [you pick one of 2-3 topic options]
+                             |
+                    full draft written (internal/external links, SEO fields)
+                             |
+                    [you approve the draft]
+                             |
+                    Shopify Admin API publish (connectors/) --> live post
+```
+
 Nothing emails, posts, or spends money without an explicit yes/no reply
 from you in Telegram first.
 
@@ -41,7 +57,8 @@ from you in Telegram first.
   shared brand-voice rules. Nothing is hardcoded into connector code.
 - `/connectors` — glue code for anything outside Hermes's built-in
   Telegram/email gateways and cron scheduler (image generation API calls,
-  the Dropbox upload, eventually the upload-app hookup).
+  the Dropbox upload, the Shopify blog publish, eventually the
+  upload-app hookup).
 - `/config` — `.env.example` (secrets template — never commit the real
   `.env`), subreddit/keyword lists, and the seasonal calendar.
 - [`TODO.md`](TODO.md) — running list of decisions/placeholders deferred to
@@ -60,6 +77,8 @@ each one:
    scan directly (not a separate opt-in nudge)
 5. Image generation from approved concepts, sent to Telegram for approval
 6. Approved image → uploaded to a Dropbox `/to-do` folder
+7. Weekly SEO blog post — 2-3 topic options on Telegram, then a full
+   draft, then live publish to Shopify on approval
 
 See the current stage's commit message / conversation for what's tested
 and what's next. The upload-app integration is intentionally out of

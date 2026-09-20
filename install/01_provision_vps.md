@@ -523,3 +523,96 @@ Should print `Uploaded to /to-do/Test Upload.png`. Check your actual
 Dropbox app folder (`Apps/<app name>/to-do/`) — don't just trust the
 printed success line. Then approve a real design via Telegram and
 confirm the same thing happens end to end.
+
+---
+
+## Part 14 — Weekly blog post (Stage 7): Shopify custom app setup
+
+### Shopify admin setup (in a browser, logged into your Shopify admin)
+
+1. Go to **Settings → Apps and sales channels → Develop apps** (you may
+   need to click **Allow custom app development** the first time).
+2. **Create an app** → name it (e.g. `riley-ink-blog-publisher`).
+3. On the **Configuration** tab, under **Admin API integration**,
+   configure scopes → check **`write_content`** only (covers creating
+   blog articles; nothing here needs product/order/customer access) →
+   **Save**.
+4. On the **API credentials** tab, **Install app**, then **Reveal token
+   once** under Admin API access token — copy it immediately, Shopify
+   only shows it this one time. If you lose it, you'll need to reveal a
+   new one from the same tab.
+5. Note your store's `*.myshopify.com` domain (shown in the admin URL,
+   or under Settings → Domains) — this is `SHOPIFY_STORE_DOMAIN`, even
+   if your storefront also has a custom domain like `rileyink.com`.
+
+### On the server (as `hermes`)
+
+Install `requests` into Hermes's own venv (same `externally-managed-
+environment` reason as the other connectors — see Part 8a):
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/pip install -r ~/riley-ink-pipeline/connectors/requirements.txt
+```
+
+Add the access token and store domain to `.env` so the next step can
+use them:
+```bash
+nano ~/.hermes/.env
+```
+```
+SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
+SHOPIFY_ADMIN_ACCESS_TOKEN=paste_token_here
+```
+Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
+
+Find your blog's id and handle (most stores have one default blog,
+often handle `news`):
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/shopify_blog_publish.py --list-blogs
+```
+Add both to `.env`:
+```
+SHOPIFY_BLOG_ID=paste_id_here
+SHOPIFY_BLOG_HANDLE=paste_handle_here
+```
+If your storefront uses a custom domain (e.g. `rileyink.com` instead of
+the `*.myshopify.com` one), also set:
+```
+SHOPIFY_PUBLIC_DOMAIN=rileyink.com
+```
+
+### Verify
+
+```bash
+echo '<p>Test post -- safe to delete from Shopify admin after.</p>' > /tmp/test-post.html
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/shopify_blog_publish.py \
+  --title "Test Post" --body-file /tmp/test-post.html --handle test-post \
+  --meta-description "Test post, safe to delete."
+```
+Should print `Published to https://.../blogs/.../test-post`. Open that
+URL and confirm the post is actually live, then delete it from
+**Online Store → Blog posts** in the Shopify admin (this is exactly the
+"look, don't just trust the success line" discipline the Dropbox
+verification above uses). Also check whether the meta title/description
+actually show up under that post's **Search engine listing** section —
+see `TODO.md`'s Stage 7 entry on the SEO-metafield mapping not yet
+being confirmed.
+
+### Create the weekly cron job
+
+Same mechanism as the existing daily-scan cron (Part 8's setup wizard
+has a **Cron Jobs** option, or ask Hermes directly via Telegram/console
+to create one the same way the daily scan's was set up) — point it at
+`prompts/blog_post.md`, delivering to your Telegram home channel,
+running **weekly, Monday 7 AM America/New_York** (same slot as the
+daily scan — see `TODO.md`'s Stage 7 entry for why Monday specifically:
+it gives the full week of slack to work through the two-stage Telegram
+review before the Fri-Sun window when novelty-apparel browsing tends to
+peak; the hour was moved from 8 AM to 7 AM per operator request, no
+particular reasoning behind the exact hour beyond preference). Adjust
+if a different day/time suits you better — it's just a cron schedule,
+not baked into the prompt logic.
+
+Also reschedule the existing **daily scan** cron job to 7 AM
+America/New_York to match (it's currently live at 8 AM — this doc
+update alone doesn't move it, use the same Cron Jobs mechanism to edit
+its schedule).

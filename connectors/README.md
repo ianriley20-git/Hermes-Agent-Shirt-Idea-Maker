@@ -23,6 +23,33 @@ scheduler. Code lives here only where the built-in tools fall short:
   Run with `/home/hermes/.hermes/hermes-agent/venv/bin/python
   dropbox_upload.py --file <png path> --name "<design name>"`. Called
   from `AGENTS.md` bucket 3 Stage B on approval.
+- `shopify_blog_publish.py` (Stage 7) — publishes a weekly blog post
+  live to Shopify via the Admin API (a custom app, `write_content`
+  scope only). Uses the `requests` library (`requirements.txt`). Full
+  setup walkthrough (custom app creation, scopes, access token, finding
+  the blog id/handle) is in `install/01_provision_vps.md` Part 14.
+  Install with the same venv pip as the other connectors:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/pip install -r requirements.txt
+  ```
+  Setup helper — list blogs to find the id/handle for `.env`:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python shopify_blog_publish.py --list-blogs
+  ```
+  Publish:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python shopify_blog_publish.py \
+    --title "..." --body-file <path to HTML body> --handle <url-handle> \
+    --meta-description "..." [--meta-title "..."] [--tags "a,b,c"] \
+    [--image-url "..."] [--image-alt "..."]
+  ```
+  Publishes immediately (`published: true`) — Telegram approval is the
+  gate, there's no separate Shopify-side draft step. Meta title/
+  description are set via legacy `global` namespace metafields
+  (`title_tag`/`description_tag`); this is Shopify's long-standing SEO
+  field storage for blog articles but hasn't been confirmed against the
+  operator's actual theme yet (see `TODO.md`). Called from `AGENTS.md`'s
+  blog-post message-routing bucket on a full-draft "yes".
 - upload-app integration (post-Stage 6, scoped separately)
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway

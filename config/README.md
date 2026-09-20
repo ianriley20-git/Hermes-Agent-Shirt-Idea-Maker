@@ -13,4 +13,7 @@
   2026-09-20, wired into `daily_scan.md` Step 1). First-draft dates —
   review and adjust freely.
 
+Stage 7 (`blog_post.md`) reuses the config files above directly rather
+than adding its own topic-source list.
+
 Files not yet listed above are created in their respective stage.
