@@ -810,15 +810,13 @@ concepts, 2026-09-03)
       check the full chain: cron fires Monday 7 AM → 2-3 topic options
       sent → pick one → full draft sent → "yes" → post actually appears
       live on rileyink.com → `~/blog_post_library.md` gets a real entry.
-- [ ] **Shopify SEO metafield mapping unverified**: `shopify_blog_publish.py`
-      sets meta title/description via legacy `global` namespace
-      metafields (`title_tag`/`description_tag`) on the article — this
-      is Shopify's long-standing convention for blog-article SEO fields,
-      but hasn't been confirmed against the operator's actual theme/
-      store. Check the Shopify admin's "Search engine listing" section
-      on the first real published post to confirm it actually picked
-      these up; if not, the fix is likely theme-specific and will need
-      investigating live rather than guessed at here.
+- [x] **Shopify SEO metafield mapping confirmed working, 2026-09-20**:
+      `shopify_blog_publish.py` sets meta title/description via legacy
+      `global` namespace metafields (`title_tag`/`description_tag`) on
+      the article — confirmed live against a real test post (see the
+      end-to-end test entry further down): the Search engine listing
+      preview in Shopify admin showed the exact meta description
+      passed via `--meta-description`. No theme-specific fix needed.
 - [ ] **Keyword research is deliberately lightweight**: no paid keyword
       tool (Ahrefs/SEMrush/etc.) is wired up — `blog_post.md` uses
       Google Trends direction, web-search autocomplete/"people also
@@ -876,11 +874,38 @@ concepts, 2026-09-03)
       directly, a raw console session does not) — this likely also
       applies retroactively to the Dropbox connector's manual verify
       steps in Part 13, never actually confirmed either way.
-- [ ] **Blog-Publisher's real install status is still unconfirmed** —
-      since client credentials grant doesn't require the "Install app"
-      step that kept failing, it's not yet verified whether that
-      matters (i.e. whether the grant would still work if a scope
-      change needs re-releasing later, or whether an explicit install
-      is quietly required for some Admin API endpoints even under this
-      grant). First real live publish is the actual test; revisit if
-      anything about scope/permissions behaves unexpectedly later.
+- [x] **Blog-Publisher's install requirement confirmed, and resolved**:
+      turns out client credentials grant *does* require a real install
+      first — confirmed directly via a `400 app_not_installed` error
+      from Shopify when attempting the grant pre-install. Fixed by
+      completing the one-time OAuth authorization-code exchange the
+      Dev Dashboard's "Install app" button had been failing to finish
+      (fresh `code` from `/admin/oauth/authorize`, exchanged via
+      `POST /admin/oauth/access_token` with `grant_type=authorization_code`
+      — a manual `curl` call, same shape as the client-credentials calls
+      but one-time only, purely to flip the shop's install record).
+      Confirmed installed afterward two ways: it appeared in the
+      Shopify mobile app's Installed Apps list, and the client
+      credentials grant started working immediately after. No further
+      re-install should be needed going forward, including after future
+      scope changes, per how this app type is documented to work — but
+      flag here if a future scope change ever needs a fresh install too.
+- [x] **End-to-end connector test confirmed working live, 2026-09-20**:
+      a real (throwaway) "Test Post" published successfully —
+      `Published to https://d7093e-ef.myshopify.com/blogs/news/test-post`
+      — confirmed actually live and fully themed on rileyink.com, and
+      confirmed the SEO metafield mapping (`title_tag`/`description_tag`)
+      **does** work correctly: the post's Search engine listing preview
+      in Shopify admin showed the exact meta description passed via
+      `--meta-description`. The "unverified" flag on the metafield
+      mapping above is resolved — it works as designed. Test post
+      deleted afterward. The full chain (client-credentials auth →
+      article creation → live render → SEO fields) is now proven; only
+      remaining gaps are the actual weekly cron job (not yet created)
+      and the still-outstanding daily-scan cron reschedule to 7 AM.
+      Also worth noting for next time: DigitalOcean's console has poor
+      copy/paste support on mobile Safari specifically — the reliable
+      workaround (used successfully throughout this setup) is asking
+      Hermes to run commands directly via Telegram instead of typing
+      them into the console by hand, same trick as the Gmail
+      OAuth/git-push-credential entries above.
