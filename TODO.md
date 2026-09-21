@@ -53,12 +53,11 @@ Updated as each stage lands; check items off (or delete them) once resolved.
       next 8 AM Eastern after creation. Not yet observed running for
       real (only the manual seeded-search test has been verified) — worth
       confirming the first automatic run actually lands.
-- [ ] **Time change requested 2026-09-20**: move this cron from `0 8 * * *`
-      to `0 7 * * *` (America/New_York), to line up with the new Stage 7
-      weekly blog cron (see below) — operator preference, no specific
-      reasoning behind the hour itself. Needs an actual edit to the live
-      cron job on the server (same Cron Jobs mechanism used to create
-      it) — not done yet, this repo change alone doesn't move it.
+- [x] **Time changed 2026-09-20**: rescheduled from `0 8 * * *` to
+      `0 7 * * *` (America/New_York) via Hermes/Telegram, to line up
+      with the new Stage 7 weekly blog cron (see below) — operator
+      preference, no specific reasoning behind the hour itself.
+      Confirmed done on the live server.
 
 ## Stage 3 (on-demand seeded search) — verified working
 - [x] Confirmed end-to-end on Telegram: "gambling collection" correctly
@@ -803,13 +802,23 @@ concepts, 2026-09-03)
       reviewed promptly — gets the post crawled/indexed with a few
       days' lead time before the Fri-Sun window when novelty-apparel
       browsing tends to peak.
-- [ ] **Not yet tested live at all** — the cron job itself still needs
-      to actually be created on the server (mechanism decided above,
-      not yet done), and the Shopify custom-app credentials haven't
-      been created/added to `.env` yet either. First real test should
-      check the full chain: cron fires Monday 7 AM → 2-3 topic options
-      sent → pick one → full draft sent → "yes" → post actually appears
-      live on rileyink.com → `~/blog_post_library.md` gets a real entry.
+- [x] **Weekly blog cron job created and confirmed, 2026-09-20**: "Weekly
+      blog post", `0 7 * * 1` (America/New_York), delivers to Telegram
+      home channel, Job ID `2a4db62437b0`, status enabled/scheduled.
+      First automatic run: Monday, September 21, 2026 at 7:00 AM EDT
+      (i.e. the very next day after this was set up).
+- [ ] **End-to-end live *cron-triggered* run not yet observed** — the
+      connector itself is confirmed working (see the end-to-end test
+      entry below, a manually-triggered publish), and the cron job is
+      confirmed created/scheduled, but the full real chain triggered
+      *by the cron itself* hasn't happened yet: cron fires Monday 7 AM
+      → 2-3 topic options sent → pick one → full draft sent → "yes" →
+      post live on rileyink.com → `~/blog_post_library.md` gets a real
+      first entry (that file doesn't exist yet — first run creates it).
+      Also worth checking whether Step 1's research (seasonal calendar +
+      niche/format library reuse) actually produces good topic options
+      on a cold first run with empty libraries, same "first few runs
+      need checking" caveat as Stage 4's category discovery above.
 - [x] **Shopify SEO metafield mapping confirmed working, 2026-09-20**:
       `shopify_blog_publish.py` sets meta title/description via legacy
       `global` namespace metafields (`title_tag`/`description_tag`) on
