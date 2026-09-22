@@ -117,6 +117,15 @@ which before responding:
    card (from `daily_scan.md`/`seeded_search.md`/`text_iterations.md`,
    no image), or as an already-rendered image?
 
+   Daily-scan concept cards are numbered within each delivered batch
+   (`#1`, `#2`, etc.). Treat replies such as `yes to #1 and #3`, `no to
+   #2`, or `yes to #1 Ash` as references to the most recent numbered
+   daily batch unless the reply is explicitly attached to an older
+   message. Preserve that concept number on all Duke/Nova/Ash render
+   captions generated from it. If more than one numbered batch is a
+   plausible target and reply context does not resolve it, ask rather
+   than guessing.
+
    **Stage A — replying to a text-only concept (no image sent yet):**
    - **On "yes"**: if the concept card includes a `Designer:` line
      (only present when the operator requested one designer for the

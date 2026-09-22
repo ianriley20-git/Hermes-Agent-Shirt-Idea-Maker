@@ -179,18 +179,25 @@ If nothing cleared the bar in Step 8: send exactly that ("Nothing
 cleared the bar today") and briefly note what was closest, rather than
 lowering the standard to produce a concept anyway.
 
-Otherwise, send each concept as its own message:
+Otherwise, number the surviving concepts sequentially in final display
+order (`#1`, `#2`, and so on), then send each concept as its own message.
+The number is the concept's stable identifier for this daily batch: keep
+it when the concept later becomes Duke/Nova/Ash renders so replies such as
+`yes to #1 and #3` or `yes to #1 Ash` can be resolved without requiring
+the operator to retype a tagline.
 
 ```
+#1
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / seasonal calendar / niche library / reference site / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 [New territory — only include this line when Step 8 flagged it as such]
 
-Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" generates one version from each designer
-(Duke, Nova, Ash) for your approval next — nothing is emailed yet.
+Reply "yes" or "no" on this one, or approve/reject multiple concepts by
+number (for example, `yes to #1 and #3`). You can still reference a
+tagline instead. "yes" generates one version from each designer (Duke,
+Nova, Ash) for your approval next — nothing is emailed yet.
 ```
 
 This is the actual delivered output for this run — this prompt's job
