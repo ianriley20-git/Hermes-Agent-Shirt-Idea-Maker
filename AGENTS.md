@@ -95,7 +95,7 @@ actually live:
   created and the Shopify custom-app credentials set up
   (`install/01_provision_vps.md` Part 14) before the first real run.
 - **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
-  2026-09-23): a daily 6:30 AM job finds up to five existing public memes
+  2026-09-23): a daily 6:20 AM job finds up to five existing public memes
   matched to current seasonal windows and Riley Ink voice, filters brands/
   franchises/teams/players/characters, and sends prepared 1080×1350 review
   images to Telegram. Approval saves the exact candidate to Dropbox

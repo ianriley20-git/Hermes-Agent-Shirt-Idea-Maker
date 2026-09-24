@@ -1,6 +1,6 @@
 # Daily seasonal meme finder
 
-Run daily at 6:30 AM America/New_York. Find up to five **existing memes**
+Run daily at 6:20 AM America/New_York. Find up to five **existing memes**
 that fit Riley Ink's voice and current season, prepare non-destructively for
 Instagram review, and send them to Telegram for approval. Do not generate,
 rewrite, re-caption, publish, or claim ownership of a meme.
