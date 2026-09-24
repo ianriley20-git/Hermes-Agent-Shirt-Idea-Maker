@@ -60,15 +60,13 @@ specific visual concept, but make sure at least two different designers
 appear across the batch (unless the operator requested one specific
 designer for all of them — see Step 0).
 
-## Step 4 — Send concepts to Telegram (text only, no image yet)
+## Step 4 — Send concepts to Telegram (text only, no image or provider prompt yet)
 
-Image generation costs real money per image, so it only happens after
-the operator approves a concept description in text first (see
-`AGENTS.md` message routing, bucket 3, Stage A) — the same gate used by
-`daily_scan.md`/`seeded_search.md`. Yes, this means judging a visual
-idea from a one-line description rather than the rendered image itself
-— coarser, but it still stops obviously-wrong concepts (wrong subject,
-wrong designer feel) from ever getting rendered.
+Image generation costs real money. This first gate still lets the operator
+choose a visual concept, but a concept YES now assembles the complete real
+provider prompt for its assigned designer and sends that prompt through
+`prompts/image_prompt_review.md`; it does **not** generate the image. The image
+call happens only after a second, prompt-specific YES.
 
 Send each concept as its own message:
 
@@ -77,11 +75,10 @@ Send each concept as its own message:
 Concept: [one line describing this iteration's visual idea]
 Designer: [Duke | Nova | Ash]
 
-Reply "yes" or "no" on this one (or reference it by concept/designer if
-replying to more than one). "yes" generates the image for your
-approval next.
+Reply "yes" to prepare this designer's complete image-generation prompt for
+review, or "no" to drop the concept. No image is generated at this stage.
 ```
 
-This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later "yes"/"no" reply triggers
-image generation, handled by `AGENTS.md` bucket 3, not by this file.
+This prompt's job ends once the concepts are sent. Later replies are handled by
+`AGENTS.md` bucket 3: Stage A assembles the assigned designer prompt, Stage P
+reviews/corrects it, and only an approved Stage P prompt can generate an image.

@@ -7,22 +7,23 @@ independently of any script.
 - `_brand_voice.md` — shared Riley Ink tone rules, plus the
   memory-based learning-from-feedback loop. Referenced by every other
   prompt file below; not run standalone.
-- `daily_scan.md` — Stage 2. Scheduled daily trend scan. Now also
-  generates and sends an image per surviving concept (Stage 5 folded
-  in) instead of text-only output.
-- `seeded_search.md` — Stage 3. On-demand deep-dive on a theme you
-  name. Same image treatment as the daily scan.
+- `daily_scan.md` — Stage 2. Scheduled daily trend scan that sends
+  text-only concepts. Concept approval prepares Duke/Nova/Ash prompts for
+  review; it no longer generates images directly.
+- `seeded_search.md` — Stage 3. On-demand deep-dive on a named theme, using
+  the same concept → prompt review → image review gates as the daily scan.
 - `text_iterations.md` — On-demand, triggered by exact text + the word
   "iterations" (e.g. "Parlay or Nothing - iterations") rather than a
   theme. Skips topic research entirely — the wording is fixed by the
   operator, this is pure visual ideation: 4-6 different illustration
   concepts for that exact text, spread across designers.
 - `image_style.md` — Stage 5. Three named house "designers," each a
-  distinct visual lane: Duke (retro vintage), Nova (modern & simple),
-  Ash (edgy). Picked per-concept by `daily_scan.md`/`seeded_search.md`
-  (aiming for a mix), or by name if the operator asks for a specific
-  one. A later "show me the Ash version" request or yes/no reply is
-  handled by `AGENTS.md`'s message routing, not by this file.
+  distinct visual lane: Duke (retro vintage), Nova (modern & simple), and
+  Ash (edgy). Defines how the complete real provider prompt is assembled.
+- `image_prompt_review.md` — mandatory cost-control gate before every
+  provider-backed image generation/edit. Persists exact prompts under stable
+  IDs, handles YES/NO/correction revisions, and requires generation to use the
+  approved prompt verbatim. `AGENTS.md` routes all replies.
 - `blog_post.md` — Stage 7. Scheduled weekly blog post for SEO/internal
   linking, published live to Shopify. Two Telegram approval gates: a
   pick between 2-3 topic options, then a full-draft approve/reject/

@@ -168,12 +168,12 @@ to Step 9 and send only the "nothing cleared the bar" message.
 
 ## Step 9 — Send concepts to Telegram (text only, no image yet)
 
-**Don't pick a designer or generate an image yet** — image generation
-costs real money per image, so it only happens after the operator
-approves the concept in text first (see `AGENTS.md` message routing,
-bucket 3, Stage A). A "yes" there generates one version from **each**
-of the three designers (Duke, Nova, Ash) for comparison, not just one,
-so there's nothing to pick or note in advance here.
+**Don't pick a designer or generate an image yet.** A concept YES now
+creates one complete reviewable provider prompt from each designer (Duke,
+Nova, Ash), not images. Each prompt is sent under its own stable Prompt ID per
+`prompts/image_prompt_review.md`. Only a later YES to an exact designer prompt
+allows that image to be generated; a NO costs nothing, and a correction returns
+a revised prompt for review.
 
 If nothing cleared the bar in Step 8: send exactly that ("Nothing
 cleared the bar today") and briefly note what was closest, rather than
@@ -188,11 +188,12 @@ Source: [subreddit / trends keyword / seasonal calendar / niche library / refere
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 [New territory — only include this line when Step 8 flagged it as such]
 
-Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" generates one version from each designer
-(Duke, Nova, Ash) for your approval next — nothing is emailed yet.
+Reply "yes" or "no" on this one (or reference it by tagline or number if
+replying to more than one). "yes" prepares the complete Duke, Nova, and Ash
+image-generation prompts for your review next; it does not generate images.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later "yes"/"no" reply triggers
-image generation, handled by `AGENTS.md` bucket 3, not by this file.
+ends once the concepts are sent. A later concept YES triggers designer prompt
+assembly and review, handled by `AGENTS.md` bucket 3 Stage A/P; it does not
+trigger image generation directly.

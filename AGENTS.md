@@ -21,8 +21,11 @@ publish it live to Shopify once the operator approves it (Stage 7).
   Read this before generating or filtering any concept. Never soften or
   skip this check.
 - `prompts/` — task-specific instructions (daily scan, seeded search,
-  exact-text iterations, image style). Referenced by name from cron
-  jobs or on-demand messages.
+  exact-text iterations, image style, and image-prompt review). Referenced by
+  name from cron jobs or on-demand messages.
+- `~/image_prompt_library.md` (server-side, outside git) — the complete
+  revision history for every reviewed image-generation prompt: stable IDs,
+  exact prompt text, designer, operator corrections, and final status.
 - `config/` — subreddit list, niche keywords, reference sites, seasonal
   calendar. Treat the niche/subreddit lists as a reliable seed, not a
   hard ceiling — `daily_scan.md` Step 1 is where the pool of niches
@@ -56,19 +59,19 @@ publish it live to Shopify once the operator approves it (Stage 7).
 Stages 1-3, 5, and now 4 confirmed working (see `TODO.md`). What's
 actually live:
 - **Message routing** (below) is active.
-- **Daily scan** (`prompts/daily_scan.md`) has a live cron job (delivers
-  to Telegram; scheduled for 7 AM America/New_York — was 8 AM, moved per
-  operator request, see `TODO.md`'s Stage 7 entry; this is a doc update
-  only, the live cron itself still needs to actually be rescheduled on
-  the server, so don't assume the new time is in effect without
-  checking) and now generates + sends an image per surviving concept
-  (not just text). Step 1 now also does
-  seasonal-calendar + open-ended category discovery (Stage 4, wired in
-  2026-09-20) — not yet confirmed working live, first few runs should
-  be checked for whether it actually surfaces new territory and grows
-  `~/niche_library.md`.
-- **Seeded search** (`prompts/seeded_search.md`) confirmed working via
-  Telegram, also now generates + sends images.
+- **Daily scan** (`prompts/daily_scan.md`) has a live 7 AM
+  America/New_York cron and returns text-only concepts. A concept YES now
+  prepares complete Duke/Nova/Ash provider prompts for review; it does not
+  generate images directly. Step 1 also does seasonal-calendar + open-ended
+  category discovery (Stage 4, wired in 2026-09-20).
+- **Seeded search** (`prompts/seeded_search.md`) is confirmed working via
+  Telegram and uses the same concept → prompt review → rendered-image review
+  gates.
+- **Image prompt review** (`prompts/image_prompt_review.md`, added
+  2026-09-24) is mandatory before every provider-backed generation/edit,
+  including text iterations, designer variants, remakes, and repair prompts.
+  Exact prompts and correction chains persist in `~/image_prompt_library.md`;
+  only an explicit prompt-specific YES permits generation.
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND uploaded to a Dropbox `/to-do` folder via
   `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`).
@@ -107,41 +110,50 @@ which before responding:
    plus the word "iterations" (route here). Read and follow
    `prompts/text_iterations.md` in full, using the exact text as Step
    0's input.
-3. **A yes/no/approval reply to a previously sent concept or design**
-   (e.g. "yes", "no", "yes on the Uncle Sam one", "reject the second
-   one") — a message can approve/reject more than one item at once;
-   handle each individually. Image generation is a separate, explicit
-   gate from final approval (added after image spend got away from
-   budget — see `TODO.md`, 2026-09-13), so first check which stage the
-   item being replied to is at — was it sent as a text-only concept
-   card (from `daily_scan.md`/`seeded_search.md`/`text_iterations.md`,
-   no image), or as an already-rendered image?
+3. **A yes/no/correction reply to a concept, reviewed image prompt, or
+   rendered design** (e.g. "yes", "no", "yes on #2", "no Duke, use a
+   horse rather than a dog") — a message can address more than one item;
+   handle each independently. There are now **three distinct gates**. First
+   classify the quoted/referenced item from its content and stable ID; do not
+   treat one gate's YES as approval for a later gate.
 
-   **Stage A — replying to a text-only concept (no image sent yet):**
-   - **On "yes"**: if the concept card includes a `Designer:` line
-     (only present when the operator requested one designer for the
-     whole run, or for a `text_iterations.md` concept, which is always
-     pre-assigned a designer for variety across the batch), generate
-     just that one image. Otherwise — the normal case — generate
-     **three images for this one concept, one from each designer**
-     (Duke, Nova, Ash — see `prompts/image_style.md`), all using the
-     same tagline/visual concept, so the operator can compare designer
-     treatments of the same idea side by side. Send each rendered
-     image as its own Telegram message using the same caption format
-     the concept card used (labeled with its actual designer), plus a
-     fresh "Reply yes or no" prompt on each — every rendered image
-     becomes its own Stage B item below (approve any number of them,
-     or none). Don't email anything yet; a concept's "yes" only
-     approves rendering it, not shipping it.
-   - **On "no"**: log the rejection to memory (tagline/text, register,
-     reason if given — see the learning-from-feedback section in
-     `prompts/_brand_voice.md`) and reply briefly confirming it was
-     logged. No image is ever generated for a rejected concept — that's
-     the entire point of gating here.
+   **Stage A — replying to a text-only concept (no provider prompt or image
+   yet; from `daily_scan.md`, `seeded_search.md`, or `text_iterations.md`):**
+   - **On YES**: do **not** generate an image. If the concept card already has
+     a `Designer:` line, assemble one complete real provider prompt for that
+     designer. Otherwise assemble three independent prompts—Duke, Nova, and
+     Ash—for the same tagline/visual concept. Read `prompts/image_style.md`
+     and `prompts/image_prompt_review.md`; assign each designer a stable
+     `IP-...-DESIGNER` ID, persist the exact prompt in
+     `~/image_prompt_library.md`, and send each complete prompt as its own
+     Stage P review card. No image tool is called at this stage.
+   - **On NO**: log the rejected concept to memory (tagline/text, register,
+     and reason if supplied) and confirm briefly. No prompt or image is made.
 
-   **Stage B — replying to an already-generated image** (sent by Stage
-   A above, a designer-variant regeneration, or any other
-   already-rendered design):
+   **Stage P — replying to a reviewed image-generation prompt** (a card with
+   a stable `Prompt ID: IP-...` and `Revision: Rn`):
+   - **On YES**: resolve the exact ID/latest pending revision. Preserve the
+     full approved prompt and its correction chain in
+     `~/image_prompt_library.md`, and log a compact learning summary to memory.
+     Then—and only then—call the image tool with exactly the reviewed prompt,
+     source asset, mode, and aspect ratio. Do not silently add, remove, or
+     rewrite instructions after approval. Save and verify the output, then
+     send the rendered image as a new Stage B item with its concept number,
+     designer, Prompt ID, and a fresh rendered-image YES/NO prompt.
+   - **On NO**: mark that designer prompt rejected in the prompt library, log
+     the reason/pattern compactly to memory, and drop it. Generate nothing and
+     do not substitute another designer automatically.
+   - **On a correction**: append the operator's wording verbatim to the prompt
+     history, revise the complete prompt, increment the revision while keeping
+     the same base Prompt ID, log the correction pattern, and resend the full
+     prompt card. Repeat until YES or NO; never generate on a correction alone.
+   - A failed render audit or a requested rendered-image edit also returns to
+     Stage P: show the exact repair/image-edit prompt first. Deterministic
+     non-creative checks do not need a prompt gate, but every provider-backed
+     generation, regeneration, or edit does.
+
+   **Stage B — replying to an already-generated image** (created only from an
+   approved Stage P prompt):
    - **Always**: log the decision to memory — tagline, register
      (deadpan/wordplay), approved or rejected, and any reason the
      operator gave. See the learning-from-feedback section in
@@ -169,23 +181,18 @@ which before responding:
 4. **A designer variant request** (e.g. "I'd like to see Ash's version
    of the fantasy football one," "show me Nova's take on that," "redo
    the knight one but edgy") — the operator wants a previously-shown
-   concept re-illustrated by a different named designer (Duke, Nova, or
-   Ash — see `prompts/image_style.md`), same tagline/joke, new style:
-   - Identify which prior concept is meant. If it's in this
-     conversation's recent context, use that. If not, use
-     `session_search` to find it (the tagline/description) from earlier
-     sessions before asking the operator to clarify.
-   - If genuinely unclear which concept or which designer is meant, ask
-     — don't guess and generate the wrong thing.
-   - Re-assemble the image prompt for that same tagline/visual concept
-     using the requested designer's section in `prompts/image_style.md`,
-     generate one new image, and send it to Telegram with the same
-     caption format `daily_scan.md`/`seeded_search.md` use (tagline,
-     designer, why it's timely/source if known, yes/no prompt).
-   - This is a new candidate design like any other — since it's already
-     a rendered image, a reply to it goes through bucket 3's Stage B
-     (not Stage A) and still needs its own explicit "yes" before
-     anything happens beyond showing it.
+   concept reinterpreted by a named designer, but this request authorizes
+   **prompt drafting only**, not image generation:
+   - Identify the exact prior concept. Use recent context or
+     `session_search`; ask only if the concept/designer remains ambiguous.
+   - Re-assemble the complete actual provider prompt for the same tagline/joke
+     using the requested designer's section in `prompts/image_style.md`.
+   - Follow `prompts/image_prompt_review.md`: assign a stable Prompt ID,
+     persist the full R1 prompt, and send the exact prompt card to Telegram.
+     Do not call an image tool yet.
+   - YES to that prompt generates exactly the reviewed prompt and creates a
+     bucket 3 Stage B rendered candidate. NO drops it at zero cost. Corrections
+     increment the same Prompt ID's revision and are resent for review.
 5. **A reply to a weekly blog post message** (a reply to a topic-options
    message or a full-draft message sent by `prompts/blog_post.md` —
    distinguish from bucket 3 by the message being about a blog post,

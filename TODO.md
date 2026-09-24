@@ -918,3 +918,29 @@ concepts, 2026-09-03)
       Hermes to run commands directly via Telegram instead of typing
       them into the console by hand, same trick as the Gmail
       OAuth/git-push-credential entries above.
+
+## Stage 5 prompt-review cost gate — built 2026-09-24
+
+- [x] **Reason**: operator reported that immediately generating Duke/Nova/Ash
+      images after concept approval was sending paid renders in the wrong
+      direction. New sequence is concept approval → exact designer prompt
+      review → rendered-image review → final Dropbox handoff.
+- [x] **Universal coverage**: `prompts/image_prompt_review.md` now gates every
+      provider-backed image call: ordinary daily/seeded concepts, single-
+      designer runs, `text_iterations.md`, bucket 4 designer variants,
+      remakes, regenerations, image edits, and failed-audit repairs.
+- [x] **Stable review identity**: each designer treatment receives a base
+      `IP-YYYYMMDD-HHMM-SS-DESIGNER` ID that survives R1/R2/etc. revisions.
+      YES generates exactly the approved revision; NO drops it at zero cost;
+      corrections are preserved verbatim and produce another full prompt card.
+- [x] **Learning/audit record**: full prompt text and every correction live in
+      server-side `~/image_prompt_library.md`; compact correction patterns are
+      also logged to memory so later prompt writing can improve without trying
+      to fit multi-paragraph prompts into memory.
+- [x] **Rendered-image gate unchanged**: prompt approval authorizes only the
+      provider call. The resulting image still needs its own explicit YES
+      before `connectors/dropbox_upload.py` writes to `/to-do`.
+- [ ] **Live verification after merge**: confirm one normal three-designer
+      concept, one `text_iterations.md` concept, one bucket 4 variant, one
+      correction round, one prompt rejection, and one failed-audit repair all
+      remain image-free until the exact latest prompt revision is approved.
