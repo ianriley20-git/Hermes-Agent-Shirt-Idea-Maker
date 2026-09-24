@@ -944,3 +944,41 @@ concepts, 2026-09-03)
       concept, one `text_iterations.md` concept, one bucket 4 variant, one
       correction round, one prompt rejection, and one failed-audit repair all
       remain image-free until the exact latest prompt revision is approved.
+
+## Stage 8: backlink outreach and gift-request monitoring, built 2026-09-23
+
+- [x] **Why**: expand the coupon/promo-directory tactic into a repeatable
+      backlink and referral-traffic system aimed at people who actually
+      buy funny shirts. The operator asked to prioritize fresh gift guides,
+      product/resource submissions, niche blogs/podcasts, and a limited
+      coupon-site lane, while rejecting link farms, PBNs, AI farms,
+      pay-only placement, and POD-business audiences.
+- [x] **Implementation**: `prompts/backlink_outreach.md` is the repo source
+      of truth for two jobs and one approval flow. The weekly hunt scores
+      relevance, qualitative authority, freshness, contact quality, and
+      likely editorial/dofollow behavior; only 6+ opportunities survive,
+      8-10 are returned without padding, and coupon sites are capped at
+      three. The gift monitor requires threads under 12 hours old and under
+      20 comments, verifies community self-promotion rules, sends at most
+      one alert per six-hour run, and stays silent when nothing qualifies.
+- [x] **Shared state**: operator-editable niches/seasonal weighting live in
+      `~/backlink_hunt_config.md`; all `BH-...`, `GR-...`, and migrated
+      coupon entries deduplicate through `~/backlink_opportunity_log.md`.
+      The old coupon-only cron was renamed/expanded and coupon history was
+      folded into this unified ledger; `~/coupon_directory_log.md` is
+      retired as an active source of truth.
+- [x] **Approval routing**: `AGENTS.md` bucket 6 handles YES/NO by stable
+      opportunity ID. YES produces a draft only (sub-100-word outreach
+      email for `BH`, helpful disclosed Reddit/forum reply for `GR`); NO is
+      logged as a future skip pattern. Hermes never sends or posts.
+- [x] **Live schedules**: `Weekly backlink hunt` (`4935788fa099`) runs
+      Saturday at 6:30 AM America/New_York. `Gift-request thread monitor`
+      (`068ccb52cb89`) runs every six hours. A one-time Thursday 2026-09-24
+      6:30 AM test (`e99977afb911`) exercises the weekly flow before its
+      first Saturday run.
+- [x] **Gift monitor confirmed live**: it found
+      `GR-20260923-1805`, the operator manually posted a disclosed Reddit
+      recommendation, and the shared ledger was updated to `submitted`.
+- [ ] **Expanded weekly hunt not yet observed**: verify Thursday's one-time
+      run returns properly scored, deduplicated opportunities and writes
+      their IDs before delivery; then confirm the Saturday recurrence.
