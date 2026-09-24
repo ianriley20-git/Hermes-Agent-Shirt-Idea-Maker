@@ -29,6 +29,10 @@ independently of any script.
   revise. Reuses the shirt pipeline's own research (seasonal calendar,
   niche/format libraries, Reddit/Trends) rather than separate topic
   sourcing. Handled by `AGENTS.md`'s blog-post message-routing bucket.
+- `backlink_outreach.md` — Stage 8. Defines the Saturday editorial/
+  coupon backlink hunt, six-hour gift-request thread monitor, shared
+  server-side deduplication ledger, and the Telegram YES/NO flow that
+  drafts outreach without ever sending or posting it automatically.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

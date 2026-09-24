@@ -40,6 +40,12 @@ publish it live to Shopify once the operator approves it (Stage 7).
 - `prompts/blog_post.md` — Stage 7, the weekly SEO blog post. Reuses the
   config files above and `~/niche_library.md`/`~/format_library.md`
   rather than sourcing topics separately.
+- `prompts/backlink_outreach.md` — Stage 8, the Saturday backlink hunt,
+  six-hour gift-request monitor, and their shared draft-only approval
+  flow. Both use `~/backlink_hunt_config.md` and the authoritative
+  deduplication/decision ledger `~/backlink_opportunity_log.md` (server-
+  side files outside git). The old coupon-only cron/log is folded into
+  this workflow; `~/coupon_directory_log.md` is retired.
 - `~/blog_post_library.md` (same location/reasoning as the two libraries
   above — not in git) — a growing catalog of *published blog posts*
   (title, URL, target keyword, products/posts linked), so later posts
@@ -89,6 +95,14 @@ actually live:
   blog-post bucket below). Not yet live — needs the cron job actually
   created and the Shopify custom-app credentials set up
   (`install/01_provision_vps.md` Part 14) before the first real run.
+- **Backlink outreach** (Stage 8, `prompts/backlink_outreach.md`, built
+  and live 2026-09-23): a Saturday 6:30 AM backlink hunt returns only
+  scored editorial/coupon opportunities, while a six-hour monitor sends
+  at most one fresh gift-request thread per run (four/day maximum).
+  Both deduplicate in `~/backlink_opportunity_log.md`; Telegram YES/NO
+  replies produce drafts only. The operator sends every email, form,
+  and forum reply manually. Coupon-only tracking is folded into this
+  shared system.
 
 ## Message routing (Telegram)
 
@@ -232,10 +246,27 @@ which before responding:
      for the same topic — don't re-run Part 1's research unless the
      change is broad enough to really be a different topic (use
      judgment; ask if unclear).
-6. **A general question about the project, its state, or how something
+6. **A YES/NO reply to a backlink opportunity** (an item carrying a
+   `BH-...` or `GR-...` ID from `prompts/backlink_outreach.md`) — resolve
+   the exact ID and source URL in `~/backlink_opportunity_log.md` before
+   acting; ask if a bare reply could identify more than one item.
+   - **YES to `BH-`**: mark `yes` and draft (never send) a page-specific
+     outreach email under 100 words with subject, one verified Riley Ink
+     link, and an offer to send a free sample shirt.
+   - **YES to `GR-`**: mark `yes`, recheck the live thread and community
+     rules, then draft (never post) a helpful answer-first reply with
+     `Full disclosure, I make these.` Include a Riley Ink link only when
+     verified rules permit it; if promotion is prohibited, recommend not
+     posting promotional copy.
+   - **NO**: mark `no`, preserve any reason, and add a concise rejection
+     pattern so both jobs learn what to skip. Never resend the URL.
+   - When the operator reports manual outreach/submission, mark the exact
+     row `submitted` with timestamp/evidence; use `live` only after the
+     resulting backlink is actually verified.
+7. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-7. **Anything else** (small talk, unclear intent, something that doesn't
+8. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
    clarifying question if genuinely unsure which bucket applies.
 
