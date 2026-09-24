@@ -29,6 +29,10 @@ independently of any script.
   revise. Reuses the shirt pipeline's own research (seasonal calendar,
   niche/format libraries, Reddit/Trends) rather than separate topic
   sourcing. Handled by `AGENTS.md`'s blog-post message-routing bucket.
+- `meme_finder.md` — Stage 9. Daily seasonal search for existing public
+  memes that fit Riley Ink's voice. Prepares static 1080×1350 review copies,
+  preserves source credit/watermarks, and uploads approved items to Dropbox
+  `/memes`; Instagram publication is deliberately deferred.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library
