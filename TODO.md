@@ -982,3 +982,41 @@ concepts, 2026-09-03)
 - [ ] **Expanded weekly hunt not yet observed**: verify Thursday's one-time
       run returns properly scored, deduplicated opportunities and writes
       their IDs before delivery; then confirm the Saturday recurrence.
+
+## Stage 9: seasonal meme finder and Dropbox review handoff, built 2026-09-23
+
+- [x] **Operator direction**: find and repost existing memes rather than
+      generating remakes; send five candidates each morning around 6:30;
+      show finished images before approval; preserve credits/watermarks;
+      exclude major brands/franchises, teams, specific players/celebrities,
+      and copyrighted characters. The operator remains the final taste judge.
+- [x] **Seasonal behavior**: `prompts/meme_finder.md` reads the live date,
+      `config/seasonal_calendar.md`, current niche seeds, and a persistent
+      server-side `~/meme_library.md`. It shifts with the calendar (currently
+      football/fantasy football/Halloween/fall), prefers recent public memes,
+      logs source/creator/date/engagement/rights status, and deduplicates by
+      canonical URL and SHA-256.
+- [x] **Instagram-ready review assets**: `connectors/meme_prepare.py` fits
+      the untouched source inside a 1080×1350 4:5 PNG with solid letterboxing
+      only—no cropping, captions, overlays, or watermark removal. Static
+      images only in this first version; GIF/video/carousels are deferred.
+- [x] **Approval handoff confirmed**: `connectors/dropbox_meme_upload.py`
+      created and verified `/memes` beside `/to-do` in the same Dropbox App
+      folder (`root_folders=/memes,/to-do`). It uses add+autorename and never
+      moves/overwrites/deletes. `AGENTS.md` bucket 7 routes
+      `M-YYYYMMDD-NN` approvals and rejections. YES saves the prepared image;
+      it does not authorize Instagram publication.
+- [x] **Daily cron created**: `Daily seasonal meme finder`
+      (`28f6dc5f3245`) runs at 5:00 AM America/New_York, up to five verified
+      candidates, fewer rather than padding, and `[SILENT]` when nothing
+      clears the bar. Moved well ahead of the 6:00–7:00 AM jobs at the
+      operator's request so it can finish while the operator is asleep and
+      avoid workdir collisions.
+- [ ] **Instagram publishing deliberately deferred**: no caption/hashtag
+      generation, Meta credentials, scheduling, or posting yet. A later stage
+      should use the approved meme ledger, require an explicit publish gate,
+      and verify the account is eligible for the Instagram Graph API.
+- [ ] **First live run review**: confirm source retrieval is reliable,
+      candidates actually match the active season/brand voice, credits remain
+      intact, excluded IP/brand material is filtered, and approved images land
+      in `/memes` with the expected filename and size.

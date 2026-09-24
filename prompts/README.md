@@ -34,6 +34,10 @@ independently of any script.
   coupon backlink hunt, six-hour gift-request thread monitor, shared
   server-side deduplication ledger, and the Telegram YES/NO flow that
   drafts outreach without ever sending or posting it automatically.
+- `meme_finder.md` — Stage 9. Daily seasonal search for existing public
+  memes that fit Riley Ink's voice. Prepares static 1080×1350 review copies,
+  preserves source credit/watermarks, and uploads approved items to Dropbox
+  `/memes`; Instagram publication is deliberately deferred.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

@@ -23,6 +23,15 @@ scheduler. Code lives here only where the built-in tools fall short:
   Run with `/home/hermes/.hermes/hermes-agent/venv/bin/python
   dropbox_upload.py --file <png path> --name "<design name>"`. Called
   from `AGENTS.md` bucket 3 Stage B on approval.
+- `meme_prepare.py` (Stage 9) — fits an existing static meme inside an
+  Instagram-feed 1080×1350 (4:5) PNG without cropping or overlaying it;
+  only solid-color letterboxing is added. Creator credits/watermarks remain
+  untouched. Run with `--input <source image> --output <prepared png>`.
+- `dropbox_meme_upload.py` (Stage 9) — creates/verifies `/memes` beside
+  `/to-do` in the same Dropbox App folder and uploads approved prepared PNGs
+  there using add+autorename. It never moves, overwrites, or deletes remote
+  files. Use `--ensure-folder` for setup or `--file <png> --name "<name>"`
+  after explicit Telegram approval.
 - `shopify_blog_publish.py` (Stage 7) — publishes a weekly blog post
   live to Shopify via the Admin API (a custom app, `write_content`
   scope only). Auth uses OAuth's client credentials grant

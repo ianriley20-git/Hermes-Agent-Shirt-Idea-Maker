@@ -49,6 +49,11 @@ publish it live to Shopify once the operator approves it (Stage 7).
   deduplication/decision ledger `~/backlink_opportunity_log.md` (server-
   side files outside git). The old coupon-only cron/log is folded into
   this workflow; `~/coupon_directory_log.md` is retired.
+- `prompts/meme_finder.md` — Stage 9, the daily seasonal existing-meme
+  finder. It prepares static candidates for Instagram review, but never
+  publishes them; approved items upload to Dropbox `/memes`.
+- `~/meme_library.md` (server-only, outside git) — source URLs, creators,
+  hashes, stable local paths, and approve/reject history for meme candidates.
 - `~/blog_post_library.md` (same location/reasoning as the two libraries
   above — not in git) — a growing catalog of *published blog posts*
   (title, URL, target keyword, products/posts linked), so later posts
@@ -106,6 +111,13 @@ actually live:
   replies produce drafts only. The operator sends every email, form,
   and forum reply manually. Coupon-only tracking is folded into this
   shared system.
+- **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
+  2026-09-23): a daily 5:00 AM job finds up to five existing public memes
+  matched to current seasonal windows and Riley Ink voice, filters brands/
+  franchises/teams/players/characters, and sends prepared 1080×1350 review
+  images to Telegram. Approval saves the exact candidate to Dropbox
+  `/memes`; it does not publish to Instagram. Caption/tag generation and
+  Meta/Instagram posting remain a future stage.
 
 ## Message routing (Telegram)
 
@@ -279,10 +291,21 @@ which before responding:
    - When the operator reports manual outreach/submission, mark the exact
      row `submitted` with timestamp/evidence; use `live` only after the
      resulting backlink is actually verified.
-7. **A general question about the project, its state, or how something
+7. **A YES/NO reply to a seasonal meme candidate** (an item carrying an
+   `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md`) — resolve the exact ID
+   in `~/meme_library.md`; Telegram reply-to context outranks recency, and
+   a bare number must not be guessed across batches.
+   - **On YES**: confirm the delivered 1080×1350 PNG still matches the
+     ledger, mark it `approved`, and upload it immediately to Dropbox
+     `/memes` with `connectors/dropbox_meme_upload.py`. Verify the remote
+     filename/size and report the exact `Uploaded to ...` path. This yes
+     authorizes saving only, never Instagram publication.
+   - **On NO**: mark it `rejected`, preserving any reason so later runs can
+     improve filtering. Never delete the source record or resend the URL.
+8. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-8. **Anything else** (small talk, unclear intent, something that doesn't
+9. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
    clarifying question if genuinely unsure which bucket applies.
 
