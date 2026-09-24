@@ -70,11 +70,16 @@ guess made before they ever see it.
 Hermes has a persistent Memory tool — use it. Whenever the operator
 approves or rejects a concept or generated image (Stage 5/6), record it:
 the tagline/theme, which register it was (deadpan vs. wordplay), and any
-reason the operator gave. Before finalizing a list of candidate ideas in
-any prompt, check memory for patterns in what's been approved/rejected
-before and let that inform which candidates to lead with — early on
-there may be little or no history, and that's fine, don't force a
-pattern out of a handful of data points.
+reason the operator gave. Also log image-prompt review feedback: designer,
+what the draft prompt proposed, the operator's correction/rejection pattern,
+and the final approved direction. Keep only a compact learning summary in
+memory; preserve every full prompt revision and verbatim correction in
+`~/image_prompt_library.md` per `prompts/image_prompt_review.md`.
+
+Before finalizing concepts **or writing a new image prompt**, check accumulated
+concept/image feedback plus prior prompt corrections and let those patterns
+shape the result. Early on there may be little history, and that's fine—do not
+force a pattern from a handful of decisions.
 
 ## Reference examples
 

@@ -24,7 +24,11 @@ Telegram (you) <---> Hermes Agent gateway <---> model (Claude and/or GPT-4)
                              |
                     [you approve a concept]
                              |
-                    image generation API (connectors/)
+                    exact Duke/Nova/Ash provider prompts shown in Telegram
+                             |
+                    [you approve/correct/reject each designer prompt]
+                             |
+                    image generation API (approved prompt verbatim)
                              |
                     [you approve an image]
                              |
@@ -75,7 +79,9 @@ each one:
 3. On-demand seeded search on a theme you message the bot
 4. Seasonal calendar + open-ended category discovery, feeding the daily
    scan directly (not a separate opt-in nudge)
-5. Image generation from approved concepts, sent to Telegram for approval
+5. Approved concept → exact per-designer prompt review/correction → approved
+   prompt generates an image → rendered image returns to Telegram for final
+   approval
 6. Approved image → uploaded to a Dropbox `/to-do` folder
 7. Weekly SEO blog post — 2-3 topic options on Telegram, then a full
    draft, then live publish to Shopify on approval

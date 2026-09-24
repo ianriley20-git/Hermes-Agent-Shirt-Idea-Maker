@@ -27,6 +27,21 @@ prompt once a designer is chosen.
 caption (see `daily_scan.md`/`seeded_search.md`'s Send step) — this is
 what makes variant requests possible, so never skip the label.
 
+## Mandatory prompt review before every image call
+
+Assembling a designer prompt does **not** authorize generation. Before any
+text-to-image or image-to-image provider call—including initial concept renders,
+`text_iterations.md`, named designer variants, remakes, revisions, and failed-
+audit repairs—read and follow `prompts/image_prompt_review.md` in full.
+
+Send the operator the complete assembled provider prompt under a stable Prompt
+ID and designer label. Only an explicit YES to that prompt revision permits an
+image call, and the approved prompt must then be used exactly as reviewed,
+without silent additions or rewrites. A correction creates a new revision of
+the same Prompt ID and returns to review; NO drops that designer version at
+zero image cost. Prompt approval never replaces the later rendered-image
+approval required for Dropbox handoff.
+
 ---
 
 ## Compositional simplicity (applies to all three designers)
@@ -165,7 +180,10 @@ way to a correct render of them:
   trailing periods and unnecessary punctuation first.
 
 **Full prompt assembly** (all three designers): the designer's fixed
-header, followed by a blank line, followed by Scene + Text treatment.
+header, followed by a blank line, followed by Scene + Text treatment. This
+complete assembled string is the exact provider prompt that must be persisted
+and sent through `prompts/image_prompt_review.md`; do not call an image tool
+while assembling it.
 
 ---
 
