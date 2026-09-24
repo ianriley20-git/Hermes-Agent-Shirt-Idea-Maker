@@ -943,11 +943,11 @@ concepts, 2026-09-03)
       `M-YYYYMMDD-NN` approvals and rejections. YES saves the prepared image;
       it does not authorize Instagram publication.
 - [x] **Daily cron created**: `Daily seasonal meme finder`
-      (`28f6dc5f3245`) runs at 6:20 AM America/New_York, up to five verified
+      (`28f6dc5f3245`) runs at 5:00 AM America/New_York, up to five verified
       candidates, fewer rather than padding, and `[SILENT]` when nothing
-      clears the bar. Moved ten minutes earlier after its first 6:30 run
-      collided with another job on the same workdir and was abandoned during
-      a scheduler restart.
+      clears the bar. Moved well ahead of the 6:00–7:00 AM jobs at the
+      operator's request so it can finish while the operator is asleep and
+      avoid workdir collisions.
 - [ ] **Instagram publishing deliberately deferred**: no caption/hashtag
       generation, Meta credentials, scheduling, or posting yet. A later stage
       should use the approved meme ledger, require an explicit publish gate,
