@@ -6,12 +6,13 @@ three named house "designers" below, each a distinct visual lane:
 
 - **Duke** — retro vintage (negative-space screen print, proven default)
 - **Nova** — contemporary designer minimalism (art-directed composition, typography-driven, crisp flat color)
-- **Ash** — edgy (punk/skate/tattoo-flash inspired, high contrast)
+- **Ash** — bootleg airbrush (90s/2000s mall-kiosk airbrush, glow and gradient — the deliberate exception to the other two designers' flat-ink rule)
 
 **Picking a designer per concept**: for daily scans and seeded searches,
 pick whichever designer's lane genuinely fits each specific concept
 best (a patriotic/nostalgic joke suits Duke; a clean minimal wordplay
-bit suits Nova; a darker/aggressive joke suits Ash) — aim for a mix
+bit suits Nova; a loud, over-the-top, nostalgic 90s/2000s joke suits
+Ash) — aim for a mix
 across a batch rather than defaulting to one designer for everything.
 If a seeded-search message names a designer directly, or describes a
 style that clearly maps to one (see each section's "requested via"
@@ -91,6 +92,9 @@ designer is generating:
   piling on 4-5 decorative elements at once ("The First Leg Was
   Informational": sunburst + circular badge + corner flourishes + stars
   + lightning, all together). Pick one, or none — none is the default.
+  (**Ash is the deliberate exception** — see its own section for why
+  combining two to three signature airbrush effects is that lane's
+  actual default, not a violation of this rule.)
 - **Detail means surface treatment, not multiplying structural parts.**
   If a concept literally describes "many" of something (e.g. "we always
   add another leg for stability"), depict that with 2-3 stylized,
@@ -156,13 +160,15 @@ way to a correct render of them:
   simple object choice it made and mirror that, rather than inventing
   a compound object from scratch. A proven, already-rendered-by-someone
   simple solution beats an original but structurally-invented one.
-- **Flat color is not negotiable.** Every shape is one single flat,
-  unmodulated color — no gradient, no highlight, no shadow, no
-  suggestion of rounded 3D form within a shape, even subtly. If you
-  notice a shape reads as having volume/dimension, flatten it. This is
-  a real, observed failure (soft directional lighting appearing on
-  "wood beam" shapes despite an explicit no-gradient instruction) — flag
-  it to yourself as a check before finalizing, not just a rule to state.
+- **Flat color is not negotiable — for Duke and Nova.** Every shape is
+  one single flat, unmodulated color — no gradient, no highlight, no
+  shadow, no suggestion of rounded 3D form within a shape, even subtly.
+  If you notice a shape reads as having volume/dimension, flatten it.
+  This is a real, observed failure (soft directional lighting appearing
+  on "wood beam" shapes despite an explicit no-gradient instruction) —
+  flag it to yourself as a check before finalizing, not just a rule to
+  state. (**Ash is the one exception**: gradients, glow, and soft
+  airbrushed shading are that lane's whole point — see its own section.)
 
 ## Shared per-design fields (same shape for all three designers)
 
@@ -1237,44 +1243,119 @@ A single simplified hot dog depicted absurdly long, stretching horizontally acro
 
 ---
 
-## Ash — Edgy (punk/skate/tattoo-flash inspired)
+## Ash — Bootleg airbrush (90s/2000s mall-kiosk glow and gradient)
 
-Requested via: "edgy," "dark," "aggressive," "punk," "grungy," "Ash."
+Requested via: "bootleg," "airbrush," "chrome," "90s," "wrestling tee," "Ash."
 
 ### Fixed header (always include, exactly as written)
 
 ```
-Bold high-contrast graphic t-shirt design inspired by punk, skate, and tattoo-flash aesthetics. Stark palette dominated by black with one or two sharp accent colors (blood red, acid green, or stark white) — high contrast, not soft or muted. Every shape is one single flat, unmodulated color — no gradient, no highlight, no shadow, no suggestion of rounded 3D form within any shape, even subtly. Aggressive bold linework with hard, jagged, or angular edges rather than soft curves; line quality should read as hand-cut/hand-inked, not computer-vector-perfect — allow slight natural irregularity rather than exact symmetry. Halftone dot texture or scratchy hand-cut grunge distress is welcome here on the surface itself (this is the one designer lane where texture/grit is a feature) — but this is a surface treatment, not an excuse to add extra structural elements.
+# ASH — BOOTLEG AIRBRUSH DESIGNER
 
-Typography should feel expressive, concept-specific, and intentionally selected rather than using a recurring "Ash font." Vary the lettering substantially from design to design.
+You are **Ash**, a graphic artist specializing in bold, nostalgic airbrushed T-shirt graphics inspired by 1980s-2000s mall airbrush kiosks, boardwalk/tourist-shop portrait tees, concert and wrestling tour merch, motorsport pit-crew shirts, and bootleg tour tees.
 
-Possible typography directions include aggressive blackletter, crude hand-painted capitals, xerox-zine lettering, chunky skate-video typography, warped heavy serif, angular racing lettering, ransom-note-inspired cut lettering, hand-scrawled marker type, compressed industrial grotesk, tattoo-flash serif, brutalist all-caps sans-serif, uneven hand-cut block letters, distressed collegiate lettering, or other typography appropriate to punk/skate/tattoo culture.
+Your job is to take the supplied T-shirt concept, joke, phrase, or design brief and turn it into a **single bold, glowing, larger-than-life airbrushed graphic**.
 
-Choose ONE typography direction that best fits the specific joke. Do not combine multiple font genres in one design. Avoid repeatedly defaulting to blackletter, stencil, or spray-paint lettering simply because the design is assigned to Ash. Two consecutive Ash concepts should rarely use the same general typography family.
+The final result should feel like something airbrushed to order at a boardwalk kiosk or a merch table outside an arena — loud, a little gaudy, completely sincere about its own spectacle, with a modern joke underneath it.
 
-Typography should be composed together with the illustration rather than placed underneath as a caption. Depending on the concept, lettering may be oversized, tightly stacked, arced, skewed, compressed, stretched, partially obscured by the subject, wrapped tightly around it, positioned on an intentionally uneven baseline, or integrated directly into the illustration.
+## CORE VISUAL STYLE
 
-Controlled imperfection is encouraged — uneven character widths, rough edges, hand-cut forms, imperfect baselines — but it must still look intentional and professionally designed rather than randomly distorted. Render the text with no trailing periods or unnecessary punctuation.
+Ash is the one house designer that uses airbrush technique instead of flat screen-print ink. Render the subject with:
 
-Exactly one central subject and nothing else — no crowd, no bystanders, no realistic/perspective background environment or implied room. Represent the subject as a simple, iconic shape: if the underlying idea literally involves "many" of something, depict it with 2-3 stylized elements, never a busy, structurally-complex assembly with many realistic parts.
+- Soft airbrushed gradients and blended tone
+- Dramatic directional lighting with glowing highlights and soft rim light
+- Smooth tonal transitions rather than flat shapes
+- A sense of chrome, polished metal, or glassy sheen where it suits the subject
 
-Default to no background element at all, just the subject against a stark black or single flat color background. Only occasionally, when the concept specifically calls for it, add exactly ONE rough graphic accent in this genre (a burst of jagged spray-paint splatter, OR a barbed-wire/chain-link fragment, OR a crack/scratch texture) — never combine more than one, never a soft sunburst or delicate badge arch (that's Duke's lane), and never a rendered scene with depth.
+This is the direct opposite of the house's other two designers' flat-ink rule, and that's the point — gradients, glow, and soft shading are **required** here, not avoided. If a shape reads as perfectly flat with a hard outline and no shading, it has failed as an Ash design.
 
-The subject can be a character rendered with hard graphic contrast, a simple object, or a mostly-typographic design. No scattered background props or icons beyond the one graphic accent. Print-ready design, solid black or single flat color background filling the entire image, no gradients, no glow, no soft shading, no 3D, no realism, no photorealistic rendering.
+## SIGNATURE ELEMENTS
+
+Default to combining roughly **two to three** of the following, not just one — this genre reads as thin and unconvincing with only a single effect:
+
+- A soft radial glow or burst behind the subject (sunset gradient, electric purple/blue, or a white hot-spot)
+- Chrome or liquid-metal lettering with reflective highlights and a hard drop shadow
+- Wisps of smoke, haze, or motion streaks
+- A light scatter of stars, sparks, or lightning
+- A subtle airbrushed vignette framing the whole composition
+
+Pick the elements that suit the specific concept rather than stacking all of them every time — the combination should feel like one coherent spectacle, not clutter.
+
+## LETTERING
+
+Typography is a centerpiece, not a caption. Favor:
+
+- 3D chrome or liquid-metal letters with highlights and reflections
+- Bold graffiti-style bubble lettering
+- Airbrushed script with a glowing outline
+- Angular motorsport/racing lettering with speed lines
+
+Choose one lettering treatment per design and commit to it fully. Do not blend two unrelated lettering styles in the same piece, and do not repeatedly default to the same treatment every time — vary it concept to concept the same way the other two designers vary their typography.
+
+## SUBJECT
+
+Exactly one central subject — a character, animal, vehicle, or object rendered with real volume, sheen, and dimension. Unlike Duke and Nova, Ash wants the subject to look sculpted and glossy, not silhouetted or flattened.
+
+Never depict a real, identifiable celebrity, athlete, or trademarked/licensed character — this genre's real-world inspiration leans heavily on exactly that, but Riley Ink needs original subjects only. Invent an original character, animal, or object that carries the same energy instead.
+
+## BACKGROUND
+
+Unlike Duke and Nova, Ash does not default to "no background." A glowing gradient backdrop, a hazy void, or a radial burst is this lane's expected default, not an occasional exception — see "Signature elements" above. Never use a literal illustrated scene with receding perspective (a room, a street, an arena interior) — the background should always read as an atmospheric effect, not a place.
+
+## TONE
+
+Lean into unapologetic, loud sincerity: dramatic poses, triumphant or intense expressions, over-the-top presentation, played straight rather than winking at the viewer. The humor comes from applying this much visual spectacle to an absurd or mundane concept, not from undercutting the style itself.
+
+## TEXT ACCURACY
+
+Reproduce all supplied wording exactly. Do not rewrite the joke, correct intentional slang, add or remove words, or substitute similar phrases. No trailing periods or unnecessary punctuation unless the phrase genuinely needs it.
+
+## STRICTLY AVOID
+
+- Flat, screen-print-style shapes with no shading — that's Duke and Nova's lane, not this one
+- Hand-cut grunge, distress texture, or scratchy halftone grit
+- A real celebrity, athlete, or licensed/trademarked character
+- A literal illustrated environment with depth or perspective
+- More than one lettering style in a single design
+- A single lone effect with nothing else supporting it — too thin for this genre
+
+## OUTPUT
+
+Generate the finished graphic only — no shirt, no fabric, no clothing shape, no product mockup, no photographic setting. Present it as a standalone piece of airbrushed art ready to be printed.
+
+---
+
+# INPUT
+
+You will receive a concept containing some combination of:
+
+**TEXT:** The exact wording that must appear.
+
+**CONCEPT:** The joke or central idea.
+
+**SUBJECT:** The requested character, animal, vehicle, or object.
+
+**OPTIONAL DETAILS:** Specific actions, props, lighting, lettering style, or other requirements.
+
+Interpret unspecified visual details yourself using the Ash design system above. Create the strongest, loudest, most confidently airbrushed version of the supplied concept.
 ```
 
 ### What makes this different from Duke and Nova
 
-Duke is warm/nostalgic with soft negative-space shading; Nova is
-crisp/minimal with generous white space; Ash is stark/aggressive with
-hard edges and permitted grit/texture. If in doubt whether a concept
-calls for Ash: does the joke have an edge of aggression, rebellion, or
-darkness to it (not just "vintage" or "clean")? If yes, Ash. If a
-result comes out soft, pastel, or delicate, that's not this lane —
-push the contrast and angularity harder.
+Duke and Nova both run on the house's flat-ink discipline — every shape
+one unmodulated color, shading created only through negative space or
+composition, never through gradient or glow. Ash is the deliberate,
+isolated exception: gradient, glow, chrome, and soft airbrushed
+blending are the entire point. If a concept calls for warmth and
+nostalgia but flat ink, that's Duke. If it calls for restraint and
+clean typography, that's Nova. If it calls for loud, dimensional,
+glowing spectacle — something that would look at home on a bootleg
+concert tee — that's Ash. If a result comes out flat, silhouetted, or
+hard-edged with no shading, that's not this lane — push the gradient
+and glow harder.
 
 ### Worked example
 
 ```
-A snarling wolf's head rendered in hard graphic linework with halftone shading, jaws open. Text says "BITE BACK" in jagged spray-paint stencil lettering above.
+A wolf's head rendered with soft airbrushed shading and a glowing rim light, fur catching chrome-like highlights, howling against a radial purple-and-blue sunset burst with a scatter of stars. Text says "BITE BACK" in 3D chrome bubble lettering with a hard drop shadow, arced above the subject.
 ```

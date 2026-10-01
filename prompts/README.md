@@ -19,7 +19,8 @@ independently of any script.
   concepts for that exact text, spread across designers.
 - `image_style.md` — Stage 5. Three named house "designers," each a
   distinct visual lane: Duke (retro vintage), Nova (modern & simple), and
-  Ash (edgy). Defines how the complete real provider prompt is assembled.
+  Ash (bootleg airbrush). Defines how the complete real provider prompt is
+  assembled.
 - `image_prompt_review.md` — mandatory cost-control gate before every
   provider-backed image generation/edit. Persists exact prompts under stable
   IDs, handles YES/NO/correction revisions, and requires generation to use the

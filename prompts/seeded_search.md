@@ -18,7 +18,7 @@ it's genuinely ambiguous what the theme is, ask a clarifying question
 instead of guessing.
 
 Also check whether the message names a designer or describes a style
-that maps to one (e.g. "Nova," "modern/clean," "Ash," "edgy/dark,"
+that maps to one (e.g. "Nova," "modern/clean," "Ash," "bootleg/airbrush,"
 "Duke," "vintage") — see each designer's "Requested via" line in
 `prompts/image_style.md`. If one is named/implied, use that designer
 for every concept in this run instead of picking freely per concept. If
