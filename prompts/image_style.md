@@ -166,24 +166,37 @@ way to a correct render of them:
 
 ## Shared per-design fields (same shape for all three designers)
 
-- **Scene**: the single subject/action only, concrete and specific —
-  comes from the concept's "Visual concept" line, expanded into a real
-  description. Not a populated scene. Explicitly decide whether a
-  background emblem fits (default: no) per the section above. Run it
-  through "Avoid content that image models render unreliably" above
-  before finalizing — if the concept involves interlocking shapes,
-  hands, or a compound object, simplify to something cleanly nameable,
-  ideally mirroring how an actual reference-site design solved the same
-  visual problem.
-- **Text treatment**: the exact text (usually the tagline or a short
-  excerpt) plus a font/style note when it matters to the joke. Strip
-  trailing periods and unnecessary punctuation first.
+Translate the concept card's own fields (Tagline, Visual concept, Why it's
+timely, Designer, and any operator-supplied specifics) into this fixed
+four-field shape before assembling the final prompt:
+
+- **TEXT**: the exact wording that must appear — usually the tagline,
+  reproduced verbatim. Strip trailing periods and unnecessary punctuation
+  first; keep a question mark or exclamation point only when the joke
+  genuinely needs it.
+- **CONCEPT**: the joke or central idea, expanded from the concept's
+  "Visual concept" line into a real description — concrete and specific,
+  not a populated scene. Run it through "Avoid content that image models
+  render unreliably" above before finalizing — if the concept involves
+  interlocking shapes, hands, or a compound object, simplify to something
+  cleanly nameable, ideally mirroring how an actual reference-site design
+  solved the same visual problem.
+- **SUBJECT**: the single requested person, character, animal, or object —
+  exactly one unless the joke is specifically and only about two people or
+  characters interacting closely.
+- **OPTIONAL DETAILS**: any specific action, prop, expression, pose, or
+  typography preference the concept card or operator actually specified.
+  Explicitly decide whether a background emblem fits (default: no) per the
+  "Compositional simplicity" section above, and note that decision here
+  when it's relevant. Omit this field entirely when there's nothing beyond
+  TEXT/CONCEPT/SUBJECT worth specifying.
 
 **Full prompt assembly** (all three designers): the designer's fixed
-header, followed by a blank line, followed by Scene + Text treatment. This
-complete assembled string is the exact provider prompt that must be persisted
-and sent through `prompts/image_prompt_review.md`; do not call an image tool
-while assembling it.
+header, followed by a blank line, followed by the TEXT/CONCEPT/SUBJECT/
+OPTIONAL DETAILS fields above. This complete assembled string is the exact
+provider prompt that must be persisted and sent through
+`prompts/image_prompt_review.md`; do not call an image tool while
+assembling it.
 
 ---
 
