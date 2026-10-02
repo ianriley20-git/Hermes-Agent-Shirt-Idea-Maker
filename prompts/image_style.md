@@ -197,6 +197,24 @@ four-field shape before assembling the final prompt:
   when it's relevant. Omit this field entirely when there's nothing beyond
   TEXT/CONCEPT/SUBJECT worth specifying.
 
+  **Never specify rendering technique or exact colors in this field.**
+  Outline style, line weight, flat-vs-shaded treatment, gradient/no-gradient,
+  and color palette are each designer's own jurisdiction, already defined in
+  their fixed header — restating or inventing technique/color instructions
+  here has produced prompts that directly contradict the chosen designer's
+  own rules. Real observed failure: a Nova concept's OPTIONAL DETAILS said
+  "build the bag from a crisp black contour and a single pale-blue flat
+  interior shape," which is exactly the generic-line-icon rendering Nova's
+  own header explicitly bans, and named a near-pastel palette close enough
+  to Nova's explicitly-banned vintage combo to trigger it anyway — the
+  model followed the more concrete instruction in OPTIONAL DETAILS over the
+  designer header's style rules. Describe concept-level specifics only
+  (composition, action, what's literally in frame, text placement); leave
+  *how* it's rendered entirely to the designer section below. The one
+  exception is a color or style the operator explicitly requested
+  themselves (in the original message or a correction) — preserve that
+  verbatim rather than inventing new technique/color choices.
+
 **Full prompt assembly** (all three designers): the designer's fixed
 header, followed by a blank line, followed by the TEXT/CONCEPT/SUBJECT/
 OPTIONAL DETAILS fields above. This complete assembled string is the exact
