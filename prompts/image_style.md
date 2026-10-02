@@ -176,6 +176,19 @@ Translate the concept card's own fields (Tagline, Visual concept, Why it's
 timely, Designer, and any operator-supplied specifics) into this fixed
 four-field shape before assembling the final prompt:
 
+**Keep this loose, not exhaustive.** The operator has directly confirmed
+that simple, trusting descriptions — a subject, the exact text, and
+sometimes one line of light context (e.g. "it's a Halloween design") —
+consistently outperform heavily prescriptive specs when run through the
+same designer header manually. A real failed example padded OPTIONAL
+DETAILS with exact crop-margin percentages, a 20-item exclusion list, and
+letter-case preservation instructions for a two-word phrase — none of
+which the operator asked for, all of which left the model following a
+checklist instead of making the compositional decisions each designer's
+own section (e.g. Nova's "Nova Move," Duke's worked judgment) is actually
+built to make. Write only what's genuinely necessary to convey the concept
+accurately, then trust the designer section to handle everything else.
+
 - **TEXT**: the exact wording that must appear — usually the tagline,
   reproduced verbatim. Strip trailing periods and unnecessary punctuation
   first; keep a question mark or exclamation point only when the joke
