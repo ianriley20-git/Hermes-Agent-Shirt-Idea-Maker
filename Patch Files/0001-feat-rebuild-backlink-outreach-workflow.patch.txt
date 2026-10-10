@@ -1,0 +1,338 @@
+From 10d781bc7aab6f005785398403d5d5b2b03622f9 Mon Sep 17 00:00:00 2001
+From: Riley Ink Hermes <designmakerbot@gmail.com>
+Date: Wed, 23 Sep 2026 21:08:01 -0400
+Subject: [PATCH] feat: rebuild backlink outreach workflow
+
+Operator request: "Update the existing Tuesday backlink cron. It currently only finds coupon/promo-code sites. Expand it into two jobs that share one approval flow."
+
+Add the Saturday scored backlink hunt, six-hour gift-request monitor, shared YES/NO drafting flow, routing rules, live-stage documentation, and coupon-log migration notes.
+---
+ AGENTS.md                    |  35 ++++++-
+ TODO.md                      |  38 +++++++
+ prompts/README.md            |   4 +
+ prompts/backlink_outreach.md | 190 +++++++++++++++++++++++++++++++++++
+ 4 files changed, 265 insertions(+), 2 deletions(-)
+ create mode 100644 prompts/backlink_outreach.md
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 7b325b7..cb68dfe 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -40,6 +40,12 @@ publish it live to Shopify once the operator approves it (Stage 7).
+ - `prompts/blog_post.md` — Stage 7, the weekly SEO blog post. Reuses the
+   config files above and `~/niche_library.md`/`~/format_library.md`
+   rather than sourcing topics separately.
++- `prompts/backlink_outreach.md` — Stage 8, the Saturday backlink hunt,
++  six-hour gift-request monitor, and their shared draft-only approval
++  flow. Both use `~/backlink_hunt_config.md` and the authoritative
++  deduplication/decision ledger `~/backlink_opportunity_log.md` (server-
++  side files outside git). The old coupon-only cron/log is folded into
++  this workflow; `~/coupon_directory_log.md` is retired.
+ - `~/blog_post_library.md` (same location/reasoning as the two libraries
+   above — not in git) — a growing catalog of *published blog posts*
+   (title, URL, target keyword, products/posts linked), so later posts
+@@ -89,6 +95,14 @@ actually live:
+   blog-post bucket below). Not yet live — needs the cron job actually
+   created and the Shopify custom-app credentials set up
+   (`install/01_provision_vps.md` Part 14) before the first real run.
++- **Backlink outreach** (Stage 8, `prompts/backlink_outreach.md`, built
++  and live 2026-09-23): a Saturday 6:30 AM backlink hunt returns only
++  scored editorial/coupon opportunities, while a six-hour monitor sends
++  at most one fresh gift-request thread per run (four/day maximum).
++  Both deduplicate in `~/backlink_opportunity_log.md`; Telegram YES/NO
++  replies produce drafts only. The operator sends every email, form,
++  and forum reply manually. Coupon-only tracking is folded into this
++  shared system.
+ 
+ ## Message routing (Telegram)
+ 
+@@ -232,10 +246,27 @@ which before responding:
+      for the same topic — don't re-run Part 1's research unless the
+      change is broad enough to really be a different topic (use
+      judgment; ask if unclear).
+-6. **A general question about the project, its state, or how something
++6. **A YES/NO reply to a backlink opportunity** (an item carrying a
++   `BH-...` or `GR-...` ID from `prompts/backlink_outreach.md`) — resolve
++   the exact ID and source URL in `~/backlink_opportunity_log.md` before
++   acting; ask if a bare reply could identify more than one item.
++   - **YES to `BH-`**: mark `yes` and draft (never send) a page-specific
++     outreach email under 100 words with subject, one verified Riley Ink
++     link, and an offer to send a free sample shirt.
++   - **YES to `GR-`**: mark `yes`, recheck the live thread and community
++     rules, then draft (never post) a helpful answer-first reply with
++     `Full disclosure, I make these.` Include a Riley Ink link only when
++     verified rules permit it; if promotion is prohibited, recommend not
++     posting promotional copy.
++   - **NO**: mark `no`, preserve any reason, and add a concise rejection
++     pattern so both jobs learn what to skip. Never resend the URL.
++   - When the operator reports manual outreach/submission, mark the exact
++     row `submitted` with timestamp/evidence; use `live` only after the
++     resulting backlink is actually verified.
++7. **A general question about the project, its state, or how something
+    works** (e.g. "what stage are we at?") — answer directly and
+    factually from this file and the repo, no need to run a prompt file.
+-7. **Anything else** (small talk, unclear intent, something that doesn't
++8. **Anything else** (small talk, unclear intent, something that doesn't
+    fit any bucket above) — respond normally as yourself, or ask a
+    clarifying question if genuinely unsure which bucket applies.
+ 
+diff --git a/TODO.md b/TODO.md
+index 6519311..d82ab2e 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -884,3 +884,41 @@ concepts, 2026-09-03)
+       is quietly required for some Admin API endpoints even under this
+       grant). First real live publish is the actual test; revisit if
+       anything about scope/permissions behaves unexpectedly later.
++
++## Stage 8: backlink outreach and gift-request monitoring, built 2026-09-23
++
++- [x] **Why**: expand the coupon/promo-directory tactic into a repeatable
++      backlink and referral-traffic system aimed at people who actually
++      buy funny shirts. The operator asked to prioritize fresh gift guides,
++      product/resource submissions, niche blogs/podcasts, and a limited
++      coupon-site lane, while rejecting link farms, PBNs, AI farms,
++      pay-only placement, and POD-business audiences.
++- [x] **Implementation**: `prompts/backlink_outreach.md` is the repo source
++      of truth for two jobs and one approval flow. The weekly hunt scores
++      relevance, qualitative authority, freshness, contact quality, and
++      likely editorial/dofollow behavior; only 6+ opportunities survive,
++      8-10 are returned without padding, and coupon sites are capped at
++      three. The gift monitor requires threads under 12 hours old and under
++      20 comments, verifies community self-promotion rules, sends at most
++      one alert per six-hour run, and stays silent when nothing qualifies.
++- [x] **Shared state**: operator-editable niches/seasonal weighting live in
++      `~/backlink_hunt_config.md`; all `BH-...`, `GR-...`, and migrated
++      coupon entries deduplicate through `~/backlink_opportunity_log.md`.
++      The old coupon-only cron was renamed/expanded and coupon history was
++      folded into this unified ledger; `~/coupon_directory_log.md` is
++      retired as an active source of truth.
++- [x] **Approval routing**: `AGENTS.md` bucket 6 handles YES/NO by stable
++      opportunity ID. YES produces a draft only (sub-100-word outreach
++      email for `BH`, helpful disclosed Reddit/forum reply for `GR`); NO is
++      logged as a future skip pattern. Hermes never sends or posts.
++- [x] **Live schedules**: `Weekly backlink hunt` (`4935788fa099`) runs
++      Saturday at 6:30 AM America/New_York. `Gift-request thread monitor`
++      (`068ccb52cb89`) runs every six hours. A one-time Thursday 2026-09-24
++      6:30 AM test (`e99977afb911`) exercises the weekly flow before its
++      first Saturday run.
++- [x] **Gift monitor confirmed live**: it found
++      `GR-20260923-1805`, the operator manually posted a disclosed Reddit
++      recommendation, and the shared ledger was updated to `submitted`.
++- [ ] **Expanded weekly hunt not yet observed**: verify Thursday's one-time
++      run returns properly scored, deduplicated opportunities and writes
++      their IDs before delivery; then confirm the Saturday recurrence.
+diff --git a/prompts/README.md b/prompts/README.md
+index 0f1943e..494be29 100644
+--- a/prompts/README.md
++++ b/prompts/README.md
+@@ -29,6 +29,10 @@ independently of any script.
+   revise. Reuses the shirt pipeline's own research (seasonal calendar,
+   niche/format libraries, Reddit/Trends) rather than separate topic
+   sourcing. Handled by `AGENTS.md`'s blog-post message-routing bucket.
++- `backlink_outreach.md` — Stage 8. Defines the Saturday editorial/
++  coupon backlink hunt, six-hour gift-request thread monitor, shared
++  server-side deduplication ledger, and the Telegram YES/NO flow that
++  drafts outreach without ever sending or posting it automatically.
+ 
+ Each file is written as an instruction set Hermes runs directly (via a
+ cron job's `prompt` field or an on-demand message), not as a library
+diff --git a/prompts/backlink_outreach.md b/prompts/backlink_outreach.md
+new file mode 100644
+index 0000000..44720ff
+--- /dev/null
++++ b/prompts/backlink_outreach.md
+@@ -0,0 +1,190 @@
++# Backlink outreach and gift-request monitoring
++
++This prompt defines the two scheduled backlink jobs and their shared
++Telegram approval flow. The goal is legitimate editorial backlinks and
++qualified referral traffic to `https://rileyink.com`, not raw link count.
++Riley Ink sells funny graphic tees, tanks, and sweatshirts in a deadpan,
++absurdist, irreverent voice. Never use generic gift-copy enthusiasm.
++
++## Shared state
++
++Both jobs read:
++
++- `~/backlink_hunt_config.md` — operator-editable niches, store context,
++  seasonal weighting, and approval conventions.
++- `~/backlink_opportunity_log.md` — the authoritative deduplication and
++  decision ledger for every delivered opportunity.
++
++The old coupon-only workflow is folded into this system. Coupon entries
++(WorthEPenny, RetailMeNot, CouponBirds, and later directories) live in the
++shared opportunity ledger alongside editorial and forum opportunities.
++`~/coupon_directory_log.md` is retired and must not be treated as an active
++source of truth.
++
++Before sending any item, canonicalize its URL and search the shared ledger.
++Never resend an already-logged URL or normalized thread ID unless the
++operator explicitly asks to revisit it. Append selected items as `pending`
++before delivery and re-read the ledger to verify the write.
++
++## Part 1 — Weekly backlink hunt
++
++**Live schedule:** Saturday, 6:30 AM America/New_York. A one-time Thursday
++morning test run may use this same workflow without changing the recurring
++schedule.
++
++Research only. Never send outreach, email anyone, submit a form, create or
++claim an account, publish a deal, bypass a CAPTCHA, or post externally.
++
++### Search priority
++
++1. Gift guides and “best funny shirts” roundups, especially pages published
++   or updated in the last 60 days or likely to be refreshed for the next
++   upcoming season.
++2. “Write for us,” “submit a product,” “suggest a brand,” contributor, and
++   resource pages in the configured niches.
++3. Niche blogs and podcasts covering fantasy football, drinking culture,
++   sports fandom, holidays, gifts, products, gear, or guests.
++4. Coupon/promo-code directories, capped at three per weekly report.
++
++Use varied search operators and current-year/season variants, including:
++
++- `"fantasy football gift guide" 2026`
++- `intitle:"gift guide" "funny shirts"`
++- `"best funny t-shirts" inurl:blog`
++- `"write for us" fantasy football`
++- `"submit a product" gift guide`
++
++Gift guides are usually written 6–10 weeks ahead. Determine the live date
++and weight searches using the seasonal calendar in the server-side config.
++Do not force a seasonal angle that the timing does not support.
++
++### Hard exclusions
++
++Skip link farms, PBNs, scraper sites, obvious AI content farms, thin affiliate
++spam, deceptive ownership, pay-for-placement-only sites, and blogs aimed at
++people starting a T-shirt/POD/Etsy business. The audience must plausibly buy
++funny shirts. Skip opportunities without a real contact route.
++
++### Verification and scoring
++
++Inspect each actual page when accessible. Record:
++
++- title and canonical URL;
++- visible/metadata published or updated date (say `unknown`, never guess);
++- a real contact route: named editor/author, editorial email, contact form,
++  submission page, or podcast booking route;
++- likely link behavior: dofollow, nofollow/sponsored, or unknown, based on
++  inspected editorial links rather than invented certainty;
++- the best matching *live and verified* Riley Ink product or collection URL.
++
++Score each dimension from 1–10: niche relevance, rough site authority,
++freshness, contact quality, and likelihood of an editorial/dofollow link.
++Give an overall 1–10 score. Authority is qualitative; never fabricate Domain
++Rating, traffic, or backlink metrics. Keep only overall scores of 6+.
++
++Select the top 8–10. If fewer than eight honestly qualify, send fewer rather
++than padding. No more than three may be coupon directories.
++
++### Weekly delivery
++
++Assign stable IDs `BH-YYYYMMDD-NN` and send one Telegram report. For each:
++
++- ID
++- page title and URL
++- published/updated date
++- overall score and five component scores
++- why it fits
++- verified Riley Ink product/collection and direct URL
++- real contact route
++- likely dofollow status
++- one-line pitch angle
++- `Reply YES <ID> or NO <ID>`
++
++## Part 2 — Gift-request thread monitor
++
++**Live schedule:** every six hours.
++
++Research and alerts only. Never post, vote, message a user, create an account,
++or bypass a CAPTCHA.
++
++Search Reddit (especially `r/GiftIdeas`, `r/gifts`, and relevant niche
++communities) and comparable public forums for active gift requests matching
++the current niches.
++
++A thread qualifies only when all are true:
++
++- original post is under 12 hours old;
++- fewer than 20 comments/replies;
++- the request naturally fits a configured Riley Ink niche and can be answered
++  helpfully without forcing a shirt recommendation;
++- canonical URL/thread ID is absent from the shared ledger;
++- age and comment count are directly verified from the live page, Reddit
++  JSON/API, or another reliable source;
++- current self-promotion rules are checked from rules/sidebar/wiki or an
++  authoritative moderator post;
++- the thread is not deleted, removed, locked, spammy, exploitative, or a
++  vulnerable personal/grief situation where brand promotion is inappropriate.
++
++If metadata cannot be verified, skip rather than guess. If community rules
++cannot be verified, label them `unclear`; any later draft must omit a Riley
++Ink link.
++
++### Daily cap and delivery shape
++
++Count today’s `GR-` ledger rows before delivery. If four have already been
++sent, output exactly `[SILENT]`. Select at most one thread per run so each
++alert is its own Telegram message and four six-hour runs naturally cap alerts
++at four per day. If nothing qualifies, output exactly `[SILENT]` and do not
++modify the ledger.
++
++Find and verify one or two matching live Riley Ink products/collections.
++Assign `GR-YYYYMMDD-HHMM`, log it as `pending`, then deliver:
++
++- ID
++- thread title, direct URL, and community
++- verified age and comment count
++- what the person is asking for
++- self-promotion rule status and rule-source URL
++- one or two verified Riley Ink matches with direct URLs
++- why the match is natural
++- `Reply YES <ID> or NO <ID>`
++
++## Part 3 — Shared YES/NO approval flow
++
++The operator sends all outreach and posts manually. Hermes only drafts.
++
++### YES to a `BH-` opportunity
++
++1. Resolve the exact ledger row and source page; never infer from a bare number.
++2. Update its decision to `yes`.
++3. Draft an outreach email under 100 words with:
++   - a subject line;
++   - one verified Riley Ink product/collection link;
++   - a concise, page-specific fit;
++   - an offer to send a free sample shirt.
++4. Use Riley Ink’s deadpan voice without generic sales enthusiasm.
++5. Return the draft only. Never send it.
++
++### YES to a `GR-` opportunity
++
++1. Resolve the exact ledger row/thread and update its decision to `yes`.
++2. Recheck the thread is still live and the community rules have not changed.
++3. Draft a genuinely useful reply that answers the request first and may
++   mention useful non-Riley suggestions.
++4. Disclose: `Full disclosure, I make these.`
++5. Include a Riley Ink link only if verified rules permit it. If rules are
++   unclear, produce a no-link draft. If self-promotion is prohibited, say so
++   and recommend not posting promotional copy.
++6. Return the draft only. Never post it.
++
++### NO to either type
++
++Update the row to `no`, preserving any reason. Add durable rejection-pattern
++notes to the ledger so both jobs learn what to skip. Do not resend the URL.
++
++### Operator reports manual completion
++
++When the operator says an email, submission, or forum reply was sent, update
++the exact ledger row to `submitted` with timestamp and evidence supplied.
++Use `live` only when the resulting link/listing is actually verified. Never
++claim a backlink is live merely because outreach was sent.
+-- 
+2.43.0
+

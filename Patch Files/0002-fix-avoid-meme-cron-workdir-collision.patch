@@ -1,0 +1,58 @@
+From cfb300f7e4ebb4db692e726012f3dc652e6bc1c6 Mon Sep 17 00:00:00 2001
+From: Riley Ink Hermes <designmakerbot@gmail.com>
+Date: Thu, 24 Sep 2026 08:16:37 -0400
+Subject: [PATCH 2/3] fix: avoid meme cron workdir collision
+
+Move the daily meme finder from 6:30 to 6:20 AM after the first scheduled run was claimed behind another 6:30 job and abandoned by a scheduler restart before it started.
+---
+ AGENTS.md              | 2 +-
+ TODO.md                | 6 ++++--
+ prompts/meme_finder.md | 2 +-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 8fed427..a711b1d 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -95,7 +95,7 @@ actually live:
+   created and the Shopify custom-app credentials set up
+   (`install/01_provision_vps.md` Part 14) before the first real run.
+ - **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
+-  2026-09-23): a daily 6:30 AM job finds up to five existing public memes
++  2026-09-23): a daily 6:20 AM job finds up to five existing public memes
+   matched to current seasonal windows and Riley Ink voice, filters brands/
+   franchises/teams/players/characters, and sends prepared 1080×1350 review
+   images to Telegram. Approval saves the exact candidate to Dropbox
+diff --git a/TODO.md b/TODO.md
+index b3fc8c2..3cd81fd 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -943,9 +943,11 @@ concepts, 2026-09-03)
+       `M-YYYYMMDD-NN` approvals and rejections. YES saves the prepared image;
+       it does not authorize Instagram publication.
+ - [x] **Daily cron created**: `Daily seasonal meme finder`
+-      (`28f6dc5f3245`) runs at 6:30 AM America/New_York, up to five verified
++      (`28f6dc5f3245`) runs at 6:20 AM America/New_York, up to five verified
+       candidates, fewer rather than padding, and `[SILENT]` when nothing
+-      clears the bar.
++      clears the bar. Moved ten minutes earlier after its first 6:30 run
++      collided with another job on the same workdir and was abandoned during
++      a scheduler restart.
+ - [ ] **Instagram publishing deliberately deferred**: no caption/hashtag
+       generation, Meta credentials, scheduling, or posting yet. A later stage
+       should use the approved meme ledger, require an explicit publish gate,
+diff --git a/prompts/meme_finder.md b/prompts/meme_finder.md
+index 95b3ce6..e0f61df 100644
+--- a/prompts/meme_finder.md
++++ b/prompts/meme_finder.md
+@@ -1,6 +1,6 @@
+ # Daily seasonal meme finder
+ 
+-Run daily at 6:30 AM America/New_York. Find up to five **existing memes**
++Run daily at 6:20 AM America/New_York. Find up to five **existing memes**
+ that fit Riley Ink's voice and current season, prepare non-destructively for
+ Instagram review, and send them to Telegram for approval. Do not generate,
+ rewrite, re-caption, publish, or claim ownership of a meme.
+-- 
+2.43.0
+

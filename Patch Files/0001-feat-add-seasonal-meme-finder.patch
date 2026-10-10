@@ -1,0 +1,551 @@
+From e5ff13f53a1264ebc255eef9f4dc31d978764362 Mon Sep 17 00:00:00 2001
+From: Riley Ink Hermes <designmakerbot@gmail.com>
+Date: Wed, 23 Sep 2026 22:52:56 -0400
+Subject: [PATCH 1/3] feat: add seasonal meme finder
+
+Operator request: "build into this a meme finder that matches my brand voice and the time of year ... funny football, fantasy football, Halloween, fall related ... continue to move with the time of year."
+
+Add the daily existing-meme research prompt, Instagram-safe 4:5 preparation, Dropbox /memes approval handoff, Telegram routing, and Stage 9 documentation while deliberately deferring Instagram publication.
+---
+ AGENTS.md                         |  27 +++++-
+ TODO.md                           |  36 +++++++
+ connectors/README.md              |   9 ++
+ connectors/dropbox_meme_upload.py | 104 ++++++++++++++++++++
+ connectors/meme_prepare.py        | 110 +++++++++++++++++++++
+ connectors/requirements.txt       |   1 +
+ prompts/README.md                 |   4 +
+ prompts/meme_finder.md            | 153 ++++++++++++++++++++++++++++++
+ 8 files changed, 442 insertions(+), 2 deletions(-)
+ create mode 100644 connectors/dropbox_meme_upload.py
+ create mode 100644 connectors/meme_prepare.py
+ create mode 100644 prompts/meme_finder.md
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 7b325b7..8fed427 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -40,6 +40,11 @@ publish it live to Shopify once the operator approves it (Stage 7).
+ - `prompts/blog_post.md` — Stage 7, the weekly SEO blog post. Reuses the
+   config files above and `~/niche_library.md`/`~/format_library.md`
+   rather than sourcing topics separately.
++- `prompts/meme_finder.md` — Stage 9, the daily seasonal existing-meme
++  finder. It prepares static candidates for Instagram review, but never
++  publishes them; approved items upload to Dropbox `/memes`.
++- `~/meme_library.md` (server-only, outside git) — source URLs, creators,
++  hashes, stable local paths, and approve/reject history for meme candidates.
+ - `~/blog_post_library.md` (same location/reasoning as the two libraries
+   above — not in git) — a growing catalog of *published blog posts*
+   (title, URL, target keyword, products/posts linked), so later posts
+@@ -89,6 +94,13 @@ actually live:
+   blog-post bucket below). Not yet live — needs the cron job actually
+   created and the Shopify custom-app credentials set up
+   (`install/01_provision_vps.md` Part 14) before the first real run.
++- **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
++  2026-09-23): a daily 6:30 AM job finds up to five existing public memes
++  matched to current seasonal windows and Riley Ink voice, filters brands/
++  franchises/teams/players/characters, and sends prepared 1080×1350 review
++  images to Telegram. Approval saves the exact candidate to Dropbox
++  `/memes`; it does not publish to Instagram. Caption/tag generation and
++  Meta/Instagram posting remain a future stage.
+ 
+ ## Message routing (Telegram)
+ 
+@@ -232,10 +244,21 @@ which before responding:
+      for the same topic — don't re-run Part 1's research unless the
+      change is broad enough to really be a different topic (use
+      judgment; ask if unclear).
+-6. **A general question about the project, its state, or how something
++6. **A YES/NO reply to a seasonal meme candidate** (an item carrying an
++   `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md`) — resolve the exact ID
++   in `~/meme_library.md`; Telegram reply-to context outranks recency, and
++   a bare number must not be guessed across batches.
++   - **On YES**: confirm the delivered 1080×1350 PNG still matches the
++     ledger, mark it `approved`, and upload it immediately to Dropbox
++     `/memes` with `connectors/dropbox_meme_upload.py`. Verify the remote
++     filename/size and report the exact `Uploaded to ...` path. This yes
++     authorizes saving only, never Instagram publication.
++   - **On NO**: mark it `rejected`, preserving any reason so later runs can
++     improve filtering. Never delete the source record or resend the URL.
++7. **A general question about the project, its state, or how something
+    works** (e.g. "what stage are we at?") — answer directly and
+    factually from this file and the repo, no need to run a prompt file.
+-7. **Anything else** (small talk, unclear intent, something that doesn't
++8. **Anything else** (small talk, unclear intent, something that doesn't
+    fit any bucket above) — respond normally as yourself, or ask a
+    clarifying question if genuinely unsure which bucket applies.
+ 
+diff --git a/TODO.md b/TODO.md
+index 15a2167..b3fc8c2 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -918,3 +918,39 @@ concepts, 2026-09-03)
+       Hermes to run commands directly via Telegram instead of typing
+       them into the console by hand, same trick as the Gmail
+       OAuth/git-push-credential entries above.
++
++## Stage 9: seasonal meme finder and Dropbox review handoff, built 2026-09-23
++
++- [x] **Operator direction**: find and repost existing memes rather than
++      generating remakes; send five candidates each morning around 6:30;
++      show finished images before approval; preserve credits/watermarks;
++      exclude major brands/franchises, teams, specific players/celebrities,
++      and copyrighted characters. The operator remains the final taste judge.
++- [x] **Seasonal behavior**: `prompts/meme_finder.md` reads the live date,
++      `config/seasonal_calendar.md`, current niche seeds, and a persistent
++      server-side `~/meme_library.md`. It shifts with the calendar (currently
++      football/fantasy football/Halloween/fall), prefers recent public memes,
++      logs source/creator/date/engagement/rights status, and deduplicates by
++      canonical URL and SHA-256.
++- [x] **Instagram-ready review assets**: `connectors/meme_prepare.py` fits
++      the untouched source inside a 1080×1350 4:5 PNG with solid letterboxing
++      only—no cropping, captions, overlays, or watermark removal. Static
++      images only in this first version; GIF/video/carousels are deferred.
++- [x] **Approval handoff confirmed**: `connectors/dropbox_meme_upload.py`
++      created and verified `/memes` beside `/to-do` in the same Dropbox App
++      folder (`root_folders=/memes,/to-do`). It uses add+autorename and never
++      moves/overwrites/deletes. `AGENTS.md` bucket 6 routes
++      `M-YYYYMMDD-NN` approvals and rejections. YES saves the prepared image;
++      it does not authorize Instagram publication.
++- [x] **Daily cron created**: `Daily seasonal meme finder`
++      (`28f6dc5f3245`) runs at 6:30 AM America/New_York, up to five verified
++      candidates, fewer rather than padding, and `[SILENT]` when nothing
++      clears the bar.
++- [ ] **Instagram publishing deliberately deferred**: no caption/hashtag
++      generation, Meta credentials, scheduling, or posting yet. A later stage
++      should use the approved meme ledger, require an explicit publish gate,
++      and verify the account is eligible for the Instagram Graph API.
++- [ ] **First live run review**: confirm source retrieval is reliable,
++      candidates actually match the active season/brand voice, credits remain
++      intact, excluded IP/brand material is filtered, and approved images land
++      in `/memes` with the expected filename and size.
+diff --git a/connectors/README.md b/connectors/README.md
+index 839ac42..b406909 100644
+--- a/connectors/README.md
++++ b/connectors/README.md
+@@ -23,6 +23,15 @@ scheduler. Code lives here only where the built-in tools fall short:
+   Run with `/home/hermes/.hermes/hermes-agent/venv/bin/python
+   dropbox_upload.py --file <png path> --name "<design name>"`. Called
+   from `AGENTS.md` bucket 3 Stage B on approval.
++- `meme_prepare.py` (Stage 9) — fits an existing static meme inside an
++  Instagram-feed 1080×1350 (4:5) PNG without cropping or overlaying it;
++  only solid-color letterboxing is added. Creator credits/watermarks remain
++  untouched. Run with `--input <source image> --output <prepared png>`.
++- `dropbox_meme_upload.py` (Stage 9) — creates/verifies `/memes` beside
++  `/to-do` in the same Dropbox App folder and uploads approved prepared PNGs
++  there using add+autorename. It never moves, overwrites, or deletes remote
++  files. Use `--ensure-folder` for setup or `--file <png> --name "<name>"`
++  after explicit Telegram approval.
+ - `shopify_blog_publish.py` (Stage 7) — publishes a weekly blog post
+   live to Shopify via the Admin API (a custom app, `write_content`
+   scope only). Auth uses OAuth's client credentials grant
+diff --git a/connectors/dropbox_meme_upload.py b/connectors/dropbox_meme_upload.py
+new file mode 100644
+index 0000000..30e4a56
+--- /dev/null
++++ b/connectors/dropbox_meme_upload.py
+@@ -0,0 +1,104 @@
++#!/usr/bin/env python3
++"""Create the Dropbox /memes folder or upload an approved meme PNG to it.
++
++The folder is inside the existing Riley Ink Dropbox App folder, beside /to-do.
++This connector only creates /memes and writes new files there; it never moves,
++renames, overwrites, or deletes remote content.
++"""
++
++from __future__ import annotations
++
++import argparse
++import os
++import re
++import sys
++from pathlib import Path
++
++import dropbox
++from dropbox.exceptions import ApiError, AuthError
++from dropbox.files import FolderMetadata, WriteMode
++
++MEME_FOLDER = "/memes"
++
++
++def _client() -> dropbox.Dropbox:
++    return dropbox.Dropbox(
++        app_key=os.environ["DROPBOX_APP_KEY"],
++        app_secret=os.environ["DROPBOX_APP_SECRET"],
++        oauth2_refresh_token=os.environ["DROPBOX_REFRESH_TOKEN"],
++    )
++
++
++def sanitize_filename(name: str) -> str:
++    cleaned = re.sub(r"[^A-Za-z0-9._ -]", "", name.strip())
++    cleaned = re.sub(r"\s+", " ", cleaned).strip(" .")
++    return cleaned or "meme"
++
++
++def ensure_folder(client: dropbox.Dropbox) -> str:
++    try:
++        metadata = client.files_get_metadata(MEME_FOLDER)
++        if not isinstance(metadata, FolderMetadata):
++            raise RuntimeError(f"{MEME_FOLDER} exists but is not a folder")
++        return metadata.path_display or MEME_FOLDER
++    except ApiError as exc:
++        error = exc.error
++        if not error.is_path() or not error.get_path().is_not_found():
++            raise
++
++    metadata = client.files_create_folder_v2(MEME_FOLDER, autorename=False).metadata
++    return metadata.path_display or MEME_FOLDER
++
++
++def upload(file_path: Path, display_name: str) -> str:
++    if not file_path.is_file():
++        raise ValueError(f"local file does not exist: {file_path}")
++    if file_path.suffix.lower() != ".png":
++        raise ValueError("approved meme handoff must be a prepared PNG")
++
++    client = _client()
++    ensure_folder(client)
++    dropbox_path = f"{MEME_FOLDER}/{sanitize_filename(display_name)}.png"
++    data = file_path.read_bytes()
++    metadata = client.files_upload(
++        data,
++        dropbox_path,
++        mode=WriteMode("add"),
++        autorename=True,
++        mute=False,
++    )
++    return metadata.path_display or dropbox_path
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--ensure-folder", action="store_true", help="Create/verify /memes and exit")
++    parser.add_argument("--file", type=Path, help="Prepared Instagram PNG")
++    parser.add_argument("--name", help="Display name used for the remote filename")
++    args = parser.parse_args()
++
++    if args.ensure_folder and (args.file or args.name):
++        parser.error("--ensure-folder cannot be combined with --file/--name")
++    if not args.ensure_folder and (args.file is None or not args.name):
++        parser.error("provide --ensure-folder or both --file and --name")
++
++    try:
++        if args.ensure_folder:
++            folder = ensure_folder(_client())
++            print(f"Ready {folder}")
++        else:
++            assert args.file is not None and args.name is not None
++            uploaded_path = upload(args.file, args.name)
++            print(f"Uploaded to {uploaded_path}")
++    except KeyError as exc:
++        print(f"Missing required environment variable: {exc}", file=sys.stderr)
++        return 1
++    except (ApiError, AuthError, RuntimeError, ValueError) as exc:
++        print(f"Dropbox meme handoff failed: {exc}", file=sys.stderr)
++        return 1
++
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/connectors/meme_prepare.py b/connectors/meme_prepare.py
+new file mode 100644
+index 0000000..78419ca
+--- /dev/null
++++ b/connectors/meme_prepare.py
+@@ -0,0 +1,110 @@
++#!/usr/bin/env python3
++"""Prepare an existing static meme for Instagram feed review without cropping.
++
++The full source is fitted inside a 1080x1350 (4:5) PNG. The script adds only
++solid-color letterboxing; it never overlays text, removes credits, or crops.
++"""
++
++from __future__ import annotations
++
++import argparse
++import statistics
++import sys
++from pathlib import Path
++
++from PIL import Image, ImageOps, UnidentifiedImageError
++
++TARGET_SIZE = (1080, 1350)
++
++
++def _corner_background(image: Image.Image) -> tuple[int, int, int]:
++    rgba = image.convert("RGBA")
++    width, height = rgba.size
++    points = (
++        (0, 0),
++        (max(0, width - 1), 0),
++        (0, max(0, height - 1)),
++        (max(0, width - 1), max(0, height - 1)),
++    )
++    opaque: list[tuple[int, int, int, int]] = []
++    for point in points:
++        pixel = rgba.getpixel(point)
++        if isinstance(pixel, tuple) and len(pixel) == 4 and pixel[3] >= 128:
++            opaque.append((int(pixel[0]), int(pixel[1]), int(pixel[2]), int(pixel[3])))
++    if not opaque:
++        return (0, 0, 0)
++    return (
++        int(statistics.median(pixel[0] for pixel in opaque)),
++        int(statistics.median(pixel[1] for pixel in opaque)),
++        int(statistics.median(pixel[2] for pixel in opaque)),
++    )
++
++
++def prepare(source: Path, output: Path, background: str = "auto") -> None:
++    try:
++        with Image.open(source) as opened:
++            if getattr(opened, "is_animated", False) and getattr(opened, "n_frames", 1) > 1:
++                raise ValueError("animated GIF/video sources are not supported in this version")
++            opened.seek(0)
++            image = ImageOps.exif_transpose(opened).convert("RGBA")
++    except (UnidentifiedImageError, OSError) as exc:
++        raise ValueError(f"cannot read source image: {exc}") from exc
++
++    if image.width < 1 or image.height < 1:
++        raise ValueError("source image has invalid dimensions")
++
++    if background == "black":
++        bg = (0, 0, 0)
++    elif background == "white":
++        bg = (255, 255, 255)
++    else:
++        bg = _corner_background(image)
++
++    scale = min(TARGET_SIZE[0] / image.width, TARGET_SIZE[1] / image.height)
++    resized_size = (
++        max(1, round(image.width * scale)),
++        max(1, round(image.height * scale)),
++    )
++    resized = image.resize(resized_size, Image.Resampling.LANCZOS)
++
++    canvas = Image.new("RGBA", TARGET_SIZE, (*bg, 255))
++    position = (
++        (TARGET_SIZE[0] - resized.width) // 2,
++        (TARGET_SIZE[1] - resized.height) // 2,
++    )
++    canvas.alpha_composite(resized, position)
++
++    output.parent.mkdir(parents=True, exist_ok=True)
++    canvas.convert("RGB").save(output, format="PNG", optimize=True)
++
++    with Image.open(output) as verified:
++        verified.verify()
++    with Image.open(output) as verified:
++        if verified.size != TARGET_SIZE or verified.mode != "RGB":
++            raise RuntimeError("prepared image failed output verification")
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--input", required=True, type=Path, help="Local static source image")
++    parser.add_argument("--output", required=True, type=Path, help="Output Instagram-ready PNG")
++    parser.add_argument(
++        "--background",
++        choices=("auto", "black", "white"),
++        default="auto",
++        help="Letterbox color; auto samples the source corners",
++    )
++    args = parser.parse_args()
++
++    try:
++        prepare(args.input, args.output, args.background)
++    except (ValueError, RuntimeError) as exc:
++        print(f"Meme preparation failed: {exc}", file=sys.stderr)
++        return 1
++
++    print(f"Prepared {args.output} ({TARGET_SIZE[0]}x{TARGET_SIZE[1]})")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/connectors/requirements.txt b/connectors/requirements.txt
+index b3990d1..9154eb9 100644
+--- a/connectors/requirements.txt
++++ b/connectors/requirements.txt
+@@ -1,2 +1,3 @@
+ dropbox>=12.0.2
+ requests>=2.31.0
++Pillow>=10.0.0
+diff --git a/prompts/README.md b/prompts/README.md
+index 0f1943e..e3e18bd 100644
+--- a/prompts/README.md
++++ b/prompts/README.md
+@@ -29,6 +29,10 @@ independently of any script.
+   revise. Reuses the shirt pipeline's own research (seasonal calendar,
+   niche/format libraries, Reddit/Trends) rather than separate topic
+   sourcing. Handled by `AGENTS.md`'s blog-post message-routing bucket.
++- `meme_finder.md` — Stage 9. Daily seasonal search for existing public
++  memes that fit Riley Ink's voice. Prepares static 1080×1350 review copies,
++  preserves source credit/watermarks, and uploads approved items to Dropbox
++  `/memes`; Instagram publication is deliberately deferred.
+ 
+ Each file is written as an instruction set Hermes runs directly (via a
+ cron job's `prompt` field or an on-demand message), not as a library
+diff --git a/prompts/meme_finder.md b/prompts/meme_finder.md
+new file mode 100644
+index 0000000..95b3ce6
+--- /dev/null
++++ b/prompts/meme_finder.md
+@@ -0,0 +1,153 @@
++# Daily seasonal meme finder
++
++Run daily at 6:30 AM America/New_York. Find up to five **existing memes**
++that fit Riley Ink's voice and current season, prepare non-destructively for
++Instagram review, and send them to Telegram for approval. Do not generate,
++rewrite, re-caption, publish, or claim ownership of a meme.
++
++Approval only saves an Instagram-ready copy to Dropbox `/memes`. It never
++publishes to Instagram or anywhere else.
++
++## Step 1 — Read current context and history
++
++Read:
++
++- `prompts/_brand_voice.md`
++- `config/seasonal_calendar.md`
++- `config/niche_keywords.md`
++- `~/meme_library.md`
++
++Determine the live date. Use the seasonal calendar as a moving guide rather
++than a fixed niche list. Weight the run toward what people are discussing
++*now* and what is about to become timely. In late September/October, for
++example, prioritize generic football, fantasy football, Halloween, and fall.
++As the year moves, automatically move into Thanksgiving, holiday, New Year,
++Super Bowl, March Madness, summer/Fourth of July, and other active windows.
++
++Use `~/meme_library.md` as the authoritative ledger of candidates, approvals,
++rejections, source URLs, and exact file hashes. Never resend an already-logged
++canonical URL or exact image hash unless the operator explicitly asks.
++
++## Step 2 — Find existing memes
++
++Search recent, public, accessible sources such as Reddit and public meme/
++community pages. Prefer material posted within the last seven days when a
++current trend or seasonal joke is available; use evergreen seasonal memes only
++when they are newly relevant and not already logged.
++
++A finalist must:
++
++- already be a complete meme; do not recreate it or add Riley Ink text;
++- fit Riley Ink's deadpan, absurdist, irreverent voice rather than sincere,
++  cutesy, or generic gift-copy enthusiasm;
++- make sense for the active season or a current configured niche;
++- have a stable source page and a directly retrievable static image;
++- preserve any visible creator credit or watermark exactly as found;
++- avoid major franchises and brands, team names/logos/uniform trade dress,
++  specific players or celebrities, and recognizable copyrighted characters;
++- avoid hate, targeted harassment, sexual content, tragedy, serious injury,
++  grief, or vulnerable-person content;
++- avoid screenshots dominated by platform chrome, ads, or unrelated comments;
++- be a static image for this first version (skip GIF/video/carousels).
++
++The operator is the final taste judge, but these exclusions are hard filters.
++Do not fill a quota with borderline items. If fewer than five survive, send
++fewer. If none survive, output exactly `[SILENT]`.
++
++Record the creator/uploader when visible, canonical source URL, source date,
++and engagement numbers only when directly displayed. Say `unknown` rather
++than guessing. Public visibility does not prove repost permission: label the
++rights status `unknown` unless the source explicitly grants reuse.
++
++## Step 3 — Download, format, and verify
++
++For each finalist:
++
++1. Assign a stable ID `M-YYYYMMDD-NN` in final display order.
++2. Download the original static image without removing a watermark, credit,
++   border, or attribution.
++3. Validate it with Pillow and save the untouched download under
++   `output/memes/YYYY-MM-DD/<ID>-source.<ext>`.
++4. Prepare an Instagram feed copy with:
++   ```
++   /home/hermes/.hermes/hermes-agent/venv/bin/python \
++     connectors/meme_prepare.py \
++     --input <source path> \
++     --output output/memes/YYYY-MM-DD/<ID>-instagram.png
++   ```
++   The script fits the full source inside a 1080×1350 (4:5) canvas, adds only
++   non-destructive letterboxing, and never crops or overlays content.
++5. Compute the source URL key and SHA-256 hash. Recheck `~/meme_library.md`;
++   reject duplicates before delivery.
++6. Use vision analysis on the prepared file. Verify full text legibility,
++   no destructive crop, preserved credit/watermark, and absence of prohibited
++   brands, franchises, teams, players, celebrities, and copyrighted
++   characters. If uncertain, reject it rather than guessing.
++7. Copy every delivered candidate to the stable output path above; never rely
++   only on a provider/browser cache path.
++
++## Step 4 — Log before delivery
++
++Append each delivered candidate to `~/meme_library.md` with:
++
++- ID and run date
++- canonical source URL
++- creator/uploader
++- source date and engagement if visible
++- seasonal/niche fit
++- original source path and prepared Instagram path
++- SHA-256
++- rights/credit note
++- decision: `pending`
++
++Re-read the ledger and confirm every ID and URL was written exactly once.
++
++## Step 5 — Telegram delivery
++
++Send up to five numbered cards, each paired with its prepared image:
++
++```
++## #N — M-YYYYMMDD-NN
++
++Why it fits: [one concise brand/season explanation]
++Source: [creator/uploader if known] — [canonical URL]
++Posted: [date/age or unknown] | Engagement: [visible figures or unknown]
++Credit/rights: [watermark/credit preserved; rights unknown unless explicit]
++
++Reply YES M-YYYYMMDD-NN or NO M-YYYYMMDD-NN.
++
++MEDIA:<absolute prepared-image path>
++```
++
++No caption or hashtag draft is needed in this version. Keep source metadata so
++a later Instagram uploader can add captions/tags without rebuilding history.
++
++## Approval flow
++
++### YES
++
++1. Resolve the exact `M-...` ID in `~/meme_library.md`; do not rely on a bare
++   number when more than one batch could apply.
++2. Confirm the prepared image exists and still matches the delivered item.
++3. Update the ledger decision to `approved`.
++4. Upload immediately to Dropbox `/memes`:
++   ```
++   /home/hermes/.hermes/hermes-agent/venv/bin/python \
++     connectors/dropbox_meme_upload.py \
++     --file <prepared Instagram PNG> \
++     --name "<ID> - <short descriptive title>"
++   ```
++5. Capture the exact `Uploaded to ...` path and verify the remote filename and
++   size. Approval authorizes saving only—not Instagram publication.
++
++### NO
++
++Update the exact ledger item to `rejected`, preserving any reason. Use repeated
++rejection patterns to improve future filtering, but never delete the source
++record or resend the URL.
++
++## Future Instagram stage — explicitly not built yet
++
++A later stage may add caption/tag drafting, Meta account authentication,
++scheduling, and Instagram publishing. Keep it separate and approval-gated.
++This version has no Meta credentials and must never post automatically.
+-- 
+2.43.0
+
