@@ -35,10 +35,17 @@ independently of any script.
   coupon backlink hunt, six-hour gift-request thread monitor, shared
   server-side deduplication ledger, and the Telegram YES/NO flow that
   drafts outreach without ever sending or posting it automatically.
-- `meme_finder.md` — Stage 9. Daily seasonal search for existing public
-  memes that fit Riley Ink's voice. Prepares static 1080×1350 review copies,
-  preserves source credit/watermarks, and uploads approved items to Dropbox
-  `/memes`; Instagram publication is deliberately deferred.
+- `meme_finder.md` — Stage 9. Tuesday/Thursday seasonal search for existing
+  public memes that fit Riley Ink's voice. Prepares static 1080×1350 review
+  copies, preserves source credit/watermarks, and uploads approved items to
+  Dropbox `/memes`.
+- `instagram_post.md` — Stage 10. Daily check (posts only a few times a
+  week) that drafts a caption/hashtags for the oldest approved-and-unposted
+  `/memes` item and publishes it live via `connectors/instagram_publish.py`.
+  Seasonal-calendar-aware so a dated joke posts on the right day. Sends a
+  post-publish heads-up rather than a pre-post approval gate — the
+  operator's one documented exception to the usual approval-before-
+  irreversible-action rule.
 
 Each file is written as an instruction set Hermes runs directly (via a
 cron job's `prompt` field or an on-demand message), not as a library

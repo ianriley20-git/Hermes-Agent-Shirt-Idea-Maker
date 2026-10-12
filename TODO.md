@@ -1012,11 +1012,83 @@ concepts, 2026-09-03)
       clears the bar. Moved well ahead of the 6:00–7:00 AM jobs at the
       operator's request so it can finish while the operator is asleep and
       avoid workdir collisions.
-- [ ] **Instagram publishing deliberately deferred**: no caption/hashtag
+- [x] **Instagram publishing deliberately deferred**: no caption/hashtag
       generation, Meta credentials, scheduling, or posting yet. A later stage
       should use the approved meme ledger, require an explicit publish gate,
       and verify the account is eligible for the Instagram Graph API.
+      **Superseded 2026-10-12 — see the Stage 10 entry below.** Built as a
+      heads-up-after-publish flow rather than a blocking pre-publish gate,
+      per the operator's explicit direction — not what this bullet
+      originally assumed, flagged here so the change in approach is clear
+      rather than silently contradicting the earlier plan.
 - [ ] **First live run review**: confirm source retrieval is reliable,
       candidates actually match the active season/brand voice, credits remain
       intact, excluded IP/brand material is filtered, and approved images land
       in `/memes` with the expected filename and size.
+
+## Stage 10: Instagram publishing, built 2026-10-12
+
+- [x] **Why**: operator wants approved memes sitting in Dropbox `/memes`
+      actually posted to Instagram, on a schedule, without babysitting
+      every individual post.
+- [x] **Design decisions from workshopping with the operator**:
+      - **Publish gate**: a second blocking yes-before-posting gate was
+        explicitly rejected in favor of a post-then-notify heads-up — the
+        meme already cleared one explicit approval when it was saved to
+        Dropbox, and the operator judged a second gate before every
+        scheduled post as defeating the point of scheduling this at all.
+        The heads-up still gives a real safety valve: a `NO M-...` reply to
+        an already-posted item triggers an actual Instagram delete, not
+        just a ledger note.
+      - **Cadence**: operator explicitly didn't want a fixed days/time
+        cron. Direction given: prioritize a special/seasonal day (e.g.
+        Halloween) landing on the right day over hitting a fixed schedule,
+        and otherwise post at roughly the cadence/times generally expected
+        to perform best on Instagram. Implemented as a **daily** cron check
+        whose prompt logic decides whether today is actually a posting day
+        (seasonal-calendar match, or a generic Tuesday/Wednesday/Thursday
+        higher-engagement heuristic capped at roughly 3x/week, with a
+        4-day-since-last-post override so the backlog never silently
+        stalls) — most daily runs are `[SILENT]`. The weekday heuristic is
+        explicitly flagged in `prompts/instagram_post.md` as a starting
+        guess, not measured data for this account; revisit once there's a
+        real posting history and actual Instagram Insights to check it
+        against.
+      - **Captions**: Hermes drafts caption + 3-8 hashtags itself each
+        time, in Riley Ink's voice, crediting a known source per the
+        ledger's existing credit field and never claiming authorship of the
+        meme — shown back to the operator in the post-publish heads-up so a
+        bad caption is still catchable (via the delete/takedown path) even
+        without a pre-publish review step.
+- [x] **Implementation**: new `prompts/instagram_post.md` reads
+      `~/meme_library.md` (extended with `Dropbox path`, `Instagram
+      status`, `Instagram posted date`, `Instagram media ID`, and
+      `Instagram permalink` fields) and `config/seasonal_calendar.md`.
+      `prompts/meme_finder.md`'s approval flow now also records the
+      uploaded Dropbox path onto the ledger entry at approval time, so this
+      stage can resolve it without re-deriving a filename. New
+      `connectors/instagram_publish.py` publishes via Meta's Graph API
+      (Content Publishing: create a media container, poll until finished,
+      publish, fetch the permalink) or deletes a published post; since
+      Instagram needs a public image URL rather than a file upload, it
+      generates a short-lived Dropbox temporary link to feed the container
+      rather than maintaining a permanent public link. `AGENTS.md` bucket 7
+      now branches on the ledger's `Instagram status` field to distinguish
+      a normal pre-publish `NO` (reject) from a `NO` on an already-posted
+      item (takedown/delete), plus a new Hard Rules note flagging this as
+      the one documented exception to the "explicit yes before anything
+      irreversible" rule — scoped to this stage only, not a precedent for
+      others. Full Meta Developer app / Instagram Business Account setup
+      walkthrough is `install/01_provision_vps.md` Part 15.
+- [ ] **Not yet live**: needs the Meta Developer app created, the
+      Instagram Business Account linked and verified eligible, a long-lived
+      Page access token generated, `INSTAGRAM_BUSINESS_ACCOUNT_ID`/
+      `META_ACCESS_TOKEN` set in `.env`, and the daily cron job actually
+      created pointing at `prompts/instagram_post.md`.
+- [ ] **First live run review**: once set up, confirm a real post actually
+      goes live and the permalink/media ID get logged correctly, that the
+      seasonal-priority path actually triggers on an active nudge window
+      rather than just the cadence path, and that a `NO` reply to a posted
+      item actually deletes the live post (not just updates the ledger).
+      Also worth revisiting the Tuesday/Wednesday/Thursday engagement
+      heuristic after a few weeks of real Instagram Insights data.

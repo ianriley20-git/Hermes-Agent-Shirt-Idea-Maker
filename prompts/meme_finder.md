@@ -139,6 +139,9 @@ a later Instagram uploader can add captions/tags without rebuilding history.
    ```
 5. Capture the exact `Uploaded to ...` path and verify the remote filename and
    size. Approval authorizes saving only—not Instagram publication.
+6. Record that exact Dropbox path onto the ledger entry (`Dropbox path:
+   /memes/...`) so `prompts/instagram_post.md` can resolve it later without
+   re-deriving the filename.
 
 ### NO
 
@@ -146,8 +149,10 @@ Update the exact ledger item to `rejected`, preserving any reason. Use repeated
 rejection patterns to improve future filtering, but never delete the source
 record or resend the URL.
 
-## Future Instagram stage — explicitly not built yet
+## Instagram publishing — handled separately
 
-A later stage may add caption/tag drafting, Meta account authentication,
-scheduling, and Instagram publishing. Keep it separate and approval-gated.
-This version has no Meta credentials and must never post automatically.
+`prompts/instagram_post.md` (Stage 10) reads this file's ledger
+(`~/meme_library.md`) for approved-and-unposted entries, drafts a caption,
+and actually publishes to Instagram on its own schedule. Nothing in this
+file posts anything — approval here only saves to Dropbox `/memes`, same
+as before.

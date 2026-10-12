@@ -67,6 +67,36 @@ scheduler. Code lives here only where the built-in tools fall short:
   field storage for blog articles but hasn't been confirmed against the
   operator's actual theme yet (see `TODO.md`). Called from `AGENTS.md`'s
   blog-post message-routing bucket on a full-draft "yes".
+- `instagram_publish.py` (Stage 10) — publishes an approved Dropbox
+  `/memes` image to Instagram, or deletes an already-published post.
+  Auth is a Facebook Page access token (`META_ACCESS_TOKEN`) against the
+  linked Instagram Business Account (`INSTAGRAM_BUSINESS_ACCOUNT_ID`) via
+  Meta's Graph API — full setup (Meta Developer app, finding the account
+  ID, exchanging for a long-lived token) is in
+  `install/01_provision_vps.md` Part 15. Since Instagram's Content
+  Publishing API needs a public image URL rather than a file upload, it
+  generates a short-lived Dropbox temporary link (`dropbox` SDK, already a
+  dependency) to feed the image into a media container, polls until it's
+  ready, then publishes it. No new dependency beyond `dropbox` and
+  `requests`, both already in `requirements.txt`. Install with the same
+  venv pip as the other connectors:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/pip install -r requirements.txt
+  ```
+  Publish:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python instagram_publish.py \
+    --dropbox-path "/memes/<file>.png" --caption "<caption + hashtags>"
+  ```
+  Delete a published post:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python instagram_publish.py --delete <media ID>
+  ```
+  Called from `AGENTS.md` bucket 7 and `prompts/instagram_post.md` — the
+  operator's documented exception to the usual pre-publish approval gate:
+  posting sends a post-publish heads-up with this delete command as the
+  real undo, rather than a second blocking yes, since the meme already
+  cleared one explicit approval when it was saved to Dropbox.
 - upload-app integration (post-Stage 6, scoped separately)
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway

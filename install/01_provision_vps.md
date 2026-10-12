@@ -652,3 +652,106 @@ Also reschedule the existing **daily scan** cron job to 7 AM
 America/New_York to match (it's currently live at 8 AM — this doc
 update alone doesn't move it, use the same Cron Jobs mechanism to edit
 its schedule).
+
+---
+
+## Part 15 — Instagram auto-posting (Stage 10): Meta Graph API setup
+
+**Prerequisite**: the Instagram account must already be a **Business** or
+**Creator** account (not Personal), and it must be linked to a **Facebook
+Page** you control — the Instagram Graph API publishes through that
+Page/Business connection, not through Instagram login directly. In the
+Instagram app: **Settings → Account type and tools**, confirm it's
+Business/Creator and linked to a Facebook Page; link one there first if not.
+
+**Note:** Meta's developer console reorganizes fairly often — if a labeled
+button/section below doesn't match exactly, look for the nearest equivalent
+rather than assuming the whole flow has changed (same spirit as the
+Shopify Dev Dashboard note in Part 14).
+
+### Meta Developer app setup (in a browser, developers.facebook.com)
+
+1. Go to `developers.facebook.com/apps` → **Create App**. Choose the
+   **Business** app type.
+2. Add the **Instagram Graph API** product to the app from the app
+   dashboard's product list (look for "Instagram" among available products
+   if the exact label differs).
+3. Under **App settings → Basic**, note the **App ID** and **App Secret** —
+   needed for the token exchange below.
+4. Your Meta account needs a role on the app (Admin by default, if you
+   created it) and must also be an admin of the Facebook Page the
+   Instagram account is linked to.
+
+### Get the Instagram Business Account ID and a long-lived access token
+
+1. Open Meta's **Graph API Explorer**
+   (`developers.facebook.com/tools/explorer`), select your app, and
+   generate a **User Access Token** with these permissions:
+   `instagram_basic`, `instagram_content_publish`, `pages_show_list`,
+   `pages_read_engagement`. This short-lived token is only for the
+   one-time setup below.
+2. Find your Facebook Page's ID — query `GET /me/accounts` in the
+   Explorer and note the `id` of the Page linked to your Instagram account.
+3. Find the Instagram Business Account ID linked to that Page — query
+   `GET /{page-id}?fields=instagram_business_account`. The response's
+   `instagram_business_account.id` is your `INSTAGRAM_BUSINESS_ACCOUNT_ID`.
+4. Exchange the short-lived user token for a long-lived one (~60 days). In
+   a terminal (this is just a `curl` call, not a server command):
+   ```bash
+   curl "https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=YOUR_APP_ID&client_secret=YOUR_APP_SECRET&fb_exchange_token=YOUR_SHORT_LIVED_TOKEN"
+   ```
+5. Use that long-lived user token to get a **Page access token** for your
+   specific Page — query `GET /{page-id}?fields=access_token` using the
+   long-lived user token. The `access_token` in that response is a Page
+   token that, in practice, stays valid indefinitely as long as you don't
+   change your Facebook password or remove the app's permissions — this is
+   the value to store as `META_ACCESS_TOKEN`.
+
+**Known risk, same shape as the Gmail lesson** (see `TODO.md`'s Stage 6
+entry): Meta tokens can still be invalidated — a password change, a
+permissions review, or roughly 90 days of the app going unused. If posting
+ever starts failing with an auth error, regenerate this token first; unlike
+Dropbox's SDK, there's no automatic refresh here.
+
+### On the server (as `hermes`)
+
+Add to `.env`:
+```bash
+nano ~/.hermes/.env
+```
+```
+INSTAGRAM_BUSINESS_ACCOUNT_ID=paste_ig_business_account_id_here
+META_ACCESS_TOKEN=paste_page_access_token_here
+```
+Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
+
+No new Python dependency — `connectors/instagram_publish.py` reuses the
+`dropbox` SDK (to generate a temporary link to the approved image) and the
+`requests` library, both already installed for the other connectors.
+
+### Verify
+
+Pick a file already sitting in Dropbox `/memes` and test a real post (this
+goes live on the real account — use something you're genuinely fine
+posting, or a disposable test image):
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/instagram_publish.py \
+  --dropbox-path "/memes/<existing file>.png" --caption "Test post -- safe to delete."
+```
+Should print `Published to <permalink>` and a media ID. Open the permalink
+and confirm it's actually live on Instagram — don't just trust the printed
+line — then delete it if it was only a test:
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/instagram_publish.py --delete <media ID printed above>
+```
+
+### Create the posting cron job
+
+Same **Cron Jobs** mechanism as the other scheduled jobs — point it at
+`prompts/instagram_post.md`, delivering to your Telegram home channel,
+running **daily** at a time of your choosing. It's deliberately a daily
+check rather than a fixed few-times-a-week schedule — see `TODO.md`'s
+Stage 10 entry for why: most days it looks at the backlog and the seasonal
+calendar and does nothing (`[SILENT]`), only actually posting a few times a
+week per the cadence/seasonal logic inside the prompt itself, so a seasonal
+day never gets missed just because the cron didn't happen to fire on it.
