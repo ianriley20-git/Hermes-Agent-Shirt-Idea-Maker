@@ -655,63 +655,96 @@ its schedule).
 
 ---
 
-## Part 15 — Instagram auto-posting (Stage 10): Meta Graph API setup
+## Part 15 — Instagram auto-posting (Stage 10): Instagram Login API setup
+
+**Superseded (2026-10-12):** originally written for the older Facebook
+Page-linked Graph API approach (Graph API Explorer, a Page access token,
+`graph.facebook.com`). That path works in principle but the Explorer's
+permission picker turned out to be unreliable in practice, and Meta's own
+console steers new apps toward a separate, simpler product instead:
+**"Instagram API with Instagram Login"** — no Facebook Page linking, no
+Graph API Explorer, authentication happens directly against the Instagram
+account. This section now documents that path, which is what's actually
+live.
 
 **Prerequisite**: the Instagram account must already be a **Business** or
-**Creator** account (not Personal), and it must be linked to a **Facebook
-Page** you control — the Instagram Graph API publishes through that
-Page/Business connection, not through Instagram login directly. In the
-Instagram app: **Settings → Account type and tools**, confirm it's
-Business/Creator and linked to a Facebook Page; link one there first if not.
+**Creator** account (not Personal) — check in the Instagram app under
+**Settings → Account type and tools**. Unlike the old approach, it does
+**not** need to be linked to a Facebook Page for this flow.
 
 **Note:** Meta's developer console reorganizes fairly often — if a labeled
 button/section below doesn't match exactly, look for the nearest equivalent
 rather than assuming the whole flow has changed (same spirit as the
 Shopify Dev Dashboard note in Part 14).
 
-### Meta Developer app setup (in a browser, developers.facebook.com)
+### Create the app
 
-1. Go to `developers.facebook.com/apps` → **Create App**. Choose the
-   **Business** app type.
-2. Add the **Instagram Graph API** product to the app from the app
-   dashboard's product list (look for "Instagram" among available products
-   if the exact label differs).
-3. Under **App settings → Basic**, note the **App ID** and **App Secret** —
-   needed for the token exchange below.
-4. Your Meta account needs a role on the app (Admin by default, if you
-   created it) and must also be an admin of the Facebook Page the
-   Instagram account is linked to.
+1. Go to `developers.facebook.com/apps` (or Meta Business Suite's
+   **Business Settings → Accounts → Apps → Create a new app ID** — both
+   land in the same place) → **Create App**.
+   - If prompted, log into Facebook with the personal account that admins
+     your business/Page — Business Settings' "Apps" page can otherwise show
+     a confusing "You need to log in with a Facebook account" error even
+     while you're already in a Business Suite session.
+2. App type: **Business**. Name it something recognizable, e.g.
+   `Riley Ink Poster`.
+3. When asked which business portfolio to connect, choose your actual
+   business portfolio (not "I don't want to connect one yet") — it needs
+   to be connected to actually reach your Instagram account later.
+4. On the **Add use cases** screen, filter by **Content management** and
+   select **"Manage messaging & content on Instagram"**. Don't also add a
+   Facebook Page-management use case — this one alone is sufficient, and
+   requesting broader scope than needed is worth avoiding on principle
+   (same reasoning as the Dropbox app's `files.content.write`-only scope).
 
-### Get the Instagram Business Account ID and a long-lived access token
+### Add the publish permission and connect your account
 
-1. Open Meta's **Graph API Explorer**
-   (`developers.facebook.com/tools/explorer`), select your app, and
-   generate a **User Access Token** with these permissions:
-   `instagram_basic`, `instagram_content_publish`, `pages_show_list`,
-   `pages_read_engagement`. This short-lived token is only for the
-   one-time setup below.
-2. Find your Facebook Page's ID — query `GET /me/accounts` in the
-   Explorer and note the `id` of the Page linked to your Instagram account.
-3. Find the Instagram Business Account ID linked to that Page — query
-   `GET /{page-id}?fields=instagram_business_account`. The response's
-   `instagram_business_account.id` is your `INSTAGRAM_BUSINESS_ACCOUNT_ID`.
-4. Exchange the short-lived user token for a long-lived one (~60 days). In
-   a terminal (this is just a `curl` call, not a server command):
-   ```bash
-   curl "https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=YOUR_APP_ID&client_secret=YOUR_APP_SECRET&fb_exchange_token=YOUR_SHORT_LIVED_TOKEN"
-   ```
-5. Use that long-lived user token to get a **Page access token** for your
-   specific Page — query `GET /{page-id}?fields=access_token` using the
-   long-lived user token. The `access_token` in that response is a Page
-   token that, in practice, stays valid indefinitely as long as you don't
-   change your Facebook password or remove the app's permissions — this is
-   the value to store as `META_ACCESS_TOKEN`.
+From the app's dashboard, open the **Instagram API** use case (left
+sidebar → the pencil/edit icon, or directly under "Use cases") → **API
+setup with Instagram login** tab:
+
+1. Under **"1. Add required messaging permissions"**, click **Add all
+   required permissions** (adds `instagram_business_basic` plus two
+   messaging/comment permissions you won't actually use, but that come
+   bundled — harmless to leave).
+2. Click **Permissions and features** in the left list, find
+   **`instagram_business_content_publish`** ("allows an app to create
+   organic feed photo and video posts on behalf of a business user" — this
+   is the one that actually matters), and add it the same way.
+3. Your account needs the **Instagram Tester** role before you can connect
+   it on a development-mode app. Go to **App roles → Roles** (or the
+   "Roles" link in the step 2 description below), **Add people**, and in
+   the dialog: check **Instagram Tester** specifically (not Administrator
+   — you already have that as the app's creator; this invite is for the
+   role you're actually missing), then search by **Instagram username**
+   (not your Facebook name) for the account you're connecting, select it,
+   and click **Add**.
+4. **Accept the invite from Instagram itself**, not Facebook: open the
+   Instagram app (or instagram.com) logged into that account → **Settings
+   → Apps and websites** → **Tester invites** tab → accept the invite from
+   your app.
+5. Back on the **API setup with Instagram login** page, under **"2.
+   Generate access tokens"**, your account should now be listed (with its
+   Instagram-scoped numeric ID shown next to the username — that's your
+   `INSTAGRAM_BUSINESS_ACCOUNT_ID`). Click **Generate token**, approve
+   whatever Instagram login/consent prompt appears, and copy the resulting
+   token — that's `META_ACCESS_TOKEN`.
+6. Leave the **Webhook Subscription** toggle **Off** — this stage only
+   ever publishes outbound, it never needs to receive events.
+7. Skip section **"3. Configure webhooks"** (same reason), **"4. Set up
+   Instagram business login"** (that's for letting *other* businesses
+   connect *their* accounts to your app — irrelevant for a single-account
+   personal tool), and **"5. Complete app review"** (only needed for
+   access beyond your app's own testers; you're only ever posting to your
+   own account, which is already a tester).
 
 **Known risk, same shape as the Gmail lesson** (see `TODO.md`'s Stage 6
-entry): Meta tokens can still be invalidated — a password change, a
-permissions review, or roughly 90 days of the app going unused. If posting
-ever starts failing with an auth error, regenerate this token first; unlike
-Dropbox's SDK, there's no automatic refresh here.
+entry): this token can still be invalidated — a password change on the
+Instagram account, a permissions review, or roughly 90 days of the app
+going unused. If posting ever starts failing with an auth error,
+regenerate this token first (same steps above, from "Generate token")
+rather than assuming the code broke; there's no automatic refresh here the
+way Dropbox's SDK provides.
 
 ### On the server (as `hermes`)
 
@@ -720,8 +753,8 @@ Add to `.env`:
 nano ~/.hermes/.env
 ```
 ```
-INSTAGRAM_BUSINESS_ACCOUNT_ID=paste_ig_business_account_id_here
-META_ACCESS_TOKEN=paste_page_access_token_here
+INSTAGRAM_BUSINESS_ACCOUNT_ID=paste_instagram_scoped_account_id_here
+META_ACCESS_TOKEN=paste_generated_token_here
 ```
 Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
 

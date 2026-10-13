@@ -69,10 +69,12 @@ scheduler. Code lives here only where the built-in tools fall short:
   blog-post message-routing bucket on a full-draft "yes".
 - `instagram_publish.py` (Stage 10) — publishes an approved Dropbox
   `/memes` image to Instagram, or deletes an already-published post.
-  Auth is a Facebook Page access token (`META_ACCESS_TOKEN`) against the
-  linked Instagram Business Account (`INSTAGRAM_BUSINESS_ACCOUNT_ID`) via
-  Meta's Graph API — full setup (Meta Developer app, finding the account
-  ID, exchanging for a long-lived token) is in
+  Auth is a token (`META_ACCESS_TOKEN`) from Meta's "Instagram API with
+  Instagram Login" product, scoped directly to the Instagram account
+  (`INSTAGRAM_BUSINESS_ACCOUNT_ID`) — no Facebook Page link needed. Calls
+  go to `graph.instagram.com`, not `graph.facebook.com`. Full setup (app
+  creation, adding the publish permission, connecting the account as an
+  Instagram Tester, generating the token) is in
   `install/01_provision_vps.md` Part 15. Since Instagram's Content
   Publishing API needs a public image URL rather than a file upload, it
   generates a short-lived Dropbox temporary link (`dropbox` SDK, already a

@@ -1080,11 +1080,33 @@ concepts, 2026-09-03)
       irreversible" rule — scoped to this stage only, not a precedent for
       others. Full Meta Developer app / Instagram Business Account setup
       walkthrough is `install/01_provision_vps.md` Part 15.
-- [ ] **Not yet live**: needs the Meta Developer app created, the
-      Instagram Business Account linked and verified eligible, a long-lived
-      Page access token generated, `INSTAGRAM_BUSINESS_ACCOUNT_ID`/
-      `META_ACCESS_TOKEN` set in `.env`, and the daily cron job actually
-      created pointing at `prompts/instagram_post.md`.
+- [x] **Meta setup path corrected while actually doing it live, 2026-10-12**:
+      the originally-documented approach (Facebook Page-linked Graph API,
+      permissions added via the Graph API Explorer, a Page access token)
+      hit real friction — the Explorer's "Add a Permission" picker was
+      unreliable across multiple browsers/profiles, and a manual OAuth-URL
+      workaround ran into Facebook's own token-scrubbing security script
+      and an app-domains validation error once JavaScript was blocked to
+      work around that. Abandoned that path entirely in favor of Meta's own
+      newer, simpler **"Instagram API with Instagram Login"** product,
+      which the console actively steers new apps toward: no Facebook Page
+      link needed, no Graph API Explorer — add the app's Instagram use
+      case, add the `instagram_business_content_publish` permission (found
+      under "Permissions and features," not bundled in the "required"
+      set), add the Instagram account as an **Instagram Tester** (accepted
+      from inside the Instagram app itself, not Facebook), then generate
+      the token directly from the app dashboard's "Generate access tokens"
+      step. Calls go to `graph.instagram.com`, not `graph.facebook.com`.
+      `connectors/instagram_publish.py`, `install/01_provision_vps.md`
+      Part 15, `config/.env.example`, and `connectors/README.md` all
+      updated to match the path that actually worked. Same spirit as the
+      Shopify Dev Dashboard lesson in Part 14 — document what actually
+      worked after hitting it live, not just the first plausible approach.
+- [ ] **Not yet live**: has the Instagram-scoped account ID and access
+      token in hand as of 2026-10-12; still needs
+      `INSTAGRAM_BUSINESS_ACCOUNT_ID`/`META_ACCESS_TOKEN` set in `.env` on
+      the server, a real test post verified live, and the daily cron job
+      actually created pointing at `prompts/instagram_post.md`.
 - [ ] **First live run review**: once set up, confirm a real post actually
       goes live and the permalink/media ID get logged correctly, that the
       seasonal-priority path actually triggers on an active nudge window

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Publish an approved Dropbox /memes image to Instagram, or delete a post.
 
-Auth: a Facebook Page access token obtained via Meta's Graph API (see
+Auth: a token from Meta's "Instagram API with Instagram Login" product (see
 install/01_provision_vps.md Part 15 for how to generate one) -- stored as
-META_ACCESS_TOKEN. Posting happens against the linked Instagram Business
-Account (INSTAGRAM_BUSINESS_ACCOUNT_ID), not direct Instagram login.
+META_ACCESS_TOKEN, scoped to the Instagram Business Account's own numeric ID
+(INSTAGRAM_BUSINESS_ACCOUNT_ID). This is a direct Instagram Login flow, not
+a Facebook Page-linked token -- calls go to graph.instagram.com, not
+graph.facebook.com. (An earlier version of this connector/doc assumed the
+older Facebook-Page-linked approach; switched after actually working through
+setup live -- see TODO.md's Stage 10 entry.)
 
 Approved images already live in Dropbox /memes (uploaded earlier by
 dropbox_meme_upload.py). Instagram's Content Publishing API needs a public
@@ -30,8 +34,8 @@ import dropbox
 import requests
 from dropbox.exceptions import ApiError, AuthError
 
-GRAPH_API_VERSION = "v21.0"  # bump if Meta deprecates this version
-GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
+GRAPH_API_VERSION = "v26.0"  # bump if Meta deprecates this version
+GRAPH_API_BASE = f"https://graph.instagram.com/{GRAPH_API_VERSION}"
 CONTAINER_POLL_INTERVAL_SECONDS = 5
 CONTAINER_POLL_TIMEOUT_SECONDS = 120
 
