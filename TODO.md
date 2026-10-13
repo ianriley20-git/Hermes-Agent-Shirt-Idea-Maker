@@ -1195,3 +1195,70 @@ concepts, 2026-09-03)
       active nudge window, a NO on a posted item actually deletes the live
       post, and cancelling/rescheduling a `scheduled` item actually deletes
       the right one-time cron rather than leaving a stale duplicate.
+
+## Stage 11: original meme creation, built 2026-10-13
+
+- [x] **Why**: operator flagged that `meme_finder.md`'s reposted memes are
+      inherently limited — the funniest, highest-engagement memes are
+      often exactly the ones riskiest to repost (copyright/rights unclear).
+      Independently arrived at the same legal reasoning already
+      established for the shirt pipeline in `config/reference_sites.md`:
+      short phrases/joke formats aren't copyrightable, what's protected is
+      someone's specific *expression* (their actual photo) — so reusing a
+      joke's wording on a brand-new, licensed photo sidesteps the
+      reposting question entirely rather than trying to work around it.
+- [x] **Why stock photos instead of AI-generated images**: operator's own
+      call, for two reasons — cost (near-free marginal cost vs. ~$0.05-0.06
+      per `gpt-image-2-medium` call) and genre authenticity (a real photo +
+      bold caption *looks* like an actual internet meme in a way an
+      original illustration wouldn't). Pexels chosen over Unsplash for v1:
+      no attribution requirement in its commercial license, generous free
+      rate limits (200/hour, 20,000/month) — Unsplash could be added later
+      as a second source if photo variety becomes limiting.
+- [x] **Font and logo**: Anton (Google Fonts, SIL Open Font License,
+      freely redistributable, visually close to classic Impact without
+      Impact's own licensing/availability problems on a Linux server) is
+      the caption font, committed to the repo at
+      `assets/fonts/Anton-Regular.ttf`. The Riley Ink logo (operator-
+      supplied) is committed at `assets/branding/riley_ink_logo.png` and
+      composited as a bottom-right watermark — operator's own insight:
+      unlike a reposted meme (which carries someone *else's* credit if it
+      spreads further), a meme with your own logo turns any share/repost
+      into free advertising that travels with the content. That's a real
+      growth reason to prefer this path over reposting, not just ethics/
+      cost.
+- [x] **One real bug caught in testing**: the first version let a long
+      bottom caption's text collide with the logo and run off both canvas
+      edges (single-line auto-shrink had no floor against genuinely long
+      input). Fixed with proper word-wrapping (up to 4 lines, sized to fit
+      both width and a height budget) and reserving space to the right of
+      the bottom caption specifically so it never overlaps the logo's
+      fixed corner. Verified visually against both a short and a long test
+      caption before shipping.
+- [x] **Implementation**: new `prompts/meme_create.md` runs the same
+      Tuesday/Thursday 4:00 AM slot as `meme_finder.md` (a second,
+      independent source, not a sequence), up to three candidates per run.
+      Sources joke *wording* only (never the original post's image) via
+      the same kind of research `meme_finder.md` already does, then calls
+      new `connectors/meme_compose.py` to search Pexels by a generic mood/
+      scene query (never aimed at recreating a specific existing meme's
+      exact photo — a separate hard rule from the general reuse reasoning,
+      covering visually iconic templates like Distracted Boyfriend where
+      the *composition* itself, not just the image file, is what's
+      distinctive) and composite the caption + logo. Shares
+      `~/meme_library.md`'s `M-YYYYMMDD-NN` ID sequence with
+      `meme_finder.md` (new entries tagged `Origin: original` vs.
+      `Origin: reposted`) and the exact same approval flow, Dropbox
+      `/memes` upload, and downstream `instagram_post.md` handoff — no
+      changes needed to Stage 10 at all, since it already just checks
+      what's sitting in `/memes` regardless of where it came from.
+- [ ] **Not yet live**: needs `PEXELS_API_KEY` set in `.env`
+      (`install/01_provision_vps.md` Part 16) and the Tuesday/Thursday
+      4:00 AM cron job actually created pointing at `prompts/meme_create.md`.
+- [ ] **First live run review**: confirm the research step actually
+      extracts wording without ever touching the original source image,
+      the Pexels query stays generic rather than drifting toward trying to
+      match a specific known meme's photo, the ID sequence really doesn't
+      collide with `meme_finder.md` on a day both produce candidates, and
+      real captions (not just the two test strings used during
+      development) render cleanly across a range of lengths.

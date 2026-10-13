@@ -27,7 +27,26 @@ scheduler. Code lives here only where the built-in tools fall short:
   Instagram-feed 1080×1350 (4:5) PNG without cropping or overlaying it;
   only solid-color letterboxing is added. Creator credits/watermarks remain
   untouched. Run with `--input <source image> --output <prepared png>`.
-- `dropbox_meme_upload.py` (Stage 9/10) — creates/verifies `/memes` beside
+- `meme_compose.py` (Stage 11) — searches Pexels for a licensed stock photo
+  (`PEXELS_API_KEY`) and composites an *original* meme onto it: caption
+  text in `assets/fonts/Anton-Regular.ttf` (classic meme styling — white
+  fill, black stroke, auto-sized and word-wrapped to fit, top and/or
+  bottom) plus the Riley Ink logo (`assets/branding/riley_ink_logo.png`)
+  as a bottom-right watermark, reserving space so long bottom captions
+  never collide with it. Outputs a 1080×1350 PNG, same shape as
+  `meme_prepare.py`'s output. No Pexels attribution is legally required,
+  but the photographer name/photo URL get printed to stdout for the
+  ledger anyway, same credit-tracking habit as the reposted side of this
+  pipeline. Use `--search "<mood/scene query>"` to source from Pexels, or
+  `--background-file <path>` to composite onto an already-local image:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python meme_compose.py \
+    --search "tired cat" --caption-top "ME" \
+    --caption-bottom "AFTER ONE REPLY-ALL EMAIL" --output out.png
+  ```
+  Called from `prompts/meme_create.md`, Step 3, before the normal
+  Telegram approval card goes out.
+- `dropbox_meme_upload.py` (Stage 9/10/11) — creates/verifies `/memes` beside
   `/to-do` in the same Dropbox App folder and uploads approved prepared PNGs
   there using add+autorename. It never moves, overwrites, or deletes remote
   files — moving a file into `/memes/posted` after a successful publish is

@@ -50,8 +50,14 @@ publish it live to Shopify once the operator approves it (Stage 7).
   side files outside git). The old coupon-only cron/log is folded into
   this workflow; `~/coupon_directory_log.md` is retired.
 - `prompts/meme_finder.md` — Stage 9, the Tuesday/Thursday seasonal
-  existing-meme finder. It prepares static candidates for Instagram review,
-  but never publishes them; approved items upload to Dropbox `/memes`.
+  existing-meme finder (reposts, with credit preserved). It prepares static
+  candidates for Instagram review, but never publishes them; approved items
+  upload to Dropbox `/memes`.
+- `prompts/meme_create.md` — Stage 11, same Tuesday/Thursday slot as Stage
+  9 and feeding the same `/memes` backlog, but builds *original* memes
+  instead of reposting: reuses a joke's wording (never its source image)
+  on a licensed Pexels stock photo via `connectors/meme_compose.py`, with
+  Riley Ink's own caption font and logo watermark.
 - `prompts/instagram_post.md` — Stage 10, the Instagram publishing job.
   Tuesday/Thursday it offers one approved-and-unposted meme (a file still
   sitting in Dropbox `/memes`, not yet moved to `/memes/posted`) with a
@@ -125,6 +131,20 @@ actually live:
   Riley Ink voice, filters brands/franchises/teams/players/characters, and
   sends prepared 1080×1350 review images to Telegram. Approval saves the
   exact candidate to Dropbox `/memes`; it does not publish to Instagram.
+- **Original meme creation** (Stage 11, `prompts/meme_create.md`, built
+  2026-10-13): runs the same Tuesday/Thursday 4:00 AM slot as Stage 9, as a
+  second, independent source into the same `/memes` backlog — up to three
+  per run. Instead of reposting, it takes a trending joke's *wording*
+  (never its source image), picks a licensed Pexels stock photo matching
+  the needed mood (a generic search, never aimed at recreating a specific
+  existing meme's exact photo), and composites Riley Ink's own caption
+  font plus the logo watermark via `connectors/meme_compose.py`
+  (`assets/fonts/Anton-Regular.ttf`, `assets/branding/riley_ink_logo.png`).
+  Same brand-voice filter and approval flow as Stage 9; feeds the exact
+  same ledger and Dropbox folder, so Stage 10 needs no awareness of which
+  stage a given `/memes` file came from. Not yet live — needs
+  `PEXELS_API_KEY` set (`install/01_provision_vps.md` Part 16) and the
+  cron job created.
 - **Instagram publishing** (Stage 10, `prompts/instagram_post.md`,
   built 2026-10-12, redesigned same day after live Meta setup and operator
   workshopping): a Tuesday/Thursday 6:00 AM job offers one
@@ -318,8 +338,9 @@ which before responding:
      resulting backlink is actually verified.
 7. **A reply to a seasonal meme candidate, a posting-schedule offer, a
    scheduled item, or an already-posted Instagram item** (an item carrying
-   an `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md` or
-   `prompts/instagram_post.md`) — resolve the exact ID in
+   an `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md`,
+   `prompts/meme_create.md`, or `prompts/instagram_post.md` — all three
+   share one ID sequence and ledger) — resolve the exact ID in
    `~/meme_library.md`; Telegram reply-to context outranks recency, and a
    bare number must not be guessed across batches. Check the ledger
    entry's `Instagram status` field first — it determines which of the

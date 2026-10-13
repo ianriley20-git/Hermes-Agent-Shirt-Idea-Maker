@@ -793,3 +793,60 @@ a **second, one-time cron job** that `prompts/instagram_post.md` creates
 itself at approval time, for the exact date/time the operator agreed to.
 You don't need to create that one manually; it's created and deleted
 automatically as part of the normal schedule/cancel/reschedule flow.
+
+---
+
+## Part 16 — Original meme creation (Stage 11): Pexels API key
+
+Much simpler than the Instagram setup — Pexels just needs a free API key,
+no OAuth, no account-type requirements.
+
+### Get a Pexels API key
+
+1. Go to `pexels.com/api` and sign up (or log in).
+2. Request/generate an API key from the dashboard — it's issued instantly,
+   no approval wait.
+
+### On the server (as `hermes`)
+
+Add it to `.env`:
+```bash
+nano ~/.hermes/.env
+```
+```
+PEXELS_API_KEY=paste_your_key_here
+```
+Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
+
+No new Python dependency — `connectors/meme_compose.py` reuses `requests`
+and `Pillow`, both already installed for the other connectors. It does
+need two asset files that live in the repo itself (not `.env`) —
+`assets/fonts/Anton-Regular.ttf` (the caption font — Anton, from Google
+Fonts, SIL Open Font License, freely redistributable) and
+`assets/branding/riley_ink_logo.png` (the watermark). Both are committed
+to this repo, so a normal `git pull` brings them automatically; just
+confirm they exist after pulling:
+```bash
+ls ~/riley-ink-pipeline/assets/fonts/Anton-Regular.ttf ~/riley-ink-pipeline/assets/branding/riley_ink_logo.png
+```
+
+### Verify
+
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/meme_compose.py \
+  --search "tired cat" --caption-top "TESTING" --caption-bottom "THE NEW MEME COMPOSER" \
+  --output /tmp/meme_test.png
+```
+Should print the Pexels photographer credit and `Composed to /tmp/meme_test.png`.
+Open the file and confirm it actually looks right — caption legible, logo
+in the bottom-right corner not overlapping the text, before trusting this
+unattended. This doesn't post anywhere or touch Dropbox; it's purely local
+image composition.
+
+### Create the cron job
+
+Same **Cron Jobs** mechanism as the others — point it at
+`prompts/meme_create.md`, delivering to your Telegram home channel,
+running **Tuesday and Thursday at 4:00 AM America/New_York** — the same
+slot as the existing "Seasonal meme finder" cron, since they're two
+independent sources feeding the same backlog, not a sequence.
