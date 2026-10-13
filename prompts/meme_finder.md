@@ -1,9 +1,12 @@
-# Daily seasonal meme finder
+# Seasonal meme finder
 
-Run daily at 5:00 AM America/New_York. Find up to five **existing memes**
-that fit Riley Ink's voice and current season, prepare non-destructively for
-Instagram review, and send them to Telegram for approval. Do not generate,
-rewrite, re-caption, publish, or claim ownership of a meme.
+Run Tuesday and Thursday at 4:00 AM America/New_York — a couple hours before
+`prompts/instagram_post.md`'s own Tuesday/Thursday 6:00 AM posting-offer run,
+so there's time for same-day approvals to land in the backlog first. Find up
+to five **existing memes** that fit Riley Ink's voice and current season,
+prepare non-destructively for Instagram review, and send them to Telegram
+for approval. Do not generate, rewrite, re-caption, publish, or claim
+ownership of a meme.
 
 Approval only saves an Instagram-ready copy to Dropbox `/memes`. It never
 publishes to Instagram or anywhere else.
@@ -151,8 +154,11 @@ record or resend the URL.
 
 ## Instagram publishing — handled separately
 
-`prompts/instagram_post.md` (Stage 10) reads this file's ledger
-(`~/meme_library.md`) for approved-and-unposted entries, drafts a caption,
-and actually publishes to Instagram on its own schedule. Nothing in this
-file posts anything — approval here only saves to Dropbox `/memes`, same
-as before.
+`prompts/instagram_post.md` (Stage 10) checks what's actually still sitting
+in Dropbox `/memes` (a file moved to `/memes/posted` is how it knows
+something's already been published — not a ledger field), drafts a caption,
+and offers it to the operator to schedule a specific post time. Nothing in
+this file posts anything — approval here only saves to Dropbox `/memes`,
+same as before. A meme can be approved here and still sit unposted for a
+while; that's expected, since approvals happen far more often than the
+twice-weekly posting cadence.

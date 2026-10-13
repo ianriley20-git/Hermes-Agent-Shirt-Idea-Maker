@@ -49,14 +49,16 @@ publish it live to Shopify once the operator approves it (Stage 7).
   deduplication/decision ledger `~/backlink_opportunity_log.md` (server-
   side files outside git). The old coupon-only cron/log is folded into
   this workflow; `~/coupon_directory_log.md` is retired.
-- `prompts/meme_finder.md` — Stage 9, the daily seasonal existing-meme
-  finder. It prepares static candidates for Instagram review, but never
-  publishes them; approved items upload to Dropbox `/memes`.
-- `prompts/instagram_post.md` — Stage 10, the Instagram publishing job that
-  actually posts approved memes from Dropbox `/memes`. Runs daily but only
-  posts a few times a week (seasonal-calendar-aware); drafts captions/
-  hashtags itself and sends a post-publish heads-up rather than a pre-post
-  approval gate — see that file for why.
+- `prompts/meme_finder.md` — Stage 9, the Tuesday/Thursday seasonal
+  existing-meme finder. It prepares static candidates for Instagram review,
+  but never publishes them; approved items upload to Dropbox `/memes`.
+- `prompts/instagram_post.md` — Stage 10, the Instagram publishing job.
+  Tuesday/Thursday it offers one approved-and-unposted meme (a file still
+  sitting in Dropbox `/memes`, not yet moved to `/memes/posted`) with a
+  drafted caption/hashtags and a proposed post time; an explicit YES with a
+  time schedules a one-time cron that actually publishes later, moving the
+  file to `/memes/posted` as the "already posted" record. A real approval
+  gate, not a heads-up — see that file for the full flow.
 - `~/meme_library.md` (server-only, outside git) — source URLs, creators,
   hashes, stable local paths, Dropbox paths, Instagram post status/
   permalinks, and approve/reject history for meme candidates.
@@ -118,27 +120,29 @@ actually live:
   and forum reply manually. Coupon-only tracking is folded into this
   shared system.
 - **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
-  2026-09-23): a Tuesday/Thursday 5:00 AM job finds up to five existing
-  public memes matched to current seasonal windows and Riley Ink voice,
-  filters brands/franchises/teams/players/characters, and sends prepared
-  1080×1350 review images to Telegram. Approval saves the exact candidate
-  to Dropbox `/memes`; it does not publish to Instagram.
-- **Instagram publishing** (Stage 10, `prompts/instagram_post.md`, built
-  2026-10-12): a daily job that checks the approved-and-unposted backlog
-  in `~/meme_library.md` and `config/seasonal_calendar.md`, but actually
-  posts only a few times a week (seasonal days get priority; otherwise it
-  targets roughly 3x/week on generically higher-engagement weekdays) — most
-  daily runs are `[SILENT]`. Drafts the caption/hashtags itself and
-  publishes live via `connectors/instagram_publish.py` (a Dropbox temporary
-  link feeds Meta's Graph API, since it needs a public image URL, not a
-  file upload). Posting itself is a deliberate, operator-approved exception
-  to this file's "explicit yes before anything irreversible" rule — the
-  meme already cleared one explicit approval (saving to Dropbox), so
-  posting sends a post-publish heads-up with a real undo (delete) rather
-  than a second blocking gate; see bucket 7 and `prompts/instagram_post.md`
-  for the exact mechanics. Not yet live — needs the Meta Developer app /
-  Instagram Business Account setup (`install/01_provision_vps.md` Part 15)
-  and the cron job actually created before the first real run.
+  2026-09-23, retimed 2026-10-12): a Tuesday/Thursday 4:00 AM job finds up
+  to five existing public memes matched to current seasonal windows and
+  Riley Ink voice, filters brands/franchises/teams/players/characters, and
+  sends prepared 1080×1350 review images to Telegram. Approval saves the
+  exact candidate to Dropbox `/memes`; it does not publish to Instagram.
+- **Instagram publishing** (Stage 10, `prompts/instagram_post.md`,
+  built 2026-10-12, redesigned same day after live Meta setup and operator
+  workshopping): a Tuesday/Thursday 6:00 AM job offers one
+  approved-and-unposted meme — found by checking what's actually still
+  sitting in Dropbox `/memes` (not yet moved to `/memes/posted`, which is
+  the operator's chosen signal for "already posted," not a ledger field) —
+  with a drafted caption/hashtags and a proposed post time. A YES with a
+  time **schedules** a one-time cron job for that moment rather than
+  posting immediately; that job does the actual publish via
+  `connectors/instagram_publish.py` (a Dropbox temporary link feeds Meta's
+  Instagram Login API, since it needs a public image URL, not a file
+  upload) and moves the file into `/memes/posted` as part of the same call.
+  This is a real, explicit approval gate — scheduling a specific time back
+  and forth with the operator *is* the yes — not a heads-up exception; see
+  bucket 7 and `prompts/instagram_post.md` for the exact mechanics. Not yet
+  live — needs the Meta Instagram Login app setup
+  (`install/01_provision_vps.md` Part 15, mostly done as of 2026-10-12 —
+  see `TODO.md`) and the two cron jobs actually created before first use.
 
 ## Message routing (Telegram)
 
@@ -312,30 +316,47 @@ which before responding:
    - When the operator reports manual outreach/submission, mark the exact
      row `submitted` with timestamp/evidence; use `live` only after the
      resulting backlink is actually verified.
-7. **A YES/NO reply to a seasonal meme candidate or an already-posted
-   Instagram item** (an item carrying an `M-YYYYMMDD-NN` ID from
-   `prompts/meme_finder.md` or `prompts/instagram_post.md`) — resolve the
-   exact ID in `~/meme_library.md`; Telegram reply-to context outranks
-   recency, and a bare number must not be guessed across batches. Check the
-   ledger entry's `Instagram status` field first — it determines which case
-   below applies, since the same ID format covers both a still-pending
-   candidate and an item already live on Instagram.
-   - **On YES** (candidate not yet posted): confirm the delivered 1080×1350
-     PNG still matches the ledger, mark it `approved`, and upload it
-     immediately to Dropbox `/memes` with `connectors/dropbox_meme_upload.py`.
-     Verify the remote filename/size, record the exact uploaded Dropbox path
-     onto the ledger entry, and report the `Uploaded to ...` path. This yes
-     authorizes saving only, never Instagram publication — `instagram_post.md`
-     handles that separately, on its own schedule.
-   - **On NO, `Instagram status` absent or not `posted`**: a normal
-     pre-publish rejection. Mark it `rejected`, preserving any reason so
-     later runs can improve filtering. Never delete the source record or
-     resend the URL.
-   - **On NO, `Instagram status: posted`**: a **takedown request**, not a
-     rejection — follow `prompts/instagram_post.md`'s "Takedown" section:
-     delete the live post via `connectors/instagram_publish.py --delete`,
-     mark the ledger `Instagram status: deleted`, preserve the reason, and
-     confirm the deletion on Telegram.
+7. **A reply to a seasonal meme candidate, a posting-schedule offer, a
+   scheduled item, or an already-posted Instagram item** (an item carrying
+   an `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md` or
+   `prompts/instagram_post.md`) — resolve the exact ID in
+   `~/meme_library.md`; Telegram reply-to context outranks recency, and a
+   bare number must not be guessed across batches. Check the ledger
+   entry's `Instagram status` field first — it determines which of the
+   four cases below applies, since the same ID format covers all of them
+   across their lifetime:
+   - **YES/NO on a candidate** (`Instagram status` absent — this is
+     `meme_finder.md`'s own approval, not a posting decision): on YES,
+     confirm the delivered 1080×1350 PNG still matches the ledger, mark it
+     `approved`, upload it immediately to Dropbox `/memes` with
+     `connectors/dropbox_meme_upload.py`, verify the remote filename/size,
+     record the exact uploaded Dropbox path onto the ledger entry, and
+     report the `Uploaded to ...` path. This authorizes saving only, never
+     posting — `instagram_post.md` handles that separately, as a later,
+     distinct decision. On NO, mark it `rejected`, preserving any reason;
+     never delete the source record or resend the URL.
+   - **A reply to a posting-schedule offer** (`Instagram status` absent or
+     not yet set to `scheduled`/`posted`, but the message is replying to an
+     `instagram_post.md` "Ready to schedule" card, not a `meme_finder.md`
+     candidate card — distinguish by which card is being replied to, not
+     just the ledger state): follow `prompts/instagram_post.md`'s "Handle
+     the reply" section — YES with a time creates a one-time cron and marks
+     the ledger `scheduled`; NO marks it `posting_rejected` (a *separate*,
+     later rejection from a candidate-stage NO — the meme was still
+     approved to save, just not to post); a correction revises and resends
+     the same card.
+   - **A reply to an item with `Instagram status: scheduled`**: this is a
+     cancel/reschedule request, not a new approval — follow
+     `prompts/instagram_post.md`'s "Cancelling or rescheduling" section:
+     delete the pending one-time cron job, then either create a new one for
+     a new time (update `Instagram scheduled for`) or mark it
+     `posting_rejected` and confirm the cancellation.
+   - **NO on an item with `Instagram status: posted`**: a takedown request,
+     not a rejection — follow `prompts/instagram_post.md`'s "Takedown"
+     section: delete the live post via `connectors/instagram_publish.py
+     --delete`, mark the ledger `Instagram status: deleted`, preserve the
+     reason, and confirm the deletion on Telegram. The file stays in
+     `/memes/posted` as a record; it is not moved back or re-offered.
 8. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
@@ -352,13 +373,12 @@ all waste more of the operator's time than one clarifying question would.
 
 - Never send an email, hit the upload app, publish a blog post, or take
   any other irreversible/external action without an explicit "yes" from
-  the operator in the same conversation. **One documented exception**:
-  `prompts/instagram_post.md`'s scheduled Instagram posting. The operator
-  explicitly chose a post-then-notify heads-up (with a real delete/undo)
-  over a second blocking gate, specifically because the meme already
-  cleared one explicit approval earlier (Dropbox `/memes`). Don't extend
-  this reasoning to any other stage without the operator making that same
-  explicit call for it.
+  the operator in the same conversation. This includes Instagram posting
+  (`prompts/instagram_post.md`) — an earlier version of this stage shipped
+  with a post-then-notify heads-up instead of a blocking gate, but the
+  operator reworked it (2026-10-12) back into a real approval: scheduling a
+  specific post time with the operator *is* the explicit yes, no exception
+  needed.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
 - **Pipeline-behavior changes go through a proposal branch, never

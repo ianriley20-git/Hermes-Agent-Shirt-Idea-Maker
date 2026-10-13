@@ -1102,15 +1102,56 @@ concepts, 2026-09-03)
       updated to match the path that actually worked. Same spirit as the
       Shopify Dev Dashboard lesson in Part 14 — document what actually
       worked after hitting it live, not just the first plausible approach.
+- [x] **Redesigned from heads-up-after-publish to schedule-and-approve,
+      2026-10-12**: after getting Meta auth working, operator workshopped
+      the actual posting flow and explicitly preferred collaborating on
+      each post (caption, hashtags, timing) before it goes live, rather
+      than the original autonomous daily-check/heads-up-with-undo design.
+      New shape: `prompts/instagram_post.md` runs **Tuesday/Thursday 6:00
+      AM** (not daily) — offers one candidate from the real backlog
+      (whatever's still sitting in Dropbox `/memes`, not yet moved to
+      `/memes/posted`) with a drafted caption/hashtags and a proposed post
+      time; the operator's YES-with-a-time **schedules** a one-time cron
+      job for that moment rather than posting immediately, and that job
+      does the actual publish later. NO is a real rejection (the meme
+      stays approved-to-save but won't be offered for posting again); a
+      correction revises and resends. This restores a normal pre-publish
+      approval gate — the earlier heads-up exception in `AGENTS.md`'s Hard
+      Rules was removed, since scheduling a specific time with the
+      operator *is* the explicit yes. Also moved `meme_finder.md`'s own
+      cron from daily 5:00 AM to Tuesday/Thursday 4:00 AM, two hours ahead
+      of the new posting-offer run, so same-day approvals are available in
+      the backlog first.
+      - **Why "already posted" is a folder, not a ledger field**: operator
+        explicitly wants the Dropbox `/memes` vs `/memes/posted` location
+        itself to be the signal the bot relies on — visually auditable in
+        Dropbox, not just an internal ledger state. `connectors/
+        dropbox_meme_upload.py` gained `--list-unposted` (lists what's
+        still in `/memes`, non-recursive so `/memes/posted` is naturally
+        excluded); `connectors/instagram_publish.py`'s `publish()` now
+        always moves the source file into `/memes/posted` after a
+        successful publish, not as an optional step. The ledger
+        (`~/meme_library.md`) still records metadata (permalink, media ID,
+        caption used, scheduled time) — it's just no longer what Step 1
+        checks to find the backlog.
+      - **Why one-time crons for the actual publish**: Hermes already has
+        precedent for creating one-off cron jobs on request (e.g. the
+        Thursday 2026-09-24 one-time test run for the backlink hunt in
+        Stage 8) — reused the same mechanism so a "post this at 6 PM
+        tonight" approval doesn't require a constantly-polling job or a
+        custom scheduling layer. Flagged as the first thing to verify
+        actually works once this goes live, since it hasn't been exercised
+        conversationally (only via the initial setup wizard) before now.
 - [ ] **Not yet live**: has the Instagram-scoped account ID and access
       token in hand as of 2026-10-12; still needs
       `INSTAGRAM_BUSINESS_ACCOUNT_ID`/`META_ACCESS_TOKEN` set in `.env` on
-      the server, a real test post verified live, and the daily cron job
-      actually created pointing at `prompts/instagram_post.md`.
-- [ ] **First live run review**: once set up, confirm a real post actually
-      goes live and the permalink/media ID get logged correctly, that the
-      seasonal-priority path actually triggers on an active nudge window
-      rather than just the cadence path, and that a `NO` reply to a posted
-      item actually deletes the live post (not just updates the ledger).
-      Also worth revisiting the Tuesday/Wednesday/Thursday engagement
-      heuristic after a few weeks of real Instagram Insights data.
+      the server, a real test post verified live, and both Tuesday/Thursday
+      cron jobs (meme finder retimed to 4:00 AM, posting-offer created at
+      6:00 AM) actually set up.
+- [ ] **First live run review**: once set up, confirm a real scheduled post
+      actually fires at the agreed time via its one-time cron, the
+      permalink/media ID get logged correctly, the file actually lands in
+      `/memes/posted`, the seasonal-priority pick actually triggers on an
+      active nudge window, a NO on a posted item actually deletes the live
+      post, and cancelling/rescheduling a `scheduled` item actually deletes
+      the right one-time cron rather than leaving a stale duplicate.

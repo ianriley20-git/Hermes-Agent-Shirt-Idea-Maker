@@ -17,7 +17,12 @@ temporary link (valid ~4 hours -- long enough for the publish flow) instead
 of maintaining a permanent public link.
 
 Flow: create a media container (image_url + caption) -> poll until the
-container finishes processing -> publish it -> fetch the live permalink.
+container finishes processing -> publish it -> fetch the live permalink ->
+move the source file from /memes to /memes/posted. That move is the
+operator's chosen source of truth for "already posted" (see
+prompts/instagram_post.md) -- always performed on a successful publish, not
+optional. A delete does NOT move the file back; it stays in /memes/posted
+as a record that it was posted and later taken down.
 
 Usage:
     python3 instagram_publish.py --dropbox-path "/memes/foo.png" --caption "..."
@@ -27,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import posixpath
 import sys
 import time
 
@@ -36,6 +42,7 @@ from dropbox.exceptions import ApiError, AuthError
 
 GRAPH_API_VERSION = "v26.0"  # bump if Meta deprecates this version
 GRAPH_API_BASE = f"https://graph.instagram.com/{GRAPH_API_VERSION}"
+POSTED_FOLDER = "/memes/posted"
 CONTAINER_POLL_INTERVAL_SECONDS = 5
 CONTAINER_POLL_TIMEOUT_SECONDS = 120
 
@@ -114,13 +121,27 @@ def get_permalink(media_id: str) -> str:
     return resp.json()["permalink"]
 
 
-def publish(dropbox_path: str, caption: str) -> tuple[str, str]:
+def move_to_posted(dropbox_path: str) -> str:
+    client = _dropbox_client()
+    destination = posixpath.join(POSTED_FOLDER, posixpath.basename(dropbox_path))
+    try:
+        client.files_create_folder_v2(POSTED_FOLDER)
+    except ApiError as exc:
+        error = exc.error
+        if not (error.is_path() and error.get_path().is_conflict()):
+            raise
+    result = client.files_move_v2(dropbox_path, destination, autorename=True)
+    return result.metadata.path_display or destination
+
+
+def publish(dropbox_path: str, caption: str) -> tuple[str, str, str]:
     image_url = get_temporary_image_url(dropbox_path)
     container_id = create_container(image_url, caption)
     wait_for_container(container_id)
     media_id = publish_container(container_id)
     permalink = get_permalink(media_id)
-    return media_id, permalink
+    moved_to = move_to_posted(dropbox_path)
+    return media_id, permalink, moved_to
 
 
 def delete(media_id: str) -> None:
@@ -152,9 +173,10 @@ def main() -> int:
             print(f"Deleted {args.delete}")
         else:
             assert args.dropbox_path is not None and args.caption is not None
-            media_id, permalink = publish(args.dropbox_path, args.caption)
+            media_id, permalink, moved_to = publish(args.dropbox_path, args.caption)
             print(f"Published to {permalink}")
             print(f"Media ID: {media_id}")
+            print(f"Moved to {moved_to}")
     except KeyError as exc:
         print(f"Missing required environment variable: {exc}", file=sys.stderr)
         return 1

@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Create the Dropbox /memes folder or upload an approved meme PNG to it.
+"""Create the Dropbox /memes folder, upload an approved meme PNG to it, or
+list what's still sitting there unposted.
 
 The folder is inside the existing Riley Ink Dropbox App folder, beside /to-do.
 This connector only creates /memes and writes new files there; it never moves,
-renames, overwrites, or deletes remote content.
+renames, overwrites, or deletes remote content -- moving a file into
+/memes/posted after a successful publish is instagram_publish.py's job, not
+this script's (see Stage 10, prompts/instagram_post.md).
 """
 
 from __future__ import annotations
@@ -16,9 +19,10 @@ from pathlib import Path
 
 import dropbox
 from dropbox.exceptions import ApiError, AuthError
-from dropbox.files import FolderMetadata, WriteMode
+from dropbox.files import FileMetadata, FolderMetadata, WriteMode
 
 MEME_FOLDER = "/memes"
+POSTED_FOLDER = "/memes/posted"
 
 
 def _client() -> dropbox.Dropbox:
@@ -70,22 +74,47 @@ def upload(file_path: Path, display_name: str) -> str:
     return metadata.path_display or dropbox_path
 
 
+def list_unposted() -> list[str]:
+    """Files sitting directly in /memes (not in /memes/posted) -- the backlog
+    not yet posted to Instagram. Folder location is the source of truth for
+    this, per the operator's own design: /memes/posted is where a file lands
+    the moment it's actually published, nowhere else marks that state."""
+    client = _client()
+    paths: list[str] = []
+    result = client.files_list_folder(MEME_FOLDER)
+    while True:
+        for entry in result.entries:
+            if isinstance(entry, FileMetadata):
+                paths.append(entry.path_display or entry.name)
+            # FolderMetadata (e.g. the "posted" subfolder itself) is skipped --
+            # this is intentionally non-recursive.
+        if not result.has_more:
+            break
+        result = client.files_list_folder_continue(result.cursor)
+    return paths
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ensure-folder", action="store_true", help="Create/verify /memes and exit")
+    parser.add_argument("--list-unposted", action="store_true", help="List files in /memes not yet moved to /memes/posted")
     parser.add_argument("--file", type=Path, help="Prepared Instagram PNG")
     parser.add_argument("--name", help="Display name used for the remote filename")
     args = parser.parse_args()
 
-    if args.ensure_folder and (args.file or args.name):
-        parser.error("--ensure-folder cannot be combined with --file/--name")
-    if not args.ensure_folder and (args.file is None or not args.name):
-        parser.error("provide --ensure-folder or both --file and --name")
+    modes = [args.ensure_folder, args.list_unposted, bool(args.file or args.name)]
+    if sum(bool(m) for m in modes) != 1:
+        parser.error("provide exactly one of: --ensure-folder, --list-unposted, or both --file and --name")
+    if (args.file is None) != (args.name is None):
+        parser.error("--file and --name must be provided together")
 
     try:
         if args.ensure_folder:
             folder = ensure_folder(_client())
             print(f"Ready {folder}")
+        elif args.list_unposted:
+            for path in list_unposted():
+                print(path)
         else:
             assert args.file is not None and args.name is not None
             uploaded_path = upload(args.file, args.name)

@@ -27,11 +27,15 @@ scheduler. Code lives here only where the built-in tools fall short:
   Instagram-feed 1080×1350 (4:5) PNG without cropping or overlaying it;
   only solid-color letterboxing is added. Creator credits/watermarks remain
   untouched. Run with `--input <source image> --output <prepared png>`.
-- `dropbox_meme_upload.py` (Stage 9) — creates/verifies `/memes` beside
+- `dropbox_meme_upload.py` (Stage 9/10) — creates/verifies `/memes` beside
   `/to-do` in the same Dropbox App folder and uploads approved prepared PNGs
   there using add+autorename. It never moves, overwrites, or deletes remote
-  files. Use `--ensure-folder` for setup or `--file <png> --name "<name>"`
-  after explicit Telegram approval.
+  files — moving a file into `/memes/posted` after a successful publish is
+  `instagram_publish.py`'s job, not this one's. Use `--ensure-folder` for
+  setup, `--file <png> --name "<name>"` after explicit Telegram approval, or
+  `--list-unposted` to list what's still sitting in `/memes` (not yet moved
+  to `/memes/posted`) — this is how `prompts/instagram_post.md` finds its
+  backlog each run.
 - `shopify_blog_publish.py` (Stage 7) — publishes a weekly blog post
   live to Shopify via the Admin API (a custom app, `write_content`
   scope only). Auth uses OAuth's client credentials grant
@@ -79,13 +83,20 @@ scheduler. Code lives here only where the built-in tools fall short:
   Publishing API needs a public image URL rather than a file upload, it
   generates a short-lived Dropbox temporary link (`dropbox` SDK, already a
   dependency) to feed the image into a media container, polls until it's
-  ready, then publishes it. No new dependency beyond `dropbox` and
-  `requests`, both already in `requirements.txt`. Install with the same
-  venv pip as the other connectors:
+  ready, then publishes it, then **moves the source file to
+  `/memes/posted`** as part of the same call — that move (not a ledger
+  field) is the operator's chosen signal for "already posted," always
+  performed on success, not optional. A delete does not move the file
+  back. No new dependency beyond `dropbox` and `requests`, both already in
+  `requirements.txt`. Install with the same venv pip as the other
+  connectors:
   ```
   /home/hermes/.hermes/hermes-agent/venv/bin/pip install -r requirements.txt
   ```
-  Publish:
+  Publish (this also moves the file to `/memes/posted` on success — only
+  run it when you actually mean to publish now, e.g. from the one-time
+  scheduled cron `prompts/instagram_post.md` creates at approval time, not
+  as a dry run):
   ```
   /home/hermes/.hermes/hermes-agent/venv/bin/python instagram_publish.py \
     --dropbox-path "/memes/<file>.png" --caption "<caption + hashtags>"
@@ -94,11 +105,10 @@ scheduler. Code lives here only where the built-in tools fall short:
   ```
   /home/hermes/.hermes/hermes-agent/venv/bin/python instagram_publish.py --delete <media ID>
   ```
-  Called from `AGENTS.md` bucket 7 and `prompts/instagram_post.md` — the
-  operator's documented exception to the usual pre-publish approval gate:
-  posting sends a post-publish heads-up with this delete command as the
-  real undo, rather than a second blocking yes, since the meme already
-  cleared one explicit approval when it was saved to Dropbox.
+  Called from `AGENTS.md` bucket 7 and `prompts/instagram_post.md` — always
+  from the one-time cron created at scheduling time, never directly from
+  the Tuesday/Thursday offer run. This delete command is also the takedown
+  mechanism for a `NO` reply on an already-posted item.
 - upload-app integration (post-Stage 6, scoped separately)
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway

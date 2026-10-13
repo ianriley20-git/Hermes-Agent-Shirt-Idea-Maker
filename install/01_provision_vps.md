@@ -778,13 +778,18 @@ line — then delete it if it was only a test:
 /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/instagram_publish.py --delete <media ID printed above>
 ```
 
-### Create the posting cron job
+### Create the posting-offer cron job
 
 Same **Cron Jobs** mechanism as the other scheduled jobs — point it at
 `prompts/instagram_post.md`, delivering to your Telegram home channel,
-running **daily** at a time of your choosing. It's deliberately a daily
-check rather than a fixed few-times-a-week schedule — see `TODO.md`'s
-Stage 10 entry for why: most days it looks at the backlog and the seasonal
-calendar and does nothing (`[SILENT]`), only actually posting a few times a
-week per the cadence/seasonal logic inside the prompt itself, so a seasonal
-day never gets missed just because the cron didn't happen to fire on it.
+running **Tuesday and Thursday at 6:00 AM America/New_York** — a couple
+hours after the meme finder's own Tuesday/Thursday 4:00 AM run on those
+same days (also worth rescheduling from its original daily 5:00 AM slot to
+match, if it hasn't been already — see `TODO.md`'s Stage 9 entry).
+
+This cron only ever *offers* a candidate and, on approval, schedules a
+future post — it never publishes directly. The actual publish happens via
+a **second, one-time cron job** that `prompts/instagram_post.md` creates
+itself at approval time, for the exact date/time the operator agreed to.
+You don't need to create that one manually; it's created and deleted
+automatically as part of the normal schedule/cancel/reschedule flow.

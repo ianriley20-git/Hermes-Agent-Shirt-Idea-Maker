@@ -1,113 +1,157 @@
 # Instagram meme publishing (Stage 10)
 
-Runs **daily** via cron, at a fixed check time (operator's choice — see
-`install/01_provision_vps.md` Part 15). Most days this produces `[SILENT]`
-and posts nothing — the job checks every day on purpose so a seasonal/event
-day (e.g. Halloween) is never missed, even though the actual posting cadence
-targets roughly three times a week, not daily. See the "Decide whether
-today is a posting day" step below for the exact logic.
+Runs **Tuesday and Thursday at 6:00 AM America/New_York** — a few hours after
+`prompts/meme_finder.md`'s 4:00 AM discovery run on the same days, so this
+isn't competing with brand-new candidate cards for attention.
 
-This stage never generates, rewrites, or alters a meme's visible credit or
-watermark — it only drafts a caption/hashtags for an already-approved image
-and publishes it. It never picks a meme that hasn't already cleared
-`prompts/meme_finder.md`'s approval gate (Dropbox `/memes`); that approval
-is the real editorial decision. Posting itself is a **heads-up, not a second
-approval gate** — the operator made that explicit choice because the meme
-already passed one explicit yes, and a second blocking gate before every
-post would defeat the point of scheduling this at all. The heads-up exists
-as a late safety check with a real undo (delete), not as cover for skipping
-review — see "Publish" and "Takedown" below.
+This is a **two-part file**: the recurring run below offers one candidate
+and, on approval, *schedules* a future post rather than posting immediately.
+A second, dynamically-created one-time cron job (see "Scheduled run") is
+what actually publishes at the agreed time.
 
-## Step 1 — Read current context and the approved backlog
+Approval here is a real, explicit yes/no gate, same as every other
+irreversible action in this pipeline — there is no heads-up-after-the-fact
+exception for this stage. The meme already cleared one approval
+(`meme_finder.md`, saving it to Dropbox `/memes`); scheduling it to post is
+a second, separate decision the operator makes deliberately, including
+*when*.
 
-Read:
+---
 
-- `prompts/_brand_voice.md`
-- `config/seasonal_calendar.md`
-- `~/meme_library.md` (authoritative ledger — source of both the
-  approved-and-unposted backlog and posting history)
+## Recurring run — offer a candidate (Tuesday/Thursday 6:00 AM cron)
 
-Filter `~/meme_library.md` to entries with `decision: approved` and no
-`Instagram status: posted` (an entry written before this stage existed, with
-no Instagram status field at all, counts as not yet posted).
+### Step 1 — Find the backlog
 
-If nothing qualifies, output exactly `[SILENT]` and stop — nothing to do
-today regardless of what day it is.
+Run:
+```
+/home/hermes/.hermes/hermes-agent/venv/bin/python \
+  connectors/dropbox_meme_upload.py --list-unposted
+```
+This lists every file currently sitting directly in Dropbox `/memes` —
+**not** `/memes/posted`. That folder location is the operator's chosen
+source of truth for "already posted," not a ledger field: if a file is
+still listed here, it hasn't been posted yet, full stop.
 
-## Step 2 — Decide whether today is a posting day
+If the list is empty, output exactly `[SILENT]` and stop.
 
-Compute two independent signals; either one alone is enough to post today:
+Cross-reference each listed path against `~/meme_library.md` by its
+recorded `Dropbox path` field to pull its metadata (why it fits, seasonal/
+niche tag, credit info, stable `M-YYYYMMDD-NN` ID). If a listed file has no
+matching ledger entry (shouldn't normally happen), skip it rather than
+guessing at its context.
 
-1. **Seasonal priority.** Check `config/seasonal_calendar.md` for an active
-   nudge window today (e.g. the days immediately around Halloween, a major
-   holiday, a sports kickoff date). If a window is active *and* at least one
-   unposted approved entry's seasonal/niche fit matches it, today is a
-   priority posting day regardless of the cadence check below — a dated
-   seasonal joke posted late is much weaker than the same joke posted on
-   the day it's actually timely.
-2. **Cadence target.** Absent a seasonal priority, target posting roughly
-   three times a week. Check the most recent `Instagram posted date` logged
-   in `~/meme_library.md`. Treat today as a posting day if:
-   - at least 2 days have passed since the last post, **and**
-   - today is Tuesday, Wednesday, or Thursday — a generic, commonly-cited
-     higher-engagement window for Instagram. This is a starting heuristic,
-     not measured data for this specific account; once there's a real
-     posting history, prefer the account's own Instagram Insights over this
-     guess if the two disagree.
-   - **or**, regardless of weekday, more than 4 days have passed since the
-     last post — so a backlog never silently stalls past a week just
-     because it's the "wrong" day.
+### Step 2 — Pick one
 
-If neither signal says to post today, output exactly `[SILENT]` and stop.
+Read `config/seasonal_calendar.md`. If an active nudge window matches one of
+the backlog entries' seasonal/niche fit, prefer that one — a dated seasonal
+joke is much weaker posted after its moment passes. Otherwise, pick the
+oldest-approved entry (by the ledger's approval date) — first in, first out,
+so nothing sits forever while newer approvals jump the queue.
 
-## Step 3 — Pick which meme to post
+### Step 3 — Draft a caption, hashtags, and a proposed time
 
-Among the entries that qualify for today (seasonally-matching entries only,
-if Step 2 triggered on seasonal priority; otherwise any unposted approved
-entry), pick the **oldest by approval date** — first in, first out, so
-nothing sits in the backlog indefinitely. Resolve its exact `M-YYYYMMDD-NN`
-ID and its Dropbox path from the ledger (see the note at the bottom of this
-file about `meme_finder.md` now recording that path on approval).
-
-## Step 4 — Draft the caption and hashtags
-
-Read `prompts/_brand_voice.md` and write, in Riley Ink's actual voice
+Read `prompts/_brand_voice.md` and draft, in Riley Ink's actual voice
 (deadpan/absurdist or wordplay — never sincere, cutesy, or generic
 gift-copy):
 
 - A short caption, one to three lines. **Never claim authorship of the
   meme.** If the ledger's credit/rights field names a known creator or
-  uploader, credit them in the caption (e.g. "Via @creator" or "h/t
-  u/redditor"); if unknown, don't invent one.
+  uploader, credit them (e.g. "Via @creator" or "h/t u/redditor"); if
+  unknown, don't invent one.
 - 3 to 8 relevant hashtags mixing the specific seasonal/niche angle with a
-  couple of broader-reach tags. More than that starts reading as
-  hashtag-stuffing rather than discoverability.
-- No link-in-bio hard sell on every post. An occasional light mention that
-  Riley Ink makes shirts is fine; the caption's actual job is to be funny
-  and shareable, not an ad.
+  couple of broader-reach tags.
+- A proposed post time — e.g. "tonight at 6 PM" or "tomorrow at 5 AM." This
+  is a generic, commonly-cited engagement-window guess, not measured data
+  for this account; say so plainly rather than presenting it as researched.
+  Prefer a time later today or the next morning, not multiple days out —
+  the backlog should move, not pile up behind a slow schedule.
 
-## Step 5 — Publish
+### Step 4 — Send one card to Telegram
+
+```
+## Ready to schedule — M-YYYYMMDD-NN
+
+[image]
+
+Why it fits: [one line]
+Proposed caption: "..."
+Proposed hashtags: #... #...
+Proposed time: tonight at 6:00 PM, or tomorrow at 5:00 AM — your call
+
+Reply YES [a time] to schedule it, NO to reject this one from posting,
+or send a correction (different caption/hashtags/time/image).
+```
+
+### Step 5 — Handle the reply
+
+- **YES, with a specific time** (one of the proposed times, or the
+  operator's own): resolve the exact date/time. Create a **one-time cron
+  job** for that moment, delivering to the Telegram home channel, whose
+  prompt instructs: *"Execute prompts/instagram_post.md's 'Scheduled run'
+  section for M-YYYYMMDD-NN."* Update the ledger entry: `Instagram status:
+  scheduled`, `Instagram scheduled for: <date/time>`, and the exact
+  caption/hashtags agreed on. Confirm to the operator what's scheduled and
+  for when. Do not re-offer this entry in a future recurring run while it's
+  in `scheduled` status.
+- **NO**: this is a permanent rejection for posting purposes — mark the
+  ledger entry's Instagram status `posting_rejected`, preserving any reason
+  given. Never re-offer it. The file stays exactly where it is in `/memes`
+  (no move, no delete) — this is a separate decision from the earlier
+  `meme_finder.md` approval, and the record should reflect that it was
+  approved to save but rejected to post, not pretend it was never approved.
+- **A correction** (different caption, different hashtags, a different
+  time, "show me a different image instead"): revise accordingly and
+  resend the same card for another round. Repeat until YES or NO. Never
+  schedule anything on a correction alone.
+
+### Cancelling or rescheduling an already-scheduled item
+
+If the operator replies to an item currently `scheduled` (before its
+one-time cron has fired) with a new instruction:
+
+- **A new time**: delete the existing one-time cron job for this ID and
+  create a new one for the new time; update the ledger's `Instagram
+  scheduled for` field to match.
+- **"Cancel" / "never mind" / NO**: delete the existing one-time cron job,
+  mark the ledger entry `posting_rejected` (same as a normal NO above), and
+  confirm the cancellation.
+
+---
+
+## Scheduled run — publish now (one-time cron, created per approval above)
+
+This section runs only when invoked by a dynamically-created one-time cron
+job referencing a specific `M-YYYYMMDD-NN` ID — never on its own schedule.
+
+### Step 1 — Resolve and verify
+
+Look up the referenced ID in `~/meme_library.md`. Confirm its status is
+still `scheduled` (not already `posted` or `posting_rejected` — if it's
+anything else, something went wrong; report it to the operator rather than
+guessing) and that its recorded Dropbox path still exists in `/memes`.
+
+### Step 2 — Publish
 
 ```
 /home/hermes/.hermes/hermes-agent/venv/bin/python \
   connectors/instagram_publish.py \
-  --dropbox-path "<Dropbox path from the ledger entry>" \
-  --caption "<drafted caption, including hashtags>"
+  --dropbox-path "<Dropbox path from the ledger>" \
+  --caption "<the exact caption + hashtags agreed on at scheduling time>"
 ```
 
-This generates a temporary Dropbox link, creates an Instagram media
-container, polls until it's ready, publishes it, and prints the live
-permalink and media ID. If it fails, report the exact error to the
-operator — don't retry beyond the connector's own built-in polling, and
-don't silently fall back to posting a different meme instead.
+This creates the Instagram media container, polls until ready, publishes
+it, fetches the live permalink, and **moves the file to `/memes/posted/`**
+as part of the same call — that move is what marks it posted for every
+future recurring run's Step 1. If it fails, report the exact error; do not
+retry beyond the connector's own built-in polling, and do not substitute a
+different meme.
 
-## Step 6 — Log and send the heads-up
+### Step 3 — Log and confirm
 
-On success:
-
-1. Update the ledger entry: `Instagram status: posted`, `Instagram posted
-   date: <today>`, `Instagram media ID: <id>`, `Instagram permalink: <url>`.
-2. Send a Telegram message immediately — **after** publishing, not before:
+On success, update the ledger: `Instagram status: posted`, `Instagram
+posted date: <today>`, `Instagram media ID: <id>`, `Instagram permalink:
+<url>`, `Dropbox path:` updated to the new `/memes/posted/...` location.
+Send a confirmation to Telegram:
 
 ```
 Posted to Instagram: <permalink>
@@ -115,21 +159,13 @@ Posted to Instagram: <permalink>
 M-YYYYMMDD-NN — <short title / why it fits>
 Caption: "<exact caption text that was posted>"
 
-Reply NO M-YYYYMMDD-NN and I'll take it down.
+Reply NO M-YYYYMMDD-NN if you want it taken down.
 ```
-
-Silence means it stays up. This is the operator's one documented exception
-to `AGENTS.md`'s general "explicit yes before anything irreversible" rule —
-granted specifically because the meme already cleared an explicit approval
-gate earlier (saving to Dropbox `/memes`), and recorded here so it isn't
-mistaken for a precedent that applies to any other stage.
 
 ## Takedown (operator replies NO to an already-posted item)
 
-A `NO M-YYYYMMDD-NN` reply where the ledger entry already shows
-`Instagram status: posted` is a **takedown request** — distinct from a
-`NO` on a still-pending candidate in `meme_finder.md`'s own flow, which
-just rejects it before it's ever posted.
+A `NO M-YYYYMMDD-NN` reply where the ledger entry already shows `Instagram
+status: posted` is a takedown, not a rejection:
 
 1. Resolve the exact ledger entry and its `Instagram media ID`.
 2. Run:
@@ -138,21 +174,14 @@ just rejects it before it's ever posted.
      connectors/instagram_publish.py --delete <media ID>
    ```
 3. Update the ledger: `Instagram status: deleted`, preserving the reason if
-   one was given.
+   given. The file stays in `/memes/posted/` as a record that it was posted
+   and later taken down — it is **not** moved back to `/memes` and will not
+   be re-offered automatically; reconsidering it later is a deliberate,
+   separate request.
 4. Confirm the deletion on Telegram.
 
 ## What this stage does not do
 
 No Stories, Reels, carousels, or video — feed image posts only, matching
 `meme_finder.md`'s static-image-only scope. No comment moderation, DM
-handling, or analytics review. No automatic re-posting of a deleted item;
-if the operator wants it back up later, that's a fresh, deliberate request.
-
-## Ledger field note
-
-`meme_finder.md`'s approval flow now records the uploaded Dropbox path back
-onto the ledger entry at approval time, specifically so this stage can
-resolve it without re-deriving the filename. Entries approved before that
-change may be missing the field — resolve the path manually from the
-`Uploaded to ...` confirmation in that approval's Telegram history if this
-stage can't find it, rather than guessing a filename.
+handling, or analytics review.
