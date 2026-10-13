@@ -702,6 +702,46 @@ concepts, 2026-09-03)
 ## Post-Stage 6 (out of scope for now)
 - [ ] Upload-app connector integration — intentionally deferred until Stage
       6 is working end to end, then scoped as its own piece of work.
+      **Scoping notes from a 2026-10-13 discussion, kept here for when this
+      is actually picked up**: operator's real manual workflow between an
+      approved design PNG and the Printify upload (via the separate,
+      already-built `Printify-POD-Manager` desktop app) is: Illustrator —
+      trace/vectorize, remove background, save a clean PNG — then a
+      realistic mockup, currently built from a MidJourney lifestyle photo
+      composited in Photoshop (warping the art onto the fabric with
+      correct folds/lighting). Closing this loop means automating both of
+      those steps, which are not equally hard:
+      - **Background removal looks more tractable than it sounds**, because
+        `image_style.md`'s three designers are already prompted to render
+        on a solid flat background (black for Duke/Ash, flat/white for
+        Nova) — a uniform flat-color background is a deterministic
+        color-key/flood-fill problem, not a general AI background-removal
+        problem, which should be far more predictable/trustworthy than
+        something like `rembg` on a photo. Real risk: edge quality (faint
+        halos from anti-aliasing/color drift at artwork edges if key
+        tolerance isn't tuned against real output). Separately, whether
+        true *vectorization* (not just transparency) is actually required
+        is an open question — may be a habit from the Illustrator-based
+        workflow rather than a real print-quality requirement from the
+        supplier; worth asking directly before building it.
+      - **Realistic mockup generation is the genuinely hard half** —
+        fabric-fold/lighting-aware compositing is an immature, actively-
+        evolving problem space, not something to promise reliable AI
+        automation of. **First thing to check before building anything
+        custom**: does Printify's own API already generate mockups from an
+        uploaded design (most POD platforms do, placing the flat art onto
+        their own product photography)? Not the lifestyle-photo quality of
+        the current manual process, but may be good enough for a first
+        version and would eliminate the hardest part of this problem
+        entirely rather than trying to reproduce Photoshop-level
+        compositing skill with AI.
+      - **Recommended phasing**: background-key automation first (bounded,
+        testable, high-confidence), check Printify's native mockup API in
+        parallel, and only invest in a custom AI mockup solution if their
+        native output genuinely isn't good enough for the brand. This is a
+        bigger initiative than anything built so far in this repo — treat
+        it as its own scoping conversation when picked up, not something to
+        spec from these notes alone.
 
 ## Category expansion: moving past the 5 fixed niches (2026-09-20)
 - [x] **Why**: after a few days of real runs, every concept was coming
