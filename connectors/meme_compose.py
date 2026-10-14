@@ -141,35 +141,76 @@ def _fit_wrapped(
     return font, lines, line_height, spacing
 
 
+LOGO_CLEARANCE = 16  # px gap to keep between a text line and the logo, when they'd actually collide
+
+
+def _resplit_last_line(
+    draw: ImageDraw.ImageDraw, lines: list[str], font: ImageFont.FreeTypeFont, safe_width: int
+) -> list[str]:
+    """If the last line is too wide to ever fit beside the logo -- even
+    shifted flush against the left margin -- push trailing words onto new
+    line(s) until it fits, or until only one word remains (an edge case
+    left as-is; nothing more can be done for a single overlong word)."""
+    lines = list(lines)
+    while True:
+        words = lines[-1].split()
+        bbox = draw.textbbox((0, 0), lines[-1], font=font, stroke_width=STROKE_WIDTH)
+        if bbox[2] - bbox[0] <= safe_width or len(words) <= 1:
+            return lines
+        lines[-1] = " ".join(words[:-1])
+        lines.append(words[-1])
+
+
 def _draw_caption(
     draw: ImageDraw.ImageDraw,
     text: str,
     canvas_size: tuple[int, int],
     *,
     top: bool,
-    reserve_right: int = 0,
+    avoid_rect: tuple[int, int, int, int] | None = None,
 ) -> None:
-    """reserve_right keeps the text clear of the logo, which always sits in
-    the bottom-right corner -- only the bottom caption needs it."""
+    """avoid_rect (left, top, right, bottom) is the logo's bounding box.
+    Lines are sized and centered using the full canvas width -- a short
+    caption stays properly centered. For a bottom caption (the only one
+    that ever shares a row with the logo, since it always sits on the
+    bottom-most line by construction), the last line is first re-wrapped
+    narrow enough to fit beside the logo if needed, then shifted left just
+    far enough to actually clear it -- re-wrapping alone isn't enough,
+    since a short-but-centered line can still reach into the logo's column;
+    shifting alone isn't enough either, since a too-wide line still
+    overlaps even pinned to the left margin. Needs both."""
     text = text.upper()
-    region_left = MARGIN
-    region_right = canvas_size[0] - MARGIN - reserve_right
-    max_width = region_right - region_left
+    max_width = canvas_size[0] - 2 * MARGIN
     max_height = round(canvas_size[1] * CAPTION_HEIGHT_FRACTION)
 
     font, lines, line_height, spacing = _fit_wrapped(draw, text, max_width, max_height)
-    total_height = len(lines) * line_height + max(0, len(lines) - 1) * spacing
 
+    if not top and avoid_rect is not None:
+        safe_width = avoid_rect[0] - MARGIN - LOGO_CLEARANCE
+        lines = _resplit_last_line(draw, lines, font, safe_width)
+
+    total_height = len(lines) * line_height + max(0, len(lines) - 1) * spacing
     y = MARGIN if top else canvas_size[1] - MARGIN - total_height
     for line in lines:
         bbox = draw.textbbox((0, 0), line, font=font, stroke_width=STROKE_WIDTH)
         line_w = bbox[2] - bbox[0]
-        x = region_left + (max_width - line_w) / 2 - bbox[0]
+        x = (canvas_size[0] - line_w) / 2 - bbox[0]
+
+        if avoid_rect is not None:
+            ax0, ay0, ax1, ay1 = avoid_rect
+            line_top, line_bottom = y, y + line_height
+            right_edge = x + bbox[2]
+            vertical_overlap = line_bottom > ay0 and line_top < ay1
+            horizontal_overlap = right_edge > ax0
+            if vertical_overlap and horizontal_overlap:
+                x -= right_edge - ax0 + LOGO_CLEARANCE
+                x = max(x, MARGIN - bbox[0])  # never push it past the left margin
+
         draw.text((x, y - bbox[1]), line, font=font, fill="white", stroke_width=STROKE_WIDTH, stroke_fill="black")
         y += line_height + spacing
 
 
-def _logo_footprint(canvas_width: int) -> tuple[Image.Image, int]:
+def _logo_footprint(canvas_width: int) -> Image.Image:
     logo = Image.open(LOGO_PATH).convert("RGBA")
     target_w = round(canvas_width * LOGO_WIDTH_FRACTION)
     scale = target_w / logo.width
@@ -177,13 +218,17 @@ def _logo_footprint(canvas_width: int) -> tuple[Image.Image, int]:
     if LOGO_OPACITY < 1.0:
         alpha = logo.split()[-1].point(lambda a: round(a * LOGO_OPACITY))
         logo.putalpha(alpha)
-    return logo, target_w
+    return logo
 
 
-def _paste_logo(canvas: Image.Image, logo: Image.Image) -> None:
-    x = canvas.width - logo.width - LOGO_MARGIN
-    y = canvas.height - logo.height - LOGO_MARGIN
-    canvas.paste(logo, (x, y), logo)
+def _logo_rect(canvas_size: tuple[int, int], logo: Image.Image) -> tuple[int, int, int, int]:
+    x0 = canvas_size[0] - logo.width - LOGO_MARGIN
+    y0 = canvas_size[1] - logo.height - LOGO_MARGIN
+    return x0, y0, canvas_size[0], canvas_size[1]
+
+
+def _paste_logo(canvas: Image.Image, logo: Image.Image, rect: tuple[int, int, int, int]) -> None:
+    canvas.paste(logo, (rect[0], rect[1]), logo)
 
 
 def compose(
@@ -195,14 +240,15 @@ def compose(
     img = Image.open(io.BytesIO(background)).convert("RGB")
     canvas = _cover_resize(img, CANVAS_SIZE).convert("RGBA")
     draw = ImageDraw.Draw(canvas)
-    logo, logo_width = _logo_footprint(canvas.width)
+    logo = _logo_footprint(canvas.width)
+    logo_rect = _logo_rect(CANVAS_SIZE, logo)
     if caption_top:
         _draw_caption(draw, caption_top, CANVAS_SIZE, top=True)
     if caption_bottom:
-        # Logo sits bottom-right, so the bottom caption reserves that space
-        # rather than risk the two overlapping.
-        _draw_caption(draw, caption_bottom, CANVAS_SIZE, top=False, reserve_right=logo_width + LOGO_MARGIN)
-    _paste_logo(canvas, logo)
+        # Logo sits bottom-right -- only a line that actually overlaps it
+        # gets nudged; see _draw_caption.
+        _draw_caption(draw, caption_bottom, CANVAS_SIZE, top=False, avoid_rect=logo_rect)
+    _paste_logo(canvas, logo, logo_rect)
     canvas.convert("RGB").save(output_path, "PNG")
 
 
