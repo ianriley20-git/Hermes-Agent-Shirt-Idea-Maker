@@ -38,19 +38,19 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 
 CANVAS_SIZE = (1080, 1350)  # matches meme_prepare.py's existing 4:5 target
-MARGIN = 60  # horizontal margin only -- a square grid-thumbnail crop doesn't trim width, since it's already 1080
-# Instagram's profile-grid thumbnail crops a 4:5 post -- worst case, a
-# centered 1080x1080 square, which trims 135px off the top and bottom of
-# this 1350-tall canvas. VERTICAL_SAFE_MARGIN keeps the logo and both
-# captions inside the part of the image that survives that crop (135px +
-# a buffer), so they're visible both in the full post and the grid
-# thumbnail, not just the former.
-VERTICAL_SAFE_MARGIN = 160
+# Deliberately a light touch, not a large inset: real meme generators
+# anchor caption text flush or near-flush to the edges (part of what
+# reads as "a meme" at a glance), and the grid-thumbnail crop this once
+# tried to fully guard against isn't even confirmed to still work the way
+# assumed -- see TODO.md's Stage 11 entry. Traded a hypothetical,
+# secondary-view risk for authenticity in the primary (feed/opened-post)
+# view, which is how most people actually see this.
+MARGIN = 60
 FONT_PATH = Path(__file__).resolve().parent.parent / "assets" / "fonts" / "Anton-Regular.ttf"
 LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "branding" / "riley_ink_logo.png"
 LOGO_WIDTH_FRACTION = 0.16  # logo width as a fraction of canvas width
 LOGO_OPACITY = 0.92
-LOGO_RIGHT_MARGIN = 36  # horizontal only; vertical uses VERTICAL_SAFE_MARGIN
+LOGO_MARGIN = 36
 STROKE_WIDTH = 6
 MAX_FONT_SIZE = 110
 MIN_FONT_SIZE = 36
@@ -197,7 +197,7 @@ def _draw_caption(
         lines = _resplit_last_line(draw, lines, font, safe_width)
 
     total_height = len(lines) * line_height + max(0, len(lines) - 1) * spacing
-    y = VERTICAL_SAFE_MARGIN if top else canvas_size[1] - VERTICAL_SAFE_MARGIN - total_height
+    y = MARGIN if top else canvas_size[1] - MARGIN - total_height
     for line in lines:
         bbox = draw.textbbox((0, 0), line, font=font, stroke_width=STROKE_WIDTH)
         line_w = bbox[2] - bbox[0]
@@ -229,8 +229,8 @@ def _logo_footprint(canvas_width: int) -> Image.Image:
 
 
 def _logo_rect(canvas_size: tuple[int, int], logo: Image.Image) -> tuple[int, int, int, int]:
-    x0 = canvas_size[0] - logo.width - LOGO_RIGHT_MARGIN
-    y0 = canvas_size[1] - logo.height - VERTICAL_SAFE_MARGIN
+    x0 = canvas_size[0] - logo.width - LOGO_MARGIN
+    y0 = canvas_size[1] - logo.height - LOGO_MARGIN
     return x0, y0, canvas_size[0], canvas_size[1]
 
 
