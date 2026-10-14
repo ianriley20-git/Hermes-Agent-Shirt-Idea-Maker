@@ -1284,3 +1284,24 @@ concepts, 2026-09-03)
       development) render cleanly across a range of lengths, and the
       mandatory Unsplash credit actually shows up in the real posted
       caption for an `Origin: original` item.
+- [x] **Caption/logo margin tuning, same day**: real test renders surfaced
+      two layout bugs in `connectors/meme_compose.py`, fixed in sequence:
+      (1) the logo collided with a bottom caption's text — fixed by
+      centering captions at full canvas width by default and only nudging
+      (and, if genuinely necessary, re-wrapping) the specific line that
+      would actually overlap the logo, rather than pre-emptively narrowing
+      the whole caption block regardless of whether a collision would
+      happen; (2) a follow-up attempt to also guard against Instagram's
+      profile-grid thumbnail crop (worst case, a centered 1:1 square crop
+      trimming 135px off the top/bottom of the 1350-tall canvas) added a
+      160px margin that overcorrected — real meme generators anchor
+      caption text flush or near-flush to the edges, and the large margin
+      made every post look less like an authentic meme in the primary
+      (feed/opened-post) view, to guard against a secondary, grid-view-only
+      risk that isn't even confirmed to still work the way assumed
+      (conflicting third-party claims on whether Instagram still crops
+      grid thumbnails to 1:1 square, or moved to a gentler 3:4, with no
+      official source found either way). Reverted to the original
+      genre-normal 60px/36px margins, keeping only the per-line collision
+      fix. Decision: prioritize authenticity in the view most people
+      actually see over protection against an unconfirmed edge case.
