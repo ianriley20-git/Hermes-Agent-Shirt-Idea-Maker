@@ -1,9 +1,9 @@
 # Original meme creation (Stage 11)
 
-Runs **Tuesday and Thursday at 4:00 AM America/New_York** — the same slot
-as `prompts/meme_finder.md`, as a second, independent source feeding the
-same Dropbox `/memes` backlog and `~/meme_library.md` ledger. Produces up
-to **three** candidates per run (fewer is fine, never pad).
+Runs **Tuesday, Thursday, and Saturday at 4:00 AM America/New_York** — the
+same slot as `prompts/meme_finder.md`, as a second, independent source
+feeding the same Dropbox `/memes` backlog and `~/meme_library.md` ledger.
+Produces up to **three** candidates per run (fewer is fine, never pad).
 
 This is **not** a repost. `meme_finder.md` finds and reposts an existing
 meme's actual image, preserving its creator's credit. This file does the
@@ -40,8 +40,27 @@ with `Origin: original`.
 
 ## Step 2 — Find joke wording (never the source image)
 
-Search recent, public sources (Reddit, meme communities, general web) the
-same way `meme_finder.md` does, but extract only:
+Draw from **two sourcing lanes**, not just one — this is where `meme_create.md`
+genuinely differs from `meme_finder.md`, beyond just not reposting the image:
+
+1. **Currently trending** (same as `meme_finder.md`'s own Step 2): recent,
+   actively-circulating jokes and formats — recency matters here, since the
+   point is to be timely.
+2. **Proven/classic formats**: well-established, enduring meme formats and
+   jokes that have already demonstrated lasting appeal over time, regardless
+   of whether they're trending *this week*. Recency doesn't matter for this
+   lane — since the final image is always original art, a years-old format
+   recreated fresh is just as valid as something posted yesterday. Still
+   must be a **recognizable existing meme format** (same as lane 1) — this
+   is about *when* the source material is from, not about inventing a new
+   format from raw, never-memed humor (that's explicitly out of scope for
+   now).
+
+Mix both lanes across a run's candidates rather than defaulting entirely to
+one. Search recent, public sources (Reddit, meme communities, general web)
+the same way `meme_finder.md` does for lane 1; for lane 2, draw on
+well-known, long-running formats you already know to be enduring rather
+than needing to verify freshness. Either way, extract only:
 
 - the exact wording/text of the joke,
 - the underlying mood/reaction it needs (e.g. "exasperated," "smug,"
@@ -99,6 +118,8 @@ Append each delivered candidate to `~/meme_library.md` with:
 
 - ID and run date
 - `Origin: original`
+- `Source lane: trending | proven classic` (which of Step 2's two lanes this
+  came from)
 - the exact wording used
 - Unsplash photographer name and photo URL — **required** credit (not
   optional), since `prompts/instagram_post.md` must surface it in the
@@ -114,7 +135,7 @@ Re-read the ledger and confirm every ID was written exactly once.
 Send each candidate paired with its composed image:
 
 ```
-## #N — M-YYYYMMDD-NN (original)
+## #N — M-YYYYMMDD-NN (original, [trending | proven classic])
 
 Why it fits: [one concise brand/season explanation]
 Source wording via: [where the joke text came from, generically — not a link to a specific image]

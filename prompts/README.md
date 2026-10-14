@@ -35,16 +35,17 @@ independently of any script.
   coupon backlink hunt, six-hour gift-request thread monitor, shared
   server-side deduplication ledger, and the Telegram YES/NO flow that
   drafts outreach without ever sending or posting it automatically.
-- `meme_finder.md` — Stage 9. Tuesday/Thursday 4:00 AM search for existing
-  public memes that fit Riley Ink's voice. Prepares static 1080×1350 review
-  copies, preserves source credit/watermarks, and uploads approved items to
-  Dropbox `/memes`.
-- `meme_create.md` — Stage 11. Same Tuesday/Thursday 4:00 AM slot as Stage
-  9, feeding the same `/memes` backlog, but builds *original* memes
-  instead of reposting: reuses a trending joke's wording (never its source
-  image) on a licensed Unsplash stock photo, with Riley Ink's own caption
-  font and logo watermark via `connectors/meme_compose.py`.
-- `instagram_post.md` — Stage 10. Tuesday/Thursday 6:00 AM job that checks
+- `meme_finder.md` — Stage 9. Tuesday/Thursday/Saturday 4:00 AM search for
+  existing public memes that fit Riley Ink's voice. Prepares static
+  1080×1350 review copies, preserves source credit/watermarks, and uploads
+  approved items to Dropbox `/memes`.
+- `meme_create.md` — Stage 11. Same Tuesday/Thursday/Saturday 4:00 AM slot
+  as Stage 9, feeding the same `/memes` backlog, but builds *original*
+  memes instead of reposting: reuses a joke's wording (never its source
+  image), from either currently-trending or proven/classic formats, on a
+  licensed Unsplash stock photo, with Riley Ink's own caption font and logo
+  watermark via `connectors/meme_compose.py`.
+- `instagram_post.md` — Stage 10. Tuesday/Thursday/Saturday 6:00 AM job that checks
   what's actually still sitting in Dropbox `/memes` (not yet moved to
   `/memes/posted`, which is how it knows something's already live) and
   offers one candidate with a drafted caption/hashtags and a proposed post

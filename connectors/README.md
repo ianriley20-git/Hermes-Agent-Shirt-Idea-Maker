@@ -132,7 +132,7 @@ scheduler. Code lives here only where the built-in tools fall short:
   ```
   Called from `AGENTS.md` bucket 7 and `prompts/instagram_post.md` — always
   from the one-time cron created at scheduling time, never directly from
-  the Tuesday/Thursday offer run. This delete command is also the takedown
+  the Tuesday/Thursday/Saturday offer run. This delete command is also the takedown
   mechanism for a `NO` reply on an already-posted item.
 - upload-app integration (post-Stage 6, scoped separately)
 

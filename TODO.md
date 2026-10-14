@@ -1305,3 +1305,39 @@ concepts, 2026-09-03)
       genre-normal 60px/36px margins, keeping only the per-line collision
       fix. Decision: prioritize authenticity in the view most people
       actually see over protection against an unconfirmed edge case.
+- [x] **Expanded to 3x/week, added a "proven classic" sourcing lane,
+      2026-10-13**: operator revisited the whole meme pipeline now that
+      both the repost (Stage 9) and original (Stage 11) lanes exist, and
+      wanted a more regular posting cadence now that it's largely
+      automated.
+      - **Cadence**: posting moved from Tuesday/Thursday to
+        Tuesday/Thursday/Saturday (3x/week). Since `instagram_post.md`'s
+        schedule-and-approve redesign already made cadence purely a
+        function of which days the cron fires (no internal "should I post
+        today" logic left to touch), this was a pure schedule change —
+        `meme_finder.md`'s and `meme_create.md`'s discovery runs moved to
+        the same three days (still 4:00 AM, two hours ahead of the 6:00 AM
+        posting-offer, same relative timing as before) so the backlog
+        keeps growing faster than the new 3x/week consumption rate.
+        Per-run candidate caps (5 for reposts, 3 for originals) were left
+        unchanged — three discovery days instead of two already scales
+        weekly volume by 1.5x on its own.
+      - **New sourcing lane for `meme_create.md`**: operator wanted to
+        expand beyond chasing only *currently trending* material to also
+        include well-established, "proven" classic meme formats regardless
+        of how recently they trended — explicitly scoped to **existing,
+        recognizable meme formats only** (not raw never-memed humor/text,
+        which the operator confirmed is out of scope for now). This fits
+        `meme_create.md` specifically, not `meme_finder.md`: since
+        `meme_create.md` never reuses the original image, a years-old
+        format recreated with original art is just as valid as something
+        trending this morning, whereas `meme_finder.md` reposts an actual
+        existing image, where staleness genuinely matters. Logged as a new
+        `Source lane: trending | proven classic` ledger field so this can
+        be reviewed later (e.g. whether one lane is outperforming the
+        other once there's real engagement data).
+- [ ] **Not yet live**: needs the Tuesday/Thursday/Saturday cron schedule
+      actually applied on the server for all three jobs (meme finder
+      retimed, meme_create and the posting-offer cron created fresh) —
+      still blocked on the same prerequisites as before
+      (`UNSPLASH_ACCESS_KEY`, Meta Instagram Login setup).

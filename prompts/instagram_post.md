@@ -1,8 +1,9 @@
 # Instagram meme publishing (Stage 10)
 
-Runs **Tuesday and Thursday at 6:00 AM America/New_York** — a few hours after
-`prompts/meme_finder.md`'s 4:00 AM discovery run on the same days, so this
-isn't competing with brand-new candidate cards for attention.
+Runs **Tuesday, Thursday, and Saturday at 6:00 AM America/New_York** — a few
+hours after `prompts/meme_finder.md`'s and `prompts/meme_create.md`'s
+4:00 AM discovery runs on the same days, so this isn't competing with
+brand-new candidate cards for attention.
 
 This is a **two-part file**: the recurring run below offers one candidate
 and, on approval, *schedules* a future post rather than posting immediately.
@@ -18,7 +19,7 @@ a second, separate decision the operator makes deliberately, including
 
 ---
 
-## Recurring run — offer a candidate (Tuesday/Thursday 6:00 AM cron)
+## Recurring run — offer a candidate (Tuesday/Thursday/Saturday 6:00 AM cron)
 
 ### Step 1 — Find the backlog
 

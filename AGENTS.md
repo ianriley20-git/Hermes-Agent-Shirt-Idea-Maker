@@ -49,19 +49,22 @@ publish it live to Shopify once the operator approves it (Stage 7).
   deduplication/decision ledger `~/backlink_opportunity_log.md` (server-
   side files outside git). The old coupon-only cron/log is folded into
   this workflow; `~/coupon_directory_log.md` is retired.
-- `prompts/meme_finder.md` — Stage 9, the Tuesday/Thursday seasonal
-  existing-meme finder (reposts, with credit preserved). It prepares static
-  candidates for Instagram review, but never publishes them; approved items
-  upload to Dropbox `/memes`.
-- `prompts/meme_create.md` — Stage 11, same Tuesday/Thursday slot as Stage
-  9 and feeding the same `/memes` backlog, but builds *original* memes
-  instead of reposting: reuses a joke's wording (never its source image)
-  on a licensed Unsplash stock photo via `connectors/meme_compose.py`, with
-  Riley Ink's own caption font and logo watermark. Unlike the reposted
-  side, Unsplash's license requires visible photographer credit in the
-  actual posted caption — see `prompts/instagram_post.md`'s Step 3.
+- `prompts/meme_finder.md` — Stage 9, the Tuesday/Thursday/Saturday
+  seasonal existing-meme finder (reposts, with credit preserved). It
+  prepares static candidates for Instagram review, but never publishes
+  them; approved items upload to Dropbox `/memes`.
+- `prompts/meme_create.md` — Stage 11, same Tuesday/Thursday/Saturday slot
+  as Stage 9 and feeding the same `/memes` backlog, but builds *original*
+  memes instead of reposting: reuses a joke's wording (never its source
+  image) on a licensed Unsplash stock photo via
+  `connectors/meme_compose.py`, with Riley Ink's own caption font and logo
+  watermark. Sources from two lanes — currently trending, and proven/
+  classic formats worth revisiting regardless of recency, since the art is
+  always original either way. Unlike the reposted side, Unsplash's license
+  requires visible photographer credit in the actual posted caption — see
+  `prompts/instagram_post.md`'s Step 3.
 - `prompts/instagram_post.md` — Stage 10, the Instagram publishing job.
-  Tuesday/Thursday it offers one approved-and-unposted meme (a file still
+  Tuesday/Thursday/Saturday it offers one approved-and-unposted meme (a file still
   sitting in Dropbox `/memes`, not yet moved to `/memes/posted`) with a
   drafted caption/hashtags and a proposed post time; an explicit YES with a
   time schedules a one-time cron that actually publishes later, moving the
@@ -128,17 +131,20 @@ actually live:
   and forum reply manually. Coupon-only tracking is folded into this
   shared system.
 - **Seasonal meme finder** (Stage 9, `prompts/meme_finder.md`, built
-  2026-09-23, retimed 2026-10-12): a Tuesday/Thursday 4:00 AM job finds up
-  to five existing public memes matched to current seasonal windows and
-  Riley Ink voice, filters brands/franchises/teams/players/characters, and
-  sends prepared 1080×1350 review images to Telegram. Approval saves the
-  exact candidate to Dropbox `/memes`; it does not publish to Instagram.
+  2026-09-23, retimed 2026-10-12, expanded to 3x/week 2026-10-13): a
+  Tuesday/Thursday/Saturday 4:00 AM job finds up to five existing public
+  memes matched to current seasonal windows and Riley Ink voice, filters
+  brands/franchises/teams/players/characters, and sends prepared 1080×1350
+  review images to Telegram. Approval saves the exact candidate to Dropbox
+  `/memes`; it does not publish to Instagram.
 - **Original meme creation** (Stage 11, `prompts/meme_create.md`, built
   2026-10-13, switched from Pexels to Unsplash the same day after Pexels
-  paused new API key issuance): runs the same Tuesday/Thursday 4:00 AM
-  slot as Stage 9, as a second, independent source into the same `/memes`
-  backlog — up to three per run. Instead of reposting, it takes a trending
-  joke's *wording* (never its source image), picks a licensed Unsplash
+  paused new API key issuance, expanded to 3x/week the same day): runs the
+  same Tuesday/Thursday/Saturday 4:00 AM slot as Stage 9, as a second,
+  independent source into the same `/memes` backlog — up to three per run,
+  sourced from two lanes (currently trending, and proven/classic formats
+  worth revisiting regardless of recency). Instead of reposting, it takes
+  a joke's *wording* (never its source image), picks a licensed Unsplash
   stock photo matching the needed mood (a generic search, never aimed at
   recreating a specific existing meme's exact photo), and composites Riley
   Ink's own caption font plus the logo watermark via
@@ -153,8 +159,9 @@ actually live:
   cron job created.
 - **Instagram publishing** (Stage 10, `prompts/instagram_post.md`,
   built 2026-10-12, redesigned same day after live Meta setup and operator
-  workshopping): a Tuesday/Thursday 6:00 AM job offers one
-  approved-and-unposted meme — found by checking what's actually still
+  workshopping, expanded to 3x/week 2026-10-13): a Tuesday/Thursday/
+  Saturday 6:00 AM job offers one approved-and-unposted meme — found by
+  checking what's actually still
   sitting in Dropbox `/memes` (not yet moved to `/memes/posted`, which is
   the operator's chosen signal for "already posted," not a ledger field) —
   with a drafted caption/hashtags and a proposed post time. A YES with a
@@ -169,6 +176,9 @@ actually live:
   live — needs the Meta Instagram Login app setup
   (`install/01_provision_vps.md` Part 15, mostly done as of 2026-10-12 —
   see `TODO.md`) and the two cron jobs actually created before first use.
+  Note: the Saturday 6:00 AM slot lands 30 minutes before the existing
+  Weekly backlink hunt (Saturday 6:30 AM) — not a technical conflict, just
+  two independent review items now queued back-to-back on Saturday mornings.
 
 ## Message routing (Telegram)
 

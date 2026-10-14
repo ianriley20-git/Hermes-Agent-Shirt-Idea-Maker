@@ -1,11 +1,11 @@
 # Seasonal meme finder
 
-Run Tuesday and Thursday at 4:00 AM America/New_York, alongside
+Run Tuesday, Thursday, and Saturday at 4:00 AM America/New_York, alongside
 `prompts/meme_create.md` (Stage 11, which builds *original* memes from
 licensed stock photos rather than reposting) — both feed the same `/memes`
 backlog, and both run a couple hours before `prompts/instagram_post.md`'s
-own Tuesday/Thursday 6:00 AM posting-offer run, so there's time for
-same-day approvals to land in the backlog first. Find up to five
+own Tuesday/Thursday/Saturday 6:00 AM posting-offer run, so there's time
+for same-day approvals to land in the backlog first. Find up to five
 **existing memes** that fit Riley Ink's voice and current season, prepare
 non-destructively for Instagram review, and send them to Telegram for
 approval. Do not generate, rewrite, re-caption, publish, or claim

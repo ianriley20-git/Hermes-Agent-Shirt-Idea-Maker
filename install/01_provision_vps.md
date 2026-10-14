@@ -782,10 +782,13 @@ line — then delete it if it was only a test:
 
 Same **Cron Jobs** mechanism as the other scheduled jobs — point it at
 `prompts/instagram_post.md`, delivering to your Telegram home channel,
-running **Tuesday and Thursday at 6:00 AM America/New_York** — a couple
-hours after the meme finder's own Tuesday/Thursday 4:00 AM run on those
-same days (also worth rescheduling from its original daily 5:00 AM slot to
-match, if it hasn't been already — see `TODO.md`'s Stage 9 entry).
+running **Tuesday, Thursday, and Saturday at 6:00 AM America/New_York** —
+a couple hours after the meme finder's own Tuesday/Thursday/Saturday
+4:00 AM run on those same days (also worth rescheduling from its original
+daily 5:00 AM slot to match, if it hasn't been already — see `TODO.md`'s
+Stage 9 entry). Note this lands 30 minutes before the existing Weekly
+backlink hunt (Saturday 6:30 AM) — not a conflict, just two independent
+items queued back-to-back on Saturday mornings.
 
 This cron only ever *offers* a candidate and, on approval, schedules a
 future post — it never publishes directly. The actual publish happens via
@@ -861,6 +864,6 @@ image composition.
 
 Same **Cron Jobs** mechanism as the others — point it at
 `prompts/meme_create.md`, delivering to your Telegram home channel,
-running **Tuesday and Thursday at 4:00 AM America/New_York** — the same
-slot as the existing "Seasonal meme finder" cron, since they're two
-independent sources feeding the same backlog, not a sequence.
+running **Tuesday, Thursday, and Saturday at 4:00 AM America/New_York** —
+the same slot as the existing "Seasonal meme finder" cron, since they're
+two independent sources feeding the same backlog, not a sequence.
