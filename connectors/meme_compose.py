@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Search Pexels for a licensed stock photo and composite an original meme
+"""Search Unsplash for a licensed stock photo and composite an original meme
 onto it: caption text (top and/or bottom, classic meme styling) plus the
 Riley Ink logo as a corner watermark. Produces a 1080x1350 (4:5) PNG ready
 for the existing Dropbox /memes -> Instagram pipeline.
@@ -8,6 +8,16 @@ Stage 11: these are original memes, not reposts -- a real, licensed photo
 (never a specific existing meme's own image) combined with Riley Ink's own
 wording, font, and branding. See prompts/meme_create.md for the full
 research/approval flow this feeds into.
+
+Switched from Pexels to Unsplash (2026-10-13) after Pexels paused new API
+key issuance. Unlike Pexels, Unsplash's API Guidelines require visible
+photographer attribution somewhere the end user sees (the Instagram
+caption -- see prompts/meme_create.md -- not just internal logging) and a
+"download tracked" ping when a photo is actually used, which search_unsplash
+below handles by hitting the result's download_location before returning
+the image. Only an Unsplash Access Key is needed for this -- the read-only
+search/download used here doesn't need the Application ID or Secret Key,
+which are for user-authenticated OAuth actions this script never does.
 
 Usage:
     python3 meme_compose.py --search "tired cat" \
@@ -37,26 +47,38 @@ LOGO_MARGIN = 36
 STROKE_WIDTH = 6
 MAX_FONT_SIZE = 110
 MIN_FONT_SIZE = 36
-PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search"
+UNSPLASH_SEARCH_URL = "https://api.unsplash.com/search/photos"
 
 
-def search_pexels(query: str) -> tuple[bytes, str, str]:
-    """Return (image_bytes, photographer_name, pexels_photo_url) for the top
-    portrait-orientation match."""
+def _unsplash_headers() -> dict[str, str]:
+    return {"Authorization": f"Client-ID {os.environ['UNSPLASH_ACCESS_KEY']}"}
+
+
+def search_unsplash(query: str) -> tuple[bytes, str, str]:
+    """Return (image_bytes, photographer_name, unsplash_photo_url) for the
+    top portrait-orientation match. photographer_name is required by
+    Unsplash's API Guidelines to be credited visibly (see the module
+    docstring), not just logged."""
     resp = requests.get(
-        PEXELS_SEARCH_URL,
-        headers={"Authorization": os.environ["PEXELS_API_KEY"]},
+        UNSPLASH_SEARCH_URL,
+        headers=_unsplash_headers(),
         params={"query": query, "per_page": 1, "orientation": "portrait"},
         timeout=30,
     )
     resp.raise_for_status()
-    results = resp.json().get("photos", [])
+    results = resp.json().get("results", [])
     if not results:
-        raise RuntimeError(f"No Pexels results for query: {query!r}")
+        raise RuntimeError(f"No Unsplash results for query: {query!r}")
     photo = results[0]
-    image_url = photo["src"]["large2x"]
-    photographer = photo.get("photographer", "unknown")
-    photo_page_url = photo.get("url", "")
+    image_url = photo["urls"]["full"]
+    photographer = photo.get("user", {}).get("name", "unknown")
+    photo_page_url = photo.get("links", {}).get("html", "")
+    download_location = photo.get("links", {}).get("download_location")
+
+    if download_location:
+        # Required by Unsplash's API Guidelines whenever a photo is actually
+        # used, not just previewed -- a tracking ping, not a real download.
+        requests.get(download_location, headers=_unsplash_headers(), timeout=30)
 
     img_resp = requests.get(image_url, timeout=30)
     img_resp.raise_for_status()
@@ -186,8 +208,8 @@ def compose(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--search", help="Pexels search query for the background photo")
-    parser.add_argument("--background-file", type=Path, help="Use a local image instead of searching Pexels")
+    parser.add_argument("--search", help="Unsplash search query for the background photo")
+    parser.add_argument("--background-file", type=Path, help="Use a local image instead of searching Unsplash")
     parser.add_argument("--caption-top", help="Top caption text (optional)")
     parser.add_argument("--caption-bottom", help="Bottom caption text (optional)")
     parser.add_argument("--output", type=Path, required=True, help="Output PNG path")
@@ -200,8 +222,8 @@ def main() -> int:
 
     try:
         if args.search:
-            image_bytes, photographer, photo_page_url = search_pexels(args.search)
-            print(f"Pexels photo by {photographer}: {photo_page_url}")
+            image_bytes, photographer, photo_page_url = search_unsplash(args.search)
+            print(f"Unsplash photo by {photographer}: {photo_page_url}")
         else:
             image_bytes = args.background_file.read_bytes()
 
@@ -211,7 +233,7 @@ def main() -> int:
         print(f"Missing required environment variable: {exc}", file=sys.stderr)
         return 1
     except requests.RequestException as exc:
-        print(f"Pexels request failed: {exc}", file=sys.stderr)
+        print(f"Unsplash request failed: {exc}", file=sys.stderr)
         return 1
     except RuntimeError as exc:
         print(f"Meme composition failed: {exc}", file=sys.stderr)

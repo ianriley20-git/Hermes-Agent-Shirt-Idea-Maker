@@ -27,17 +27,23 @@ scheduler. Code lives here only where the built-in tools fall short:
   Instagram-feed 1080×1350 (4:5) PNG without cropping or overlaying it;
   only solid-color letterboxing is added. Creator credits/watermarks remain
   untouched. Run with `--input <source image> --output <prepared png>`.
-- `meme_compose.py` (Stage 11) — searches Pexels for a licensed stock photo
-  (`PEXELS_API_KEY`) and composites an *original* meme onto it: caption
-  text in `assets/fonts/Anton-Regular.ttf` (classic meme styling — white
-  fill, black stroke, auto-sized and word-wrapped to fit, top and/or
+- `meme_compose.py` (Stage 11) — searches Unsplash for a licensed stock
+  photo (`UNSPLASH_ACCESS_KEY`) and composites an *original* meme onto it:
+  caption text in `assets/fonts/Anton-Regular.ttf` (classic meme styling —
+  white fill, black stroke, auto-sized and word-wrapped to fit, top and/or
   bottom) plus the Riley Ink logo (`assets/branding/riley_ink_logo.png`)
   as a bottom-right watermark, reserving space so long bottom captions
   never collide with it. Outputs a 1080×1350 PNG, same shape as
-  `meme_prepare.py`'s output. No Pexels attribution is legally required,
-  but the photographer name/photo URL get printed to stdout for the
-  ledger anyway, same credit-tracking habit as the reposted side of this
-  pipeline. Use `--search "<mood/scene query>"` to source from Pexels, or
+  `meme_prepare.py`'s output. Switched from Pexels (2026-10-13) after
+  Pexels paused new API key issuance with no stated end date. Unlike
+  Pexels, **Unsplash's API Guidelines require visible photographer
+  attribution** (not just internal logging) and a "download tracked" ping
+  whenever a photo is actually used — this connector calls the result's
+  `download_location` automatically, but the visible-attribution half is
+  on the caller: `prompts/meme_create.md`'s caption step must credit the
+  photographer in the actual Instagram caption, not just log it. The
+  photographer name/photo URL are printed to stdout either way. Use
+  `--search "<mood/scene query>"` to source from Unsplash, or
   `--background-file <path>` to composite onto an already-local image:
   ```
   /home/hermes/.hermes/hermes-agent/venv/bin/python meme_compose.py \

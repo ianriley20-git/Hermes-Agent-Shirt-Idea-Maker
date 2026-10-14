@@ -55,9 +55,17 @@ Read `prompts/_brand_voice.md` and draft, in Riley Ink's actual voice
 gift-copy):
 
 - A short caption, one to three lines. **Never claim authorship of the
-  meme.** If the ledger's credit/rights field names a known creator or
-  uploader, credit them (e.g. "Via @creator" or "h/t u/redditor"); if
-  unknown, don't invent one.
+  meme.** For an `Origin: reposted` entry (`meme_finder.md`), if the
+  ledger's credit/rights field names a known creator or uploader, credit
+  them (e.g. "Via @creator" or "h/t u/redditor"); if unknown, don't invent
+  one — this credit is good practice, not a legal requirement. For an
+  `Origin: original` entry (`meme_create.md`), **crediting the Unsplash
+  photographer in the caption is mandatory, not optional** — the ledger's
+  photographer name/photo-credit field must appear in the posted caption
+  somewhere (e.g. "Photo via [Name] on Unsplash"), since Unsplash's API
+  Guidelines require visible attribution wherever the photo is actually
+  used. Do not schedule a post for an `Origin: original` entry whose
+  caption is missing this credit.
 - 3 to 8 relevant hashtags mixing the specific seasonal/niche angle with a
   couple of broader-reach tags.
 - A proposed post time — e.g. "tonight at 6 PM" or "tomorrow at 5 AM." This

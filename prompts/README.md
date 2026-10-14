@@ -42,7 +42,7 @@ independently of any script.
 - `meme_create.md` — Stage 11. Same Tuesday/Thursday 4:00 AM slot as Stage
   9, feeding the same `/memes` backlog, but builds *original* memes
   instead of reposting: reuses a trending joke's wording (never its source
-  image) on a licensed Pexels stock photo, with Riley Ink's own caption
+  image) on a licensed Unsplash stock photo, with Riley Ink's own caption
   font and logo watermark via `connectors/meme_compose.py`.
 - `instagram_post.md` — Stage 10. Tuesday/Thursday 6:00 AM job that checks
   what's actually still sitting in Dropbox `/memes` (not yet moved to

@@ -1215,6 +1215,24 @@ concepts, 2026-09-03)
       no attribution requirement in its commercial license, generous free
       rate limits (200/hour, 20,000/month) — Unsplash could be added later
       as a second source if photo variety becomes limiting.
+      **Superseded 2026-10-13, same day**: when the operator actually went
+      to sign up, Pexels' own API pages (several localized versions
+      checked — Ukrainian, Slovak, Czech; no English-language announcement
+      found) showed new API key issuance paused, no stated reason or end
+      date. Switched to Unsplash instead — the originally-noted
+      alternative. Real tradeoff that came with the switch: Unsplash's API
+      Guidelines require visible photographer attribution wherever a photo
+      is actually used (not just internal logging) plus a "download
+      tracked" API ping, neither of which Pexels required.
+      `connectors/meme_compose.py` handles the tracking ping automatically;
+      `prompts/instagram_post.md`'s caption step was updated to treat the
+      photographer credit as mandatory in the actual posted caption for
+      `Origin: original` entries, not optional the way the reposted side's
+      creator credit is. `UNSPLASH_ACCESS_KEY` replaces `PEXELS_API_KEY`
+      everywhere (env vars, install doc Part 16, connector, prompt files).
+      Only Unsplash's Access Key is needed, not the Application ID or
+      Secret Key it also issues — those are for OAuth user actions this
+      connector doesn't do.
 - [x] **Font and logo**: Anton (Google Fonts, SIL Open Font License,
       freely redistributable, visually close to classic Impact without
       Impact's own licensing/availability problems on a Linux server) is
@@ -1240,25 +1258,29 @@ concepts, 2026-09-03)
       independent source, not a sequence), up to three candidates per run.
       Sources joke *wording* only (never the original post's image) via
       the same kind of research `meme_finder.md` already does, then calls
-      new `connectors/meme_compose.py` to search Pexels by a generic mood/
-      scene query (never aimed at recreating a specific existing meme's
-      exact photo — a separate hard rule from the general reuse reasoning,
-      covering visually iconic templates like Distracted Boyfriend where
-      the *composition* itself, not just the image file, is what's
-      distinctive) and composite the caption + logo. Shares
+      new `connectors/meme_compose.py` to search Unsplash by a generic
+      mood/scene query (never aimed at recreating a specific existing
+      meme's exact photo — a separate hard rule from the general reuse
+      reasoning, covering visually iconic templates like Distracted
+      Boyfriend where the *composition* itself, not just the image file,
+      is what's distinctive) and composite the caption + logo. Shares
       `~/meme_library.md`'s `M-YYYYMMDD-NN` ID sequence with
       `meme_finder.md` (new entries tagged `Origin: original` vs.
-      `Origin: reposted`) and the exact same approval flow, Dropbox
-      `/memes` upload, and downstream `instagram_post.md` handoff — no
-      changes needed to Stage 10 at all, since it already just checks
-      what's sitting in `/memes` regardless of where it came from.
-- [ ] **Not yet live**: needs `PEXELS_API_KEY` set in `.env`
+      `Origin: reposted`) and the exact same approval flow and Dropbox
+      `/memes` upload. One real change to Stage 10 was needed after the
+      Unsplash switch (see the superseded note above): `instagram_post.md`'s
+      caption-drafting step now treats an `Origin: original` entry's
+      photographer credit as mandatory in the posted caption, distinct
+      from the optional reposted-creator credit it already handled.
+- [ ] **Not yet live**: needs `UNSPLASH_ACCESS_KEY` set in `.env`
       (`install/01_provision_vps.md` Part 16) and the Tuesday/Thursday
       4:00 AM cron job actually created pointing at `prompts/meme_create.md`.
 - [ ] **First live run review**: confirm the research step actually
       extracts wording without ever touching the original source image,
-      the Pexels query stays generic rather than drifting toward trying to
-      match a specific known meme's photo, the ID sequence really doesn't
-      collide with `meme_finder.md` on a day both produce candidates, and
-      real captions (not just the two test strings used during
-      development) render cleanly across a range of lengths.
+      the Unsplash query stays generic rather than drifting toward trying
+      to match a specific known meme's photo, the ID sequence really
+      doesn't collide with `meme_finder.md` on a day both produce
+      candidates, real captions (not just the two test strings used during
+      development) render cleanly across a range of lengths, and the
+      mandatory Unsplash credit actually shows up in the real posted
+      caption for an `Origin: original` item.

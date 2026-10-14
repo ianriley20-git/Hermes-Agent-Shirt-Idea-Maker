@@ -63,7 +63,7 @@ For each surviving idea:
 1. Assign the next `M-YYYYMMDD-NN` ID in the shared daily sequence.
 2. Decide the caption split (top/bottom, or bottom-only — whatever reads
    best for the joke; not every meme needs both).
-3. Write a short, generic Pexels search query describing the *mood/scene*
+3. Write a short, generic Unsplash search query describing the *mood/scene*
    needed (e.g. "tired cat," "confused man office," "triumphant woman") —
    never a query aimed at finding or matching a specific existing meme's
    photo.
@@ -76,11 +76,15 @@ For each surviving idea:
      --caption-bottom "<bottom text or omit>" \
      --output output/memes/YYYY-MM-DD/<ID>-original.png
    ```
-   This searches Pexels, composites the caption (Riley Ink's house font)
-   and the Riley Ink logo watermark, and prints the photographer's name and
-   Pexels photo URL — capture both for the ledger. The output is already
-   1080×1350, ready for the same Instagram pipeline `meme_finder.md`
-   candidates use.
+   This searches Unsplash, composites the caption (Riley Ink's house font)
+   and the Riley Ink logo watermark, pings Unsplash's required
+   download-tracking endpoint, and prints the photographer's name and
+   Unsplash photo URL — capture both for the ledger. **This photographer
+   credit is not optional** — Unsplash's API Guidelines require it to
+   appear visibly wherever the photo is used, so `prompts/instagram_post.md`
+   must put it in the actual posted caption later (see that file's Step 3).
+   The output is already 1080×1350, ready for the same Instagram pipeline
+   `meme_finder.md` candidates use.
 5. Recheck `~/meme_library.md` for the same wording already logged;
    reject duplicates before delivery.
 6. Use vision analysis on the composed file: confirm the caption is fully
@@ -96,9 +100,9 @@ Append each delivered candidate to `~/meme_library.md` with:
 - ID and run date
 - `Origin: original`
 - the exact wording used
-- Pexels photographer name and photo URL (credit, even though Pexels's
-  license doesn't require it — same traceability habit as the reposted
-  side of this pipeline)
+- Unsplash photographer name and photo URL — **required** credit (not
+  optional), since `prompts/instagram_post.md` must surface it in the
+  actual posted caption to satisfy Unsplash's API Guidelines
 - seasonal/niche fit
 - composed file path
 - decision: `pending`
@@ -114,7 +118,7 @@ Send each candidate paired with its composed image:
 
 Why it fits: [one concise brand/season explanation]
 Source wording via: [where the joke text came from, generically — not a link to a specific image]
-Photo: [Pexels photographer name] — [photo URL]
+Photo: [Unsplash photographer name] — [photo URL]
 
 Reply YES M-YYYYMMDD-NN or NO M-YYYYMMDD-NN.
 

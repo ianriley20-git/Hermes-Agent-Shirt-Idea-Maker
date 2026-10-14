@@ -796,16 +796,30 @@ automatically as part of the normal schedule/cancel/reschedule flow.
 
 ---
 
-## Part 16 — Original meme creation (Stage 11): Pexels API key
+## Part 16 — Original meme creation (Stage 11): Unsplash API key
 
-Much simpler than the Instagram setup — Pexels just needs a free API key,
-no OAuth, no account-type requirements.
+**Superseded (2026-10-13):** originally written for Pexels, which has
+since paused new API key issuance with no stated end date (confirmed via
+several of Pexels' own localized API pages showing the notice, no official
+English-language announcement or timeline found). Switched to Unsplash
+instead, still free, no account-type requirements.
 
-### Get a Pexels API key
+### Get an Unsplash API key
 
-1. Go to `pexels.com/api` and sign up (or log in).
-2. Request/generate an API key from the dashboard — it's issued instantly,
-   no approval wait.
+1. Go to `unsplash.com/developers` and register as a developer (or log in).
+2. Create a new application — gives you an **Application ID**, **Access
+   Key**, and **Secret Key**.
+3. Only the **Access Key** is needed for this connector — it's used for
+   read-only search/download, not the OAuth user-action flow the
+   Application ID/Secret Key are for. Safe to keep the other two on hand,
+   just not required here.
+
+**Attribution requirement, unlike Pexels**: Unsplash's API Guidelines
+require visible credit to the photographer wherever the photo is actually
+used — `connectors/meme_compose.py` handles the required "download
+tracked" API ping automatically, but `prompts/meme_create.md` is
+responsible for putting the photographer's name in the actual Instagram
+caption text, not just logging it internally.
 
 ### On the server (as `hermes`)
 
@@ -814,7 +828,7 @@ Add it to `.env`:
 nano ~/.hermes/.env
 ```
 ```
-PEXELS_API_KEY=paste_your_key_here
+UNSPLASH_ACCESS_KEY=paste_your_access_key_here
 ```
 Save (**Ctrl+O**, Enter), exit (**Ctrl+X**).
 
@@ -837,7 +851,7 @@ ls ~/riley-ink-pipeline/assets/fonts/Anton-Regular.ttf ~/riley-ink-pipeline/asse
   --search "tired cat" --caption-top "TESTING" --caption-bottom "THE NEW MEME COMPOSER" \
   --output /tmp/meme_test.png
 ```
-Should print the Pexels photographer credit and `Composed to /tmp/meme_test.png`.
+Should print the Unsplash photographer credit and `Composed to /tmp/meme_test.png`.
 Open the file and confirm it actually looks right — caption legible, logo
 in the bottom-right corner not overlapping the text, before trusting this
 unattended. This doesn't post anywhere or touch Dropbox; it's purely local

@@ -56,8 +56,10 @@ publish it live to Shopify once the operator approves it (Stage 7).
 - `prompts/meme_create.md` — Stage 11, same Tuesday/Thursday slot as Stage
   9 and feeding the same `/memes` backlog, but builds *original* memes
   instead of reposting: reuses a joke's wording (never its source image)
-  on a licensed Pexels stock photo via `connectors/meme_compose.py`, with
-  Riley Ink's own caption font and logo watermark.
+  on a licensed Unsplash stock photo via `connectors/meme_compose.py`, with
+  Riley Ink's own caption font and logo watermark. Unlike the reposted
+  side, Unsplash's license requires visible photographer credit in the
+  actual posted caption — see `prompts/instagram_post.md`'s Step 3.
 - `prompts/instagram_post.md` — Stage 10, the Instagram publishing job.
   Tuesday/Thursday it offers one approved-and-unposted meme (a file still
   sitting in Dropbox `/memes`, not yet moved to `/memes/posted`) with a
@@ -132,18 +134,22 @@ actually live:
   sends prepared 1080×1350 review images to Telegram. Approval saves the
   exact candidate to Dropbox `/memes`; it does not publish to Instagram.
 - **Original meme creation** (Stage 11, `prompts/meme_create.md`, built
-  2026-10-13): runs the same Tuesday/Thursday 4:00 AM slot as Stage 9, as a
-  second, independent source into the same `/memes` backlog — up to three
-  per run. Instead of reposting, it takes a trending joke's *wording*
-  (never its source image), picks a licensed Pexels stock photo matching
-  the needed mood (a generic search, never aimed at recreating a specific
-  existing meme's exact photo), and composites Riley Ink's own caption
-  font plus the logo watermark via `connectors/meme_compose.py`
-  (`assets/fonts/Anton-Regular.ttf`, `assets/branding/riley_ink_logo.png`).
-  Same brand-voice filter and approval flow as Stage 9; feeds the exact
-  same ledger and Dropbox folder, so Stage 10 needs no awareness of which
-  stage a given `/memes` file came from. Not yet live — needs
-  `PEXELS_API_KEY` set (`install/01_provision_vps.md` Part 16) and the
+  2026-10-13, switched from Pexels to Unsplash the same day after Pexels
+  paused new API key issuance): runs the same Tuesday/Thursday 4:00 AM
+  slot as Stage 9, as a second, independent source into the same `/memes`
+  backlog — up to three per run. Instead of reposting, it takes a trending
+  joke's *wording* (never its source image), picks a licensed Unsplash
+  stock photo matching the needed mood (a generic search, never aimed at
+  recreating a specific existing meme's exact photo), and composites Riley
+  Ink's own caption font plus the logo watermark via
+  `connectors/meme_compose.py` (`assets/fonts/Anton-Regular.ttf`,
+  `assets/branding/riley_ink_logo.png`). Unlike Pexels, Unsplash requires
+  visible photographer credit wherever the photo is used — handled by
+  `instagram_post.md`'s caption step, not optional. Same brand-voice
+  filter and approval flow as Stage 9; feeds the exact same ledger and
+  Dropbox folder, so Stage 10 needs no awareness of which stage a given
+  `/memes` file came from. Not yet live — needs `UNSPLASH_ACCESS_KEY` set
+  (`install/01_provision_vps.md` Part 16) and the
   cron job created.
 - **Instagram publishing** (Stage 10, `prompts/instagram_post.md`,
   built 2026-10-12, redesigned same day after live Meta setup and operator
