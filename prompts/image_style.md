@@ -315,17 +315,13 @@ Avoid mathematically perfect symmetry or sterile vector geometry.
 
 The result should resemble artwork prepared manually for an old screen-print shop.
 
-## DISTRESSING
+## INK SURFACES — CLEAN, NO DISTRESSING (TEMPORARY)
 
-Apply a **slightly distressed vintage ink texture** across the printed surfaces.
+Printed surfaces should be **clean, solid, unweathered ink** — no scratches, speckles, worn patches, or ink-loss texture of any kind, even subtly.
 
-The distressing should resemble naturally aged screen-print ink: small scratches, speckles, worn patches, and subtle ink loss.
+This is a deliberate, temporary departure from Duke's traditional worn/distressed look, not a style downgrade: a separate deterministic post-processing step now applies a controlled distress texture after the design is finalized (background-removed, color-reduced, and vectorized), rather than baking unpredictable AI-rendered texture into the source artwork. Baked-in distressing was making automated background removal, color-count reduction, and vectorization meaningfully harder and less reliable — see TODO.md's Stage 6 upload-loop notes for the full reasoning. Revisit this once the post-processing distress step actually exists.
 
-Distressing belongs **inside the printed surfaces themselves**.
-
-Do not create a rectangular distressed texture behind the artwork.
-
-The overall silhouette of the composition should remain clean and readable.
+The overall silhouette of the composition should remain clean and readable, same as always.
 
 ## COMPOSITION
 

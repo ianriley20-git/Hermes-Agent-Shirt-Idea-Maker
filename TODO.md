@@ -742,6 +742,29 @@ concepts, 2026-09-03)
         bigger initiative than anything built so far in this repo — treat
         it as its own scoping conversation when picked up, not something to
         spec from these notes alone.
+      - **Hands-on testing (2026-10-14 through 2026-10-20, branch
+        `hermes-proposed/bg-removal-mockup-testing-2026-10-14`)** against
+        real approved designs confirmed the background-removal approach
+        above (border-connected flood-fill, protecting small enclosed
+        negative-space regions like letter counters) and found a real
+        tension: Duke's baked-in distressed ink texture (dozens of subtly
+        different shades within one nominal ink color) made automated color
+        reduction and vectorization meaningfully worse — a vectorizer either
+        traces the grain literally as noisy stipple, or needs enough
+        blur/quantization to flatten it that the result stops looking
+        distressed anyway. Decision: generate Duke without any distressing
+        for now (`prompts/image_style.md`'s DISTRESSING section replaced
+        2026-10-20 — see that file), and add distress back as a separate,
+        controlled post-processing step (a stock/procedural grain texture
+        composited onto the finished flat-color art, clipped to the opaque
+        shapes, never touching the vector edges) once that step actually
+        exists. Revert the prompt change if the post-processing step is
+        abandoned. A plain color-count reduction also turned out to reliably
+        sacrifice small-but-visually-important colors (e.g. a red accent
+        merged into a similarly-dark outline color) in favor of whichever
+        regions have more pixels — every quantization method tried behaved
+        this way; operator wants a real "choose which colors to keep"
+        mechanism eventually, not a per-design heuristic fix.
 
 ## Category expansion: moving past the 5 fixed niches (2026-09-20)
 - [x] **Why**: after a few days of real runs, every concept was coming
