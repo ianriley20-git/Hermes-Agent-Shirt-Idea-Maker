@@ -134,6 +134,43 @@ scheduler. Code lives here only where the built-in tools fall short:
   from the one-time cron created at scheduling time, never directly from
   the Tuesday/Thursday/Saturday offer run. This delete command is also the takedown
   mechanism for a `NO` reply on an already-posted item.
+- `bg_remove.py` (post-Stage 6, in testing on
+  `hermes-proposed/bg-removal-mockup-testing-2026-10-14`) — removes the flat
+  background from an approved Duke/Nova/Ash design, producing a transparent
+  PNG. A deterministic color-key operation, not general AI background
+  removal: all three designers already render on a solid flat background
+  (`prompts/image_style.md`), so the background is found by flood-filling
+  from the image border (`scipy.ndimage.label`, 8-connectivity) rather than
+  guessing a fixed color per designer — a background-colored region fully
+  enclosed inside the artwork (a letter counter, a dark accent) never
+  touches the border and so stays opaque, while a region that's actually
+  Duke's documented "negative space = unprinted shirt fabric" convention
+  (see that designer's FLAT INK RULE/BACKGROUND RULES sections) correctly
+  goes transparent too, even mid-artwork (confirmed against a real
+  catcher's-mask design's cage mesh and chest-pad gaps during testing).
+  Edge pixels get a soft alpha ramp plus alpha decontamination (un-blending
+  the background color out of partially-transparent edge RGB) rather than a
+  hard cutoff, to avoid a background-color fringe when composited onto a
+  different-colored product later. A small enclosed background-colored
+  region not connected to the border (a letter counter in "BLUE" or "PUT ME
+  DOWN") is swept into transparency too (`--island-max-fraction`, default
+  1% of image area) — letterform counters need to show the garment through
+  them regardless of print color, same as any real screen print — while a
+  *large* enclosed same-color region (Nova's black 8-ball) stays protected,
+  since at that size it's far more likely to be an intentional printed
+  shape than a gap. Trims to the opaque bounding box (`--trim-padding`,
+  default 20px) unless `--no-trim` is passed. Needs `numpy`/`scipy` added to
+  `requirements.txt`.
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python bg_remove.py \
+    --input <approved design PNG> --output <transparent PNG>
+  ```
+  Not yet wired into any prompt file or message-routing bucket — this is
+  exploratory testing toward the Post-Stage 6 upload-loop initiative
+  (background removal + realistic mockup generation), not a live stage.
+- Mockup generation (post-Stage 6, same branch) — not yet started;
+  workshopping image-gen prompts against the operator's "Plain Mockups"
+  Dropbox folder once background removal is solid.
 - upload-app integration (post-Stage 6, scoped separately)
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway
