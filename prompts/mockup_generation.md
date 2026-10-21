@@ -116,18 +116,76 @@ the design symmetrically. This is the one check that would have caught the
 off-center mistake immediately instead of after the operator spotted it —
 always do it, don't rely on a visual impression from the full image alone.
 
-## Known limitations (true as of 2026-10-21)
+## Automated landmark detection (`connectors/mockup_landmarks.py`, added 2026-10-21)
 
-- Steps 2's measurements (shoulder width, collar point, rotation) are done
-  by hand per photo via a ruled grid overlay, not automated landmark
-  detection. Works, but doesn't scale to running unattended across many
-  mockup photos without a person measuring each one.
-- The 18.5in average shoulder width is a fixed constant, not adjusted for
-  garment size/style (a sweatshirt's looser cut reads differently than a
-  fitted tee at the same actual body width).
+Step 2's measurements can now be found automatically instead of by hand,
+using two cues for two different jobs -- confirmed on real test photos that
+conflating them (using either one directly as the collar position) silently
+reproduces real, repeatable errors:
+
+- **MediaPipe pose landmarks (shoulders) answer WHERE TO LOOK**: a tight
+  search window (default 55px half-width) for the collar notch. Without
+  this, a shadow/crease or a beard overlapping the collar can look like an
+  even more prominent "notch" than the real collar and wins a naive
+  search -- confirmed on a real photo (the false notch was 92px from the
+  true collar; constraining the search to near the pose anchor fixed it).
+- **The garment's own color mask answers WHERE IT ACTUALLY IS**: segment by
+  color (seeded from the image's own center, morphologically closed to
+  survive fabric-texture speckle), then find the collar's low point as a
+  genuine local peak (via `scipy.signal.find_peaks`, not a plain global
+  max, which wrongly favors a monotonically-climbing edge artifact over an
+  real peak) in "topmost garment pixel per column" within that window.
+- **Never use face or shoulder position AS the collar position directly.**
+  Confirmed on a real photo: a person's head can be turned relative to
+  their torso, so the face's horizontal center can be tens of pixels from
+  the garment's true centerline. Worth naming plainly: manually eyeballing
+  a photo's center is *more* exposed to this bias, not less -- re-checking
+  with a precise ruled grid twice this session, the "obviously correct"
+  manual reading turned out to be the one that was off, not the automated
+  measurement.
+
+Cross-validated against three real photos (different poses, garment colors,
+body types): collar-point detection now lands within ~5-10px of a precise
+ruled-grid re-measurement on all three, versus up to 92px off before the
+pose-anchored search window was added.
+
+**Still a known gap**: shoulder-WIDTH detection (used for the px/inch
+scale) measures the mask's widest row, which overshoots the true
+shoulder-seam width on a loose/baggy garment (a sweatshirt's sleeves read
+~24% wider than the actual shoulder bones) -- inflates the whole design's
+size on that garment type. Collar *position* is solid; scale/width
+detection on loose garments is the next thing to fix, not yet solved.
+
+## Verification gate (`connectors/mockup_verify.py`, added 2026-10-21)
+
+Checks a finished composite against the mockup's own garment mask after
+the fact — the actual safety net for an unattended pipeline, since no
+placement heuristic is likely to be perfect on every future photo:
+
+1. **Containment**: at every row the design occupies, does it stay within
+   the garment mask's own left/right extent? Catches spillover onto the
+   background.
+2. **Centering**: is the placement's center within tolerance (default
+   15px) of the mask's own independently-measured collar x? Catches a
+   placement that's technically on the fabric but visibly off-center.
+
+Either check failing means hold for manual review, not ship. Confirmed
+this actually distinguishes a real miss from a good placement: run
+*without* a pose model, the gate's own internal check is exposed to the
+same false-notch failure mode as detection itself and would wrongly reject
+a correct placement — the gate needs the same fused (pose + mask) method
+powering it that detection does, not just a simpler one.
+
+## Remaining known limitations (true as of 2026-10-21)
+
+- Shoulder-width/scale detection on loose garments (see above) — the one
+  unresolved piece of the automated measurement pipeline.
 - Blend If's luminance range and the global opacity trim are fixed
   defaults, not tuned per photo — they happened to work well on every
   photo tested so far, but haven't been stress-tested against a strongly
   backlit or unusually colored mockup.
+- `connectors/mockup_landmarks.py`'s MediaPipe pose model
+  (`pose_landmarker.task`) must be downloaded separately (not committed to
+  the repo) — see the script's `--pose-model` argument.
 - Not wired into `AGENTS.md`'s message routing or any approval gate yet —
   exploratory tooling only, same status as the rest of this branch's work.
