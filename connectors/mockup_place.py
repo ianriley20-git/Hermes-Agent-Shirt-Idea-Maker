@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -46,7 +47,26 @@ DESIGN_TOP_OFFSET_IN = 1.0  # design top, measured down from the box's own top
 BOX_TOP_FROM_COLLAR_IN = 1.0
 
 
-def build_quad_from_template(template: dict, design_size: tuple[int, int]) -> list[tuple[float, float]]:
+def _rotate_quad(
+    quad: list[tuple[float, float]], pivot: tuple[float, float], degrees: float
+) -> list[tuple[float, float]]:
+    """Rotate quad's corners around pivot. Image y grows downward, so a positive angle here reads
+    as a clockwise tilt on screen (the design's top leans toward the viewer's right)."""
+    if not degrees:
+        return quad
+    theta = math.radians(degrees)
+    cos_t, sin_t = math.cos(theta), math.sin(theta)
+    px, py = pivot
+    rotated = []
+    for x, y in quad:
+        dx, dy = x - px, y - py
+        rotated.append((px + dx * cos_t - dy * sin_t, py + dx * sin_t + dy * cos_t))
+    return rotated
+
+
+def build_quad_from_template(
+    template: dict, design_size: tuple[int, int], tilt_degrees: float = 0.0
+) -> list[tuple[float, float]]:
     collar_x = template["collar_x"]
     collar_y = template["collar_y"]
     px_per_inch = template["px_per_inch"]
@@ -79,12 +99,13 @@ def build_quad_from_template(template: dict, design_size: tuple[int, int]) -> li
     half_left = half_width * left_factor
     half_right = half_width * right_factor
 
-    return [
+    quad = [
         (collar_x - half_left, top_y),
         (collar_x + half_right, top_y),
         (collar_x + half_right, bottom_y),
         (collar_x - half_left, bottom_y),
     ]
+    return _rotate_quad(quad, (collar_x, collar_y), tilt_degrees)
 
 
 def place(
@@ -92,6 +113,7 @@ def place(
     mockup_path: Path,
     design_path: Path,
     output_path: Path,
+    tilt_degrees: float = 0.0,
     **composite_kwargs,
 ) -> dict:
     try:
@@ -105,7 +127,7 @@ def place(
     except (UnidentifiedImageError, OSError) as exc:
         raise ValueError(f"cannot read design: {exc}") from exc
 
-    quad = build_quad_from_template(template, design_size)
+    quad = build_quad_from_template(template, design_size, tilt_degrees)
     composite(mockup_path, design_path, output_path, quad, **composite_kwargs)
     return {"quad": quad, "template": template}
 
@@ -116,6 +138,15 @@ def main() -> int:
     parser.add_argument("--mockup", required=True, type=Path, help="The same mockup photo the template was built from")
     parser.add_argument("--design", required=True, type=Path, help="New design PNG to hot-swap in")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--tilt-degrees",
+        type=float,
+        default=0.0,
+        help="Rotate the whole design around the collar point. Positive tilts the top toward the "
+        "viewer's right (clockwise on screen); negative tilts it left. 0 keeps the design plumb "
+        "-vertical, which the garment's own natural drape/pose doesn't always actually look best "
+        "with -- a manual, operator-reviewed knob, not auto-derived.",
+    )
     parser.add_argument("--global-opacity", type=float, default=0.96)
     parser.add_argument("--no-blend-if", action="store_true")
     parser.add_argument("--edge-pull-side", choices=("left", "right"), default=None)
@@ -129,6 +160,7 @@ def main() -> int:
             args.mockup,
             args.design,
             args.output,
+            tilt_degrees=args.tilt_degrees,
             global_opacity=args.global_opacity,
             apply_blend_if=not args.no_blend_if,
             edge_pull_side=args.edge_pull_side,

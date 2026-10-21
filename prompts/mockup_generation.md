@@ -13,6 +13,13 @@ automated via `connectors/mockup_landmarks.py` instead of done by hand — see
 "Automated landmark detection" below for how, and "Step 6 — Reuse an
 approved mockup" for the Smart-Object-style template workflow.
 
+**Step 1's vectorization path (`vc_trace` + `vc_trace_candidates.py`) is
+locked in as of 2026-10-21** — confirmed by the operator after resolving
+the "Yesferatu" background/speckle issues (see Step 1 below and
+`connectors/README.md`). Not locked in yet: color-count selection (still
+ad hoc — see Step 1's note) and mockup placement tilt (new, unconfirmed —
+see Step 3).
+
 ## Step 1 — Prepare the design
 
 Start from the final approved, high-resolution design (ideally the
@@ -20,6 +27,19 @@ Start from the final approved, high-resolution design (ideally the
 older low-resolution one).
 
 Get a clean, transparent-background PNG. Primary path, as of 2026-10-21:
+
+**Choosing the swatches (count and exact colors) is still a manual, ad hoc
+step, not a built tool** — currently done by sampling the raw source's own
+pixel histogram (bucket colors to merge near-duplicate anti-aliasing noise,
+count frequency, read off the dominant clusters by eye) and judging which
+clusters are real distinct inks versus blend/compression artifacts. This
+caught a real bug on "Yesferatu": an earlier guessed swatch list split one
+real ink (a unified tan/cream used for both skin and text) into two near
+-miss colors, which caused pixels to flicker between both wrong targets at
+their shared boundary — exact sampling fixed it. Worth formalizing into a
+proper tool (auto-cluster the histogram, present the candidate color list
+for operator count/hex confirmation, same approval-gate pattern as
+everything else here) — not built yet.
 
 0. **Generate candidates, don't guess one setting.** Noise and Paths
    (fidelity) are both real trade-offs with no single value that's
@@ -158,6 +178,17 @@ verbal recollection. Lives in `mockup_place.py`'s
   asymmetric half-widths per Step 2's rotation finding, and a mild
   vertical tilt (the nearer/fuller side sits very slightly lower) for a
   believable sense of wrapping around the chest.
+- **`--tilt-degrees` (new, 2026-10-21, unconfirmed default)**: rotates the
+  whole quad around the collar point — a genuine whole-design lean, not
+  the asymmetric left/right width compression above. Until now the design
+  was always placed perfectly plumb-vertical; the operator observed a real
+  composite looked like it wanted a slight left lean instead, which this
+  adds as a manual, per-mockup knob (`mockup_place.py`'s
+  `build_quad_from_template()` / `_rotate_quad()`). Positive degrees tilt
+  the top toward the viewer's right, negative toward the left. Not yet
+  auto-derived from anything (e.g. the garment's own measured shoulder
+  slope) — still fully manual, and whether a small default tilt should
+  apply to every mockup or stay a case-by-case call is still open.
 
 ## Step 4 — Composite (`connectors/mockup_composite.py`)
 
