@@ -85,13 +85,32 @@ left-vs-right span for rotation.
 
 ## Step 3 — Compute the placement quad
 
-Using the scale and collar point from Step 2:
+Replicates Printify's own real front print-area box model, found directly
+in the operator's own `Printify-POD-Manager` app (`src/main.ts`,
+`computePlacement()` — commented there as "Typical B+C 3001 front print
+area") rather than an invented formula. Confirmed with the operator
+2026-10-21 to use the app's coded width constant over his own differing
+verbal recollection. Lives in `mockup_place.py`'s
+`build_quad_from_template()`.
 
-- Design top edge = collar y + (3.5in x scale) — standard chest-print drop
-  below the collar.
-- Design width ~= 10in x scale (a 12in standard adult print area minus
-  ~1in margin on each side); height = width x the design's own aspect
-  ratio, never set independently (distorts the art).
+- A fixed box, in inches: `PRINT_AREA_W_IN = 12`, `PRINT_AREA_H_IN = 16`,
+  `MAX_DESIGN_W_IN = 9.5`, `DESIGN_TOP_OFFSET_IN = 1.0` (design top, down
+  from the box's own top) — these four numbers are Printify's/the
+  operator's real settings, not estimates.
+- Scale the design by whichever of width or height is more constraining
+  (`min(scale_by_width, scale_by_height)`, exactly mirroring
+  `computePlacement()`), so a tall/narrow design shrinks to fit the box's
+  height instead of overflowing it — a case the old ad-hoc formula didn't
+  handle at all.
+- **One assumption not present in Printify's own code**: where the box's
+  top sits relative to the collar. `main.ts` doesn't need this (Printify's
+  per-garment template already positions the box on the physical shirt);
+  our pipeline does, since placement starts from the collar point Step 2
+  measures. Current default: `BOX_TOP_FROM_COLLAR_IN = 1.0`, chosen so it
+  plus `DESIGN_TOP_OFFSET_IN` (1.0 + 1.0 = 2.0in) matches the operator's
+  own separately-stated "~2 inches" collar-to-design-top estimate. Treat
+  this one constant — not the box dimensions — as the thing to revisit if
+  a real placement comes out high/low.
 - Build the 4-corner destination quad centered horizontally on the
   **collar x-coordinate** at both the top and bottom edges. Apply
   asymmetric half-widths per Step 2's rotation finding, and a mild
@@ -175,6 +194,11 @@ correctly centered and sized on the first try.
 
 ## Remaining known limitations (true as of 2026-10-21)
 
+- Step 3's box model uses Printify's own real width/height/top-offset
+  constants (confirmed with the operator), but `BOX_TOP_FROM_COLLAR_IN`
+  (how far below the collar the box's own top sits) is our own fitted
+  assumption, not something Printify's code exposes — re-check this one
+  constant first if a real placement comes out sitting high or low.
 - Shoulder-width/scale detection used to overshoot on loose garments (a
   sweatshirt's baggy sleeves read ~24% wider than the true shoulder-joint
   distance) — fixed by switching to MediaPipe's own shoulder-landmark

@@ -25,6 +25,26 @@ from PIL import Image, UnidentifiedImageError
 
 from mockup_composite import composite
 
+# Printify's own standard front print-area box, replicated from the
+# operator's real, already-established Printify-POD-Manager app
+# (src/main.ts computePlacement(), commented there as "Typical B+C 3001
+# front print area in inches") rather than guessed or estimated fresh.
+# Confirmed with the operator 2026-10-21 to use the coded 9.5in design
+# width over his own differing verbal recollection of "10.5-11in".
+PRINT_AREA_W_IN = 12.0
+PRINT_AREA_H_IN = 16.0
+MAX_DESIGN_W_IN = 9.5
+DESIGN_TOP_OFFSET_IN = 1.0  # design top, measured down from the box's own top
+
+# Printify's own garment template positions the print-area box some
+# distance below the collar internally -- that geometry isn't in
+# main.ts (it's template data, not placement math), so this constant is
+# our own anchor assumption, not something read out of his app. Chosen
+# so that BOX_TOP_FROM_COLLAR_IN + DESIGN_TOP_OFFSET_IN (1.0 + 1.0 = 2.0)
+# matches the operator's own stated "~2 inches" collar-to-design-top
+# estimate. Revisit if a real placement shows this box anchor is off.
+BOX_TOP_FROM_COLLAR_IN = 1.0
+
 
 def build_quad_from_template(template: dict, design_size: tuple[int, int]) -> list[tuple[float, float]]:
     collar_x = template["collar_x"]
@@ -32,12 +52,24 @@ def build_quad_from_template(template: dict, design_size: tuple[int, int]) -> li
     px_per_inch = template["px_per_inch"]
     rotation_ratio = template.get("rotation_ratio") or 1.0
 
-    top_y = collar_y + 3.5 * px_per_inch
-    half_width = 10 * px_per_inch / 2
-
     design_w, design_h = design_size
-    aspect = design_h / design_w
-    height = 2 * half_width * aspect
+    aspect = design_h / design_w  # height / width, the design's own shape
+
+    # Mirrors computePlacement() in main.ts exactly: scale by whichever of
+    # width/height is more constraining, so a tall/narrow design shrinks
+    # to fit the box's height rather than overflowing it.
+    max_available_h_in = PRINT_AREA_H_IN - DESIGN_TOP_OFFSET_IN
+    scale_by_width = MAX_DESIGN_W_IN / PRINT_AREA_W_IN
+    scale_by_height = max_available_h_in / (PRINT_AREA_W_IN * aspect)
+    scale = min(scale_by_width, scale_by_height)
+
+    design_width_in = scale * PRINT_AREA_W_IN
+    design_height_in = design_width_in * aspect
+
+    box_top_y = collar_y + BOX_TOP_FROM_COLLAR_IN * px_per_inch
+    top_y = box_top_y + DESIGN_TOP_OFFSET_IN * px_per_inch
+    half_width = (design_width_in * px_per_inch) / 2
+    height = design_height_in * px_per_inch
     bottom_y = top_y + height
 
     # rotation_ratio = left_span / right_span from the template's own
