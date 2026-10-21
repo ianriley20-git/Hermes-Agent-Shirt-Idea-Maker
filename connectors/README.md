@@ -134,43 +134,88 @@ scheduler. Code lives here only where the built-in tools fall short:
   from the one-time cron created at scheduling time, never directly from
   the Tuesday/Thursday/Saturday offer run. This delete command is also the takedown
   mechanism for a `NO` reply on an already-posted item.
-- `bg_remove.py` (post-Stage 6, in testing on
-  `hermes-proposed/bg-removal-mockup-testing-2026-10-14`) — removes the flat
-  background from an approved Duke/Nova/Ash design, producing a transparent
-  PNG. A deterministic color-key operation, not general AI background
-  removal: all three designers already render on a solid flat background
-  (`prompts/image_style.md`), so the background is found by flood-filling
-  from the image border (`scipy.ndimage.label`, 8-connectivity) rather than
-  guessing a fixed color per designer — a background-colored region fully
-  enclosed inside the artwork (a letter counter, a dark accent) never
-  touches the border and so stays opaque, while a region that's actually
-  Duke's documented "negative space = unprinted shirt fabric" convention
-  (see that designer's FLAT INK RULE/BACKGROUND RULES sections) correctly
-  goes transparent too, even mid-artwork (confirmed against a real
-  catcher's-mask design's cage mesh and chest-pad gaps during testing).
-  Edge pixels get a soft alpha ramp plus alpha decontamination (un-blending
-  the background color out of partially-transparent edge RGB) rather than a
-  hard cutoff, to avoid a background-color fringe when composited onto a
-  different-colored product later. A small enclosed background-colored
-  region not connected to the border (a letter counter in "BLUE" or "PUT ME
-  DOWN") is swept into transparency too (`--island-max-fraction`, default
-  1% of image area) — letterform counters need to show the garment through
-  them regardless of print color, same as any real screen print — while a
-  *large* enclosed same-color region (Nova's black 8-ball) stays protected,
-  since at that size it's far more likely to be an intentional printed
-  shape than a gap. Trims to the opaque bounding box (`--trim-padding`,
-  default 20px) unless `--no-trim` is passed. Needs `numpy`/`scipy` added to
-  `requirements.txt`.
+- `vc_trace/` (post-Stage 6, in testing — primary design-prep path as of
+  2026-10-21) — a small Rust tool (requires a local clone of
+  [`storytold/vectorcraft`](https://github.com/storytold/vectorcraft),
+  MIT/Apache-2.0, at a path set in `vc_trace/Cargo.toml`; not published on
+  crates.io, so this is a local-path dependency for now, fine while this
+  whole stage is exploratory) that traces a raw design straight to flat
+  vector color regions using `vectorcraft-trace`'s `Palette::DocumentLibrary`
+  mode (operator-supplied swatches, not auto-derived-by-population —
+  auto quantization reliably drops small-but-important colors) and
+  rasterizes the result straight to a real alpha-transparent PNG with
+  `tiny-skia`. No reportlab/renderPM white-canvas round trip, no
+  `bg_remove.py` step needed for most designs.
+  Background handling: unlike VectorCraft's own Ignore Color (which drops
+  every pixel of that color anywhere in the image), `--background`
+  specifies which swatch is the canvas background, and only the traced
+  region of that color whose bounding box touches the canvas edge gets
+  dropped — every enclosed same-colored region (a design's own black
+  linework, hatching, pupils) stays opaque. This is the fix for a real
+  failure found on "Yesferatu": that design uses black as actual line-art
+  ink throughout (not just as background), and both
+  `bg_remove.py --island-max-fraction` (its enclosed-region sweep) and
+  VectorCraft's own Ignore Color blanket-drop every black region — the
+  background *and* the linework — with no way to tell them apart by color
+  alone. Border-connectivity is the actual signal: a canvas background is
+  the one region touching all four edges; real ink almost never does.
+  `--max-enclosed-area` still exists for a design that genuinely wants a
+  small enclosed background-colored region dropped too (a letter counter,
+  a mesh cutout) — off (`0`) by default, since that's indistinguishable
+  from real linework without operator judgment per design.
+  Build (Windows note: point `CARGO_TARGET_DIR` somewhere short — the
+  default nested target dir hits `MAX_PATH`):
+  ```
+  CARGO_TARGET_DIR=C:/vcbuild cargo build --release
+  ```
+  Run:
+  ```
+  vc_trace --input <raw design> --output <transparent PNG> \
+    --swatches "#000000,#f6e8c0,#f6b478,#1a3a5c,#c0392b" \
+    --background "#000000" --noise 2 [--svg <also write an SVG>]
+  ```
+  `--swatches` are the operator's exact chosen colors (see
+  `prompts/image_prompt_review.md`'s color-review step); `--noise` filters
+  small AI-texture/JPEG-artifact regions below that pixel-area threshold
+  (near 0 for a clean/no-distress source, higher for one with real baked
+  -in texture).
+- `bg_remove.py` (post-Stage 6, in testing) — fallback-only now that
+  `vc_trace/` exists (see above) for most designs; still useful for (a) a
+  design that genuinely doesn't need re-tracing, or (b) stripping a solid
+  rendering-canvas fill as a pure artifact cleanup (not real background
+  detection). A deterministic color-key operation: the background is found
+  by flood-filling from the image border (`scipy.ndimage.label`,
+  8-connectivity), so an enclosed background-colored region (a letter
+  counter, a dark accent) stays opaque by default unless swept in via
+  `--island-max-fraction` (default 1% of image area) — **confirmed this
+  sweep can eat real linework**, not just intentional negative space, on a
+  design that uses the background color as actual ink detail throughout
+  (see "Yesferatu" above); pass `--island-max-fraction 0` for those, or
+  prefer `vc_trace/` instead. Edge pixels get a soft alpha ramp plus alpha
+  decontamination (un-blending the background color out of
+  partially-transparent edge RGB). Trims to the opaque bounding box
+  (`--trim-padding`, default 20px) unless `--no-trim` is passed. Needs
+  `numpy`/`scipy` added to `requirements.txt`.
   ```
   /home/hermes/.hermes/hermes-agent/venv/bin/python bg_remove.py \
     --input <approved design PNG> --output <transparent PNG>
   ```
-  Not yet wired into any prompt file or message-routing bucket — this is
-  exploratory testing toward the Post-Stage 6 upload-loop initiative
-  (background removal + realistic mockup generation), not a live stage.
-- Mockup generation (post-Stage 6, same branch) — not yet started;
-  workshopping image-gen prompts against the operator's "Plain Mockups"
-  Dropbox folder once background removal is solid.
+- `posterize.py` (post-Stage 6, in testing) — reduces a transparent design
+  to an exact operator-chosen color count via Pillow quantization against a
+  donor palette built only from opaque pixels. Mostly superseded by
+  `vc_trace/`'s `Palette::DocumentLibrary` tracing for final art (that path
+  doesn't drop small-but-important colors the way population-based
+  quantization does), but still useful as a quick preview tool.
+- `mockup_composite.py` / `mockup_landmarks.py` / `mockup_verify.py` /
+  `mockup_place.py` (post-Stage 6, in testing — validated 2026-10-20/21) —
+  the realistic mockup-compositing pipeline (perspective warp, Blend If
+  dark-transparency, automated collar/shoulder measurement via a
+  MediaPipe-pose + garment-mask fusion, a containment/centering
+  verification gate, and a save/hot-swap template workflow). See
+  `prompts/mockup_generation.md` for the full procedure — this is the
+  most mature piece of the upload-loop initiative so far, validated across
+  multiple designs and mockup photos with the gate passing clean on every
+  one.
 - upload-app integration (post-Stage 6, scoped separately)
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway

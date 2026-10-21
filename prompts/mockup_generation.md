@@ -19,25 +19,39 @@ Start from the final approved, high-resolution design (ideally the
 2880x2880-class output from the current image-generation setup, not an
 older low-resolution one).
 
-Remove the background and get a clean, transparent-background PNG. Two
-paths, in preference order:
+Get a clean, transparent-background PNG. Primary path, as of 2026-10-21:
 
-1. **Preferred: VectorCraft trace.** Sample the design's real colors
-   directly from its own color histogram (never from a downstream
-   derivative like an already-posterized file — that silently inherits
-   whatever colors that derivative already lost, which is exactly how a
-   real blue accent went missing during this session's testing). Trace with
-   `Palette::DocumentLibrary` (operator-chosen swatches), `ignore_white:
-   true` + `ignore_color` set to the background color (drops it natively,
-   no separate background-removal step needed), and a noise value tuned to
-   the source: near 0 for a design generated without baked-in distressing,
-   much higher (100-300) for an older design with real texture to filter.
-   Rasterize the resulting SVG at high resolution (dpi=216 or higher) with
-   a solid white canvas fill (`renderPM` has no native transparent-PNG
-   output), then strip that white fill back out with `bg_remove.py` as a
-   pure rendering-artifact cleanup, not a real background-detection step.
-2. **Fallback: `connectors/bg_remove.py`** directly on the raw design PNG,
-   if a vector trace isn't available or needed for this design.
+1. **Preferred: `connectors/vc_trace/`** (replaces the old
+   SVG-render-then-strip-white-canvas workflow entirely). Sample the
+   design's real colors directly from its own color histogram (never from
+   a downstream derivative like an already-posterized file — that
+   silently inherits whatever colors that derivative already lost, which
+   is exactly how a real blue accent went missing during this session's
+   testing). Trace with operator-chosen swatches (`--swatches`) and a
+   noise value tuned to the source (near 0 for a design generated without
+   baked-in distressing, higher for an older design with real texture or a
+   JPEG source's compression artifacts to filter), rasterizing straight to
+   a real alpha-transparent PNG in one pass — no reportlab/renderPM white
+   -canvas round trip, no separate background-removal step.
+   **Background handling is border-connectivity-based, not color-based**:
+   `--background` names which swatch is the canvas background, and only
+   the traced region of that color whose bounding box touches the canvas
+   edge gets dropped; every enclosed same-colored region (the design's own
+   black linework, hatching, pupils) stays opaque by default. This matters
+   because a design can use the same color as both background *and* real
+   ink detail throughout (confirmed on "Yesferatu" — thin black line art
+   over a black canvas): both VectorCraft's own Ignore Color and
+   `bg_remove.py`'s enclosed-region sweep blanket-drop every region of
+   that color with no way to tell background from ink apart by color
+   alone, which ate real linework on that design. `vc_trace` doesn't have
+   that failure mode since it checks each region's own position, not just
+   its color.
+2. **Fallback: `connectors/bg_remove.py`** directly on the raw design PNG
+   — for a design that genuinely doesn't need re-tracing, or when
+   `vc_trace` isn't available. If the background color also appears as
+   real ink detail (not just background) anywhere in the design, pass
+   `--island-max-fraction 0` or prefer `vc_trace` instead — see that
+   script's own entry in `connectors/README.md` for why.
 
 Either way, end with a transparent PNG at 2000px+ on the long edge.
 

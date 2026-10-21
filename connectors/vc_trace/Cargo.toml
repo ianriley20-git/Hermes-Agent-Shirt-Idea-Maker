@@ -1,0 +1,16 @@
+[package]
+name = "vc_trace"
+version = "0.1.0"
+edition = "2021"
+
+# Depends on a local clone of https://github.com/storytold/vectorcraft (MIT/Apache-2.0) for its
+# tracer -- not published on crates.io yet. Requires that clone to exist locally at the path
+# below; see connectors/README.md for the dependency note. Not wired into any server deployment
+# yet (this whole mockup-generation stage is exploratory), so a local-path dependency is fine for
+# now.
+[dependencies]
+vectorcraft-trace = { path = "C:/Users/ianri/Documents/Software_Development/Vector Craft/vectorcraft/crates/trace" }
+kurbo = "0.13"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+tiny-skia = "0.11"
+clap = { version = "4", features = ["derive"] }
