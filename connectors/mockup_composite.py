@@ -108,7 +108,24 @@ def composite(
     if edge_pull_px and edge_pull_side:
         design = _local_pull_edge(design, edge_pull_side, edge_pull_px, edge_pull_falloff)
 
+    # Pre-downscale toward the quad's own footprint before warping. PERSPECTIVE's BICUBIC
+    # interpolates at sample points; it isn't an area-averaging decimation filter, so warping
+    # straight from a much larger source (a ~2880px design onto a few-hundred-px quad on a small
+    # mockup photo) under-samples fine detail and aliases into visible noise/"pixelation" -- most
+    # visible on exactly the fine linework this pipeline already fights to preserve. Resizing with
+    # LANCZOS first (a proper area-aware filter) to roughly 2x the quad's own size gives the
+    # perspective warp a much smaller reduction to handle, which BICUBIC resamples cleanly. Never
+    # upscales -- only kicks in when the source is meaningfully bigger than where it's landing.
     w, h = design.size
+    dest_xs = [p[0] for p in dest_quad]
+    dest_w = max(dest_xs) - min(dest_xs)
+    target_scale = (dest_w * 2.0) / w if w else 1.0
+    if 0 < target_scale < 1.0:
+        new_w = max(1, round(w * target_scale))
+        new_h = max(1, round(h * target_scale))
+        design = design.resize((new_w, new_h), Image.LANCZOS)
+        w, h = new_w, new_h
+
     src_quad = [(0, 0), (w, 0), (w, h), (0, h)]
 
     coeffs = _find_coeffs(dest_quad, src_quad)
