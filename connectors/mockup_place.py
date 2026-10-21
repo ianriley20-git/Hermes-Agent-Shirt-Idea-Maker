@@ -152,19 +152,24 @@ def main() -> int:
     parser.add_argument(
         "--blend-if-high",
         type=float,
-        default=90.0,
+        default=50.0,
         help="Blend If upper luminance bound (0-255), read from the GARMENT photo beneath the "
         "design (Underlying Layer, not This Layer) -- raise to pull more of the garment's "
         "midtones into the shadow-transparency ramp, not just its darkest shadows, for a "
-        "stronger effect.",
+        "stronger effect. Default (50) was tuned against a black sweatshirt mockup whose fabric "
+        "in the design area only spans luminance ~0-54 -- a much brighter garment (a white or "
+        "light tee) may need a higher value to register any effect at all, since its fabric "
+        "luminance could sit well above 50 throughout. Check the garment's own luminance range in "
+        "the design area before trusting this default on a new mockup photo.",
     )
     parser.add_argument(
         "--blend-if-min-alpha",
         type=float,
-        default=0.15,
+        default=0.35,
         help="Floor opacity (0-1) for the design wherever the garment beneath it is at its "
         "darkest -- lower for a stronger effect (more of that fabric shadow shows through); 0 "
-        "lets the design go fully transparent there.",
+        "lets the design go fully transparent there. Default (0.35) confirmed by the operator as "
+        "'perfect' on the same black-sweatshirt test as --blend-if-high's default.",
     )
     parser.add_argument("--edge-pull-side", choices=("left", "right"), default=None)
     parser.add_argument("--edge-pull-px", type=float, default=0.0)

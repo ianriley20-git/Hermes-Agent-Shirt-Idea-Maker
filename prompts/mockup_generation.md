@@ -212,13 +212,24 @@ verbal recollection. Lives in `mockup_place.py`'s
    to zero by ~40% across the design), leaving the rest of the design
    completely untouched. This mirrors grabbing just one edge with
    Photoshop's Warp tool rather than rescaling the whole layer.
-3. **Blend If dark-transparency.** Compute each pixel's own luminance and
-   ramp its alpha down below a threshold (default: luminance 0-90 ramps
-   from ~15% to 100% of original alpha), so the design's own dark/shadow
-   areas let the garment's real fabric and lighting show through instead
-   of sitting as flat opaque ink. Most visible on darker garments; genuinely
-   subtle on a bright, evenly-lit, light-colored photo — that's an honest
-   property of the technique, not a bug to chase.
+3. **Blend If dark-transparency — "Underlying Layer," not "This Layer."**
+   Compute each pixel's luminance from the **garment photo itself**, not
+   the design — an earlier version of this pipeline got this backwards
+   (ramped the design's own ink darkness instead), which the operator
+   caught directly: their described technique ("parts of the design with
+   dark shadows *behind* it") is Photoshop's Underlying Layer Blend If,
+   reacting to what's beneath the design, not the design's own color.
+   Ramp the design's alpha down where the garment beneath it is dark
+   (default: garment luminance 0-50 ramps from 35% to 100% of the
+   design's alpha — confirmed by the operator as "perfect" against a
+   black sweatshirt), so real fabric folds/shadows imprint onto the
+   design's surface. **This default is garment-luminance-dependent, not
+   universal**: it was tuned to a black sweatshirt whose fabric in the
+   design area only spans luminance ~0-54; a much brighter garment (white,
+   pastel) may need a proportionally higher `--blend-if-high` to register
+   any effect, since its fabric could sit well above 50 throughout — check
+   the new mockup's own luminance range in the design area before trusting
+   this default on a different-colored garment.
 4. **Global opacity trim**, ~4%, on the whole composited layer.
 5. Alpha-composite onto the mockup and flatten to RGB.
 
@@ -298,9 +309,14 @@ correctly centered and sized on the first try.
   re-specified per design when hot-swapping, not yet part of the saved
   template.
 - Blend If's luminance range and the global opacity trim are fixed
-  defaults, not tuned per photo — they happened to work well on every
-  photo tested so far, but haven't been stress-tested against a strongly
-  backlit or unusually colored mockup.
+  defaults, not auto-tuned per photo. Now known to be garment-luminance
+  -dependent (confirmed 2026-10-21, see Step 4): the current default was
+  tuned against one black sweatshirt's own observed luminance range, not
+  derived generally — a lighter-colored garment likely needs a
+  proportionally higher `--blend-if-high` to register any effect at all.
+  Worth automating (sample the mockup's own luminance in the design area,
+  scale the threshold to it) rather than re-tuning by hand per mockup —
+  not built yet.
 - `connectors/mockup_landmarks.py`'s MediaPipe pose model
   (`pose_landmarker.task`) must be downloaded separately (not committed to
   the repo) — see the script's `--pose-model` argument.
