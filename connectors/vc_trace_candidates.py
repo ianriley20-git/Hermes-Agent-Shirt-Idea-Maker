@@ -18,6 +18,15 @@ hand before settling on one per design. Rather than have the agent guess,
 this generates a small grid and lets the operator choose, matching this
 pipeline's existing pattern of an explicit human approval gate at every
 creative decision point (see AGENTS.md's Stage P image-prompt review).
+
+Grid candidates render at --scale 1.0 (the source's own native resolution)
+regardless of vc_trace's own higher default, purely for speed/size during
+comparison -- a 3x3 grid at vc_trace's real default would be 9x the pixels
+for no comparison benefit. Once the operator picks a cell, re-run vc_trace
+directly with that exact noise/paths and the default --scale (3.0) for the
+actual Step 1 output that goes on to the mockup stage -- the vector paths
+cost nothing extra in quality at a higher scale, but a throwaway grid
+candidate doesn't need it.
 """
 
 from __future__ import annotations
@@ -52,6 +61,7 @@ def run_candidates(
     background: str | None,
     background_bias: float | None,
     smooth_rounds: int | None,
+    scale: float = 1.0,
 ) -> list[tuple[int, float, Path]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = input_path.stem
@@ -66,6 +76,7 @@ def run_candidates(
                 "--swatches", swatches,
                 "--noise", str(noise),
                 "--paths", str(paths_val),
+                "--scale", str(scale),
             ]
             if background:
                 cmd += ["--background", background]
@@ -194,6 +205,7 @@ def main() -> int:
         args.background,
         args.background_bias,
         args.smooth_rounds,
+        scale=1.0,
     )
     if not candidates:
         print("no candidates were generated successfully", file=sys.stderr)
@@ -216,6 +228,11 @@ def main() -> int:
     print(f"Overview sheet (pick a design, not pixel detail): {sheet_path}")
     if detail_sheet_path:
         print(f"Detail sheet (zoomed, for checking speckle/linework): {detail_sheet_path}")
+    print(
+        "\nThese candidates are --scale 1.0 (fast, for comparison only). Once the operator picks "
+        "a cell, re-run vc_trace directly with that exact --noise/--paths and no --scale override "
+        "(defaults to 3.0) for the real Step 1 output before moving on to the mockup stage."
+    )
     return 0
 
 

@@ -64,9 +64,18 @@ everything else here) — not built yet.
    one zoomed region at near-native resolution instead. Pick
    `--detail-crop` based on *this* design's own busiest/finest area (a
    face, dense hatching, small text) — there's no universal default.
-   Once the operator picks a cell (e.g. "noise=15, paths=50"), that
-   candidate PNG *is* the Step 1 output — proceed straight to Step 2 with
-   it, no separate re-trace needed.
+   Once the operator picks a cell (e.g. "noise=15, paths=50"), **re-run
+   `vc_trace` once more directly** with that exact `--noise`/`--paths`
+   (grid candidates render at `--scale 1.0` for speed — the source's own
+   native resolution, not vc_trace's real default) to get the actual Step
+   1 output. This matters: confirmed with the operator that a composite
+   built from a scale-1.0 trace looked pixelated on the mockup — the
+   traced paths are real vector geometry, so rendering larger than the
+   source's native pixel size costs nothing in quality, and gives the
+   mockup stage's own perspective-warp downscale (Step 4) real headroom
+   to sample from instead of aliasing. `vc_trace`'s own default is now
+   `--scale 3.0` for exactly this reason; don't override it down for a
+   design that's actually moving on to the mockup stage or to print.
 1. **Preferred: `connectors/vc_trace/`** (replaces the old
    SVG-render-then-strip-white-canvas workflow entirely). Sample the
    design's real colors directly from its own color histogram (never from

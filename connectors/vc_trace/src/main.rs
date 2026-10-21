@@ -185,8 +185,15 @@ struct Args {
     /// (tight/precise). Lower suits a sketchy/distressed source; higher suits crisp flat art.
     #[arg(long, default_value_t = 50.0)]
     paths: f64,
-    /// Upscale the rasterized output by this factor (vector paths, so this stays crisp).
-    #[arg(long, default_value_t = 1.0)]
+    /// Rasterize the output at this multiple of the source's own pixel size. The traced paths are
+    /// real vector geometry, not upsampled raster, so this costs nothing in quality -- confirmed
+    /// a plain 1.0 (the source's native resolution) left visible aliasing once the mockup
+    /// compositing step's own perspective warp shrinks it back down (that warp samples per-pixel,
+    /// not by area-averaging, so it needs headroom to downscale cleanly from). Default 3.0 for
+    /// real output; keep the fast default of 1.0 only for throwaway grid-comparison renders (see
+    /// vc_trace_candidates.py), not for a design that's actually moving on to the mockup stage or
+    /// to print.
+    #[arg(long, default_value_t = 3.0)]
     scale: f64,
     /// Rounds of bilateral pre-smoothing before quantizing (0 disables it).
     #[arg(long, default_value_t = 3)]

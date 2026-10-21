@@ -205,6 +205,16 @@ scheduler. Code lives here only where the built-in tools fall short:
   -in texture); `--paths` (0-100, default 50) sets how tightly the curve
   fit follows the pixel edge — low suits sketchy/distressed art, high
   suits crisp flat art.
+  `--scale` (default **3.0**) rasterizes at that multiple of the source's
+  own pixel size — free quality, not upsampled raster, since the traced
+  paths are real vector geometry. Confirmed this actually matters: a
+  composite built from a `--scale 1.0` trace looked pixelated on the
+  mockup, because the mockup stage's own perspective warp (Step 4,
+  `mockup_composite.py`) samples per-pixel rather than area-averaging when
+  it shrinks the design to fit a small mockup photo's quad, so it needs
+  real headroom to downscale cleanly from. Only drop to `--scale 1.0` for
+  a throwaway comparison render (see `vc_trace_candidates.py` below),
+  never for a design actually moving on to the mockup stage or to print.
 - `vc_trace_candidates.py` (post-Stage 6, in testing) — runs `vc_trace`
   across a noise x paths grid (3x3 by default: low/mid/high on each axis)
   and builds two labeled sheets, so the operator picks the cleanest
