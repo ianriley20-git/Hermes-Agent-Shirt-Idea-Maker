@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Composite a finished design onto a lifestyle mockup photo, following the
 operator's own established Photoshop workflow: warp into perspective, apply
-a Blend If-style dark-transparency effect so the design's own shadows let
-the garment's real fabric and lighting show through, trim overall opacity a
-few percent. See prompts/mockup_generation.md for the full procedure,
-including how to measure a mockup photo's placement quad by hand -- this
-script only does the compositing itself, it does not measure the photo.
+an "Underlying Layer" Blend If dark-transparency effect so the garment's own
+shadows/folds let its real fabric and lighting show through the design's
+surface, trim overall opacity a few percent. See prompts/mockup_generation.md
+for the full procedure, including how to measure a mockup photo's placement
+quad by hand -- this script only does the compositing itself, it does not
+measure the photo.
 """
 
 from __future__ import annotations
@@ -67,20 +68,26 @@ def _find_coeffs(dest_quad: list[tuple[float, float]], src_quad: list[tuple[floa
     return np.linalg.solve(a, b).tolist()
 
 
-def _blend_if_dark_transparency(rgba: Image.Image, low: float, high: float, min_alpha_factor: float) -> Image.Image:
-    """Photoshop 'This Layer' Blend If, black slider alt-dragged to create a
-    soft ramp: pixels in the design that are themselves dark become more
-    transparent, so the garment's own shadow shows through instead of a flat
-    opaque dark ink color."""
-    arr = np.asarray(rgba).astype(np.float64)
-    rgb = arr[..., :3]
-    alpha = arr[..., 3]
-    luminance = 0.299 * rgb[..., 0] + 0.587 * rgb[..., 1] + 0.114 * rgb[..., 2]
+def _blend_if_underlying_transparency(
+    design_rgba: Image.Image, underlying_rgb: Image.Image, low: float, high: float, min_alpha_factor: float
+) -> Image.Image:
+    """Photoshop 'Underlying Layer' Blend If, black slider alt-dragged to create a soft ramp:
+    where the layer BENEATH (the garment photo itself) is dark -- a fold, a shadowed crease --
+    the design layer becomes more transparent there, letting that real fabric shadow show through
+    onto the design's surface. This reacts to the GARMENT's own darkness at each point, not the
+    design's own ink color -- distinct from (and an earlier, wrong implementation of this
+    pipeline used) 'This Layer' Blend If, which instead reacts to the design's own pixel darkness
+    regardless of what the garment is doing beneath it. design_rgba and underlying_rgb must
+    already be the same size and pixel-aligned (both the mockup photo's own canvas size)."""
+    design_arr = np.asarray(design_rgba).astype(np.float64)
+    alpha = design_arr[..., 3]
+    under_arr = np.asarray(underlying_rgb.convert("RGB")).astype(np.float64)
+    luminance = 0.299 * under_arr[..., 0] + 0.587 * under_arr[..., 1] + 0.114 * under_arr[..., 2]
 
     factor = np.clip((luminance - low) / (high - low), 0.0, 1.0)
     factor = min_alpha_factor + (1 - min_alpha_factor) * factor
 
-    out = arr.copy()
+    out = design_arr.copy()
     out[..., 3] = alpha * factor
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode="RGBA")
 
@@ -132,7 +139,7 @@ def composite(
     warped = design.transform(mockup.size, Image.PERSPECTIVE, coeffs, Image.BICUBIC, fillcolor=(0, 0, 0, 0))
 
     if apply_blend_if:
-        warped = _blend_if_dark_transparency(warped, blend_if_low, blend_if_high, blend_if_min_alpha)
+        warped = _blend_if_underlying_transparency(warped, mockup, blend_if_low, blend_if_high, blend_if_min_alpha)
 
     if global_opacity != 1.0:
         arr = np.asarray(warped).astype(np.float64)

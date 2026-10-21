@@ -153,16 +153,18 @@ def main() -> int:
         "--blend-if-high",
         type=float,
         default=90.0,
-        help="Blend If upper luminance bound (0-255) -- raise to pull more of the design's "
-        "midtones into the shadow-transparency ramp, not just its darkest pixels, for a stronger "
-        "effect.",
+        help="Blend If upper luminance bound (0-255), read from the GARMENT photo beneath the "
+        "design (Underlying Layer, not This Layer) -- raise to pull more of the garment's "
+        "midtones into the shadow-transparency ramp, not just its darkest shadows, for a "
+        "stronger effect.",
     )
     parser.add_argument(
         "--blend-if-min-alpha",
         type=float,
         default=0.15,
-        help="Floor opacity (0-1) for the design's very darkest pixels -- lower for a stronger "
-        "effect (more garment shows through the darkest ink); 0 lets them go fully transparent.",
+        help="Floor opacity (0-1) for the design wherever the garment beneath it is at its "
+        "darkest -- lower for a stronger effect (more of that fabric shadow shows through); 0 "
+        "lets the design go fully transparent there.",
     )
     parser.add_argument("--edge-pull-side", choices=("left", "right"), default=None)
     parser.add_argument("--edge-pull-px", type=float, default=0.0)
