@@ -73,11 +73,27 @@ def _garment_mask(arr: np.ndarray, seed_box_frac: float = 0.08, tolerance: float
     return mask, tuple(round(c) for c in seed_color.tolist())
 
 
-def _pose_anchor(image_path: Path, pose_model_path: Path | None) -> tuple[float, float] | None:
-    """MediaPipe shoulder-midpoint, used only as a search-window center --
-    never as the collar position itself (see module docstring). Returns
-    None (not an error) if mediapipe/the model isn't available or no pose
-    is found, so callers can fall back to a wider, unanchored search."""
+# Average adult shoulder-JOINT (acromion-to-acromion-ish, what MediaPipe's
+# shoulder landmarks approximate) distance in inches, fitted against three
+# real test photos' already-validated-correct scales. Deliberately NOT the
+# same constant as a garment-seam shoulder width (~18.5in) -- those are two
+# different physical reference points. Confirmed: using the garment-seam
+# constant against a joint-landmark distance is exactly what overshot the
+# true scale on a baggy sweatshirt by ~24% (the mask-width method also
+# independently overshot the same way, for a different reason -- a loose
+# sleeve's silhouette reads wider than the true shoulder-seam width too).
+_POSE_SHOULDER_INCHES = 11.6
+
+
+def _pose_anchor(image_path: Path, pose_model_path: Path | None) -> tuple[float, float, float] | None:
+    """MediaPipe shoulder-midpoint (x, y) and shoulder-to-shoulder pixel
+    distance. The midpoint is used only as a search-window center, never as
+    the collar position itself (see module docstring). The distance is
+    preferred over mask-width for scale -- it's a body-joint measurement,
+    not garment silhouette, so a loose/baggy garment can't inflate it the
+    way it inflates a mask-width reading. Returns None (not an error) if
+    mediapipe/the model isn't available or no pose is found, so callers can
+    fall back to mask-width-based estimates."""
     if pose_model_path is None or not pose_model_path.exists():
         return None
     try:
@@ -99,7 +115,8 @@ def _pose_anchor(image_path: Path, pose_model_path: Path | None) -> tuple[float,
     left_shoulder, right_shoulder = lm[11], lm[12]
     mid_x = (left_shoulder.x + right_shoulder.x) / 2 * image.width
     mid_y = (left_shoulder.y + right_shoulder.y) / 2 * image.height
-    return mid_x, mid_y
+    shoulder_dist_px = abs((left_shoulder.x - right_shoulder.x) * image.width)
+    return mid_x, mid_y, shoulder_dist_px
 
 
 def find_landmarks(
@@ -155,6 +172,7 @@ def find_landmarks(
 
     anchor = _pose_anchor(image_path, pose_model_path)
     pose_anchor_x = anchor[0] if anchor else None
+    pose_shoulder_dist_px = anchor[2] if anchor else None
 
     if pose_anchor_x is not None:
         # Pose landmarks say roughly where the collar should be -- search
@@ -197,6 +215,20 @@ def find_landmarks(
     left_span = collar_x - shoulder_left
     right_span = shoulder_right - collar_x
 
+    # Prefer the pose-landmark shoulder distance for scale -- it's a body-
+    # joint measurement, immune to a loose/baggy garment's silhouette
+    # overshooting the mask-width reading (confirmed: inflated the whole
+    # design ~24% on a sweatshirt before this fix). Mask-width stays as the
+    # fallback when no pose is available, and still drives left/right
+    # rotation detection either way (that only needs a ratio, not absolute
+    # scale).
+    if pose_shoulder_dist_px is not None:
+        px_per_inch = pose_shoulder_dist_px / _POSE_SHOULDER_INCHES
+        scale_source = "pose_landmarks"
+    else:
+        px_per_inch = shoulder_width / 18.5
+        scale_source = "mask_width"
+
     return {
         "image_size": (w, h),
         "garment_color": garment_color,
@@ -204,12 +236,14 @@ def find_landmarks(
         "pose_anchor_x": round(pose_anchor_x, 1) if pose_anchor_x is not None else None,
         "collar_x": collar_x,
         "collar_y": collar_y,
-        "shoulder_width_px": shoulder_width,
+        "mask_shoulder_width_px": shoulder_width,
+        "pose_shoulder_width_px": round(pose_shoulder_dist_px, 1) if pose_shoulder_dist_px is not None else None,
         "shoulder_row": shoulder_row,
         "left_span_px": left_span,
         "right_span_px": right_span,
         "rotation_ratio": round(left_span / right_span, 3) if right_span else None,
-        "px_per_inch": round(shoulder_width / 18.5, 2),
+        "px_per_inch": round(px_per_inch, 2),
+        "scale_source": scale_source,
         "mask": mask,
     }
 
