@@ -12,6 +12,13 @@ aspect ratio (never reuses a literal pixel box from another design, which
 would stretch/distort anything with a different aspect ratio), and
 composites it -- skipping the whole measurement step for any mockup
 that's already been validated once.
+
+Once an operator approves a specific look on a mockup (tilt, size, shift,
+Blend If strength -- see --save-adjustments below), those values save into
+the SAME template JSON, right alongside the measured landmarks, so the
+next design hot-swapped into this mockup picks them up automatically with
+no flags to re-pass. Deliberately excludes edge-pull, which is tuned to
+one specific design's own shape, not a property of the photo.
 """
 
 from __future__ import annotations
@@ -120,14 +127,42 @@ def build_quad_from_template(
     return _rotate_quad(quad, (collar_x, collar_y), tilt_degrees)
 
 
+# Per-mockup placement/look adjustments that get saved into (and read back from) the template
+# JSON once approved -- these are properties of how a design should sit on THIS photo, same as
+# the measured landmarks, not of whatever design happened to be tested when they were tuned.
+# Deliberately excludes edge-pull: that's tuned to one specific design's own shape (which edge is
+# crowded, by how much), not a property of the photo, so it still needs re-specifying per design.
+_ADJUSTMENT_DEFAULTS = {
+    "tilt_degrees": 0.0,
+    "scale_factor": 1.0,
+    "shift_x_in": 0.0,
+    "global_opacity": 0.96,
+    "blend_if_high": 50.0,
+    "blend_if_min_alpha": 0.35,
+}
+
+
+def _resolve_adjustments(template: dict, overrides: dict[str, float | None]) -> dict[str, float]:
+    """CLI value if explicitly given, else the template's own saved value from a prior
+    --save-adjustments, else the hardcoded default -- in that order."""
+    return {
+        key: overrides[key] if overrides.get(key) is not None else template.get(key, default)
+        for key, default in _ADJUSTMENT_DEFAULTS.items()
+    }
+
+
 def place(
     template_path: Path,
     mockup_path: Path,
     design_path: Path,
     output_path: Path,
-    tilt_degrees: float = 0.0,
-    scale_factor: float = 1.0,
-    shift_x_in: float = 0.0,
+    tilt_degrees: float | None = None,
+    scale_factor: float | None = None,
+    shift_x_in: float | None = None,
+    global_opacity: float | None = None,
+    blend_if_high: float | None = None,
+    blend_if_min_alpha: float | None = None,
+    save_adjustments: bool = False,
     **composite_kwargs,
 ) -> dict:
     try:
@@ -141,9 +176,37 @@ def place(
     except (UnidentifiedImageError, OSError) as exc:
         raise ValueError(f"cannot read design: {exc}") from exc
 
-    quad = build_quad_from_template(template, design_size, tilt_degrees, scale_factor, shift_x_in)
-    composite(mockup_path, design_path, output_path, quad, **composite_kwargs)
-    return {"quad": quad, "template": template}
+    resolved = _resolve_adjustments(
+        template,
+        {
+            "tilt_degrees": tilt_degrees,
+            "scale_factor": scale_factor,
+            "shift_x_in": shift_x_in,
+            "global_opacity": global_opacity,
+            "blend_if_high": blend_if_high,
+            "blend_if_min_alpha": blend_if_min_alpha,
+        },
+    )
+
+    quad = build_quad_from_template(
+        template, design_size, resolved["tilt_degrees"], resolved["scale_factor"], resolved["shift_x_in"]
+    )
+    composite(
+        mockup_path,
+        design_path,
+        output_path,
+        quad,
+        global_opacity=resolved["global_opacity"],
+        blend_if_high=resolved["blend_if_high"],
+        blend_if_min_alpha=resolved["blend_if_min_alpha"],
+        **composite_kwargs,
+    )
+
+    if save_adjustments:
+        template.update(resolved)
+        template_path.write_text(json.dumps(template, indent=2))
+
+    return {"quad": quad, "template": template, "adjustments": resolved, "saved": save_adjustments}
 
 
 def main() -> int:
@@ -152,54 +215,63 @@ def main() -> int:
     parser.add_argument("--mockup", required=True, type=Path, help="The same mockup photo the template was built from")
     parser.add_argument("--design", required=True, type=Path, help="New design PNG to hot-swap in")
     parser.add_argument("--output", required=True, type=Path)
+    # Default None on all of these: omitted means "use whatever's already saved in the template
+    # from a prior --save-adjustments, or the hardcoded default if nothing's saved yet" -- see
+    # _resolve_adjustments(). Pass a flag explicitly to override the template for this one run.
     parser.add_argument(
         "--tilt-degrees",
         type=float,
-        default=0.0,
+        default=None,
         help="Rotate the whole design around the collar point. Positive tilts the top toward the "
-        "viewer's right (clockwise on screen); negative tilts it left. 0 keeps the design plumb "
-        "-vertical, which the garment's own natural drape/pose doesn't always actually look best "
-        "with -- a manual, operator-reviewed knob, not auto-derived.",
+        "viewer's right (clockwise on screen); negative tilts it left. Hardcoded default is 0 "
+        "(plumb-vertical), which the garment's own natural drape/pose doesn't always actually "
+        "look best with -- a manual, operator-reviewed knob, not auto-derived.",
     )
     parser.add_argument(
         "--scale-factor",
         type=float,
-        default=1.0,
+        default=None,
         help="Multiplies the design's computed box size (aspect preserved) for this one mockup "
         "-- e.g. 1.15 for 'a little larger.' A manual override on top of the Printify box model, "
-        "not a change to the box model's own real settings.",
+        "not a change to the box model's own real settings. Hardcoded default 1.0.",
     )
     parser.add_argument(
         "--shift-x-in",
         type=float,
-        default=0.0,
+        default=None,
         help="Shifts the design's horizontal center this many inches from the measured collar_x "
         "-- negative moves it left, positive right. Tilt still rotates around the true collar "
-        "point, not this shifted center.",
+        "point, not this shifted center. Hardcoded default 0.0.",
     )
-    parser.add_argument("--global-opacity", type=float, default=0.96)
+    parser.add_argument("--global-opacity", type=float, default=None, help="Hardcoded default 0.96.")
     parser.add_argument("--no-blend-if", action="store_true")
     parser.add_argument(
         "--blend-if-high",
         type=float,
-        default=50.0,
+        default=None,
         help="Blend If upper luminance bound (0-255), read from the GARMENT photo beneath the "
         "design (Underlying Layer, not This Layer) -- raise to pull more of the garment's "
         "midtones into the shadow-transparency ramp, not just its darkest shadows, for a "
-        "stronger effect. Default (50) was tuned against a black sweatshirt mockup whose fabric "
-        "in the design area only spans luminance ~0-54 -- a much brighter garment (a white or "
-        "light tee) may need a higher value to register any effect at all, since its fabric "
-        "luminance could sit well above 50 throughout. Check the garment's own luminance range in "
-        "the design area before trusting this default on a new mockup photo.",
+        "stronger effect. Hardcoded default 50, tuned against a black sweatshirt mockup whose "
+        "fabric in the design area only spans luminance ~0-54 -- a much brighter garment (a white "
+        "or light tee) may need a higher value to register any effect at all. Check the garment's "
+        "own luminance range in the design area before trusting this default on a new mockup.",
     )
     parser.add_argument(
         "--blend-if-min-alpha",
         type=float,
-        default=0.35,
+        default=None,
         help="Floor opacity (0-1) for the design wherever the garment beneath it is at its "
         "darkest -- lower for a stronger effect (more of that fabric shadow shows through); 0 "
-        "lets the design go fully transparent there. Default (0.35) confirmed by the operator as "
-        "'perfect' on the same black-sweatshirt test as --blend-if-high's default.",
+        "lets the design go fully transparent there. Hardcoded default 0.35.",
+    )
+    parser.add_argument(
+        "--save-adjustments",
+        action="store_true",
+        help="After a successful placement, write the resolved tilt/scale/shift/opacity/blend-if "
+        "values back into --template's own JSON file, so a future hot-swap on this same mockup "
+        "picks them up automatically without re-passing any flags. Use once an operator has "
+        "actually approved the look -- not on every exploratory run.",
     )
     parser.add_argument("--edge-pull-side", choices=("left", "right"), default=None)
     parser.add_argument("--edge-pull-px", type=float, default=0.0)
@@ -219,6 +291,7 @@ def main() -> int:
             apply_blend_if=not args.no_blend_if,
             blend_if_high=args.blend_if_high,
             blend_if_min_alpha=args.blend_if_min_alpha,
+            save_adjustments=args.save_adjustments,
             edge_pull_side=args.edge_pull_side,
             edge_pull_px=args.edge_pull_px,
             edge_pull_falloff=args.edge_pull_falloff,
@@ -229,7 +302,10 @@ def main() -> int:
 
     print(f"Used template: {result['template']['mockup_filename']}")
     print(f"Computed quad: {result['quad']}")
+    print(f"Adjustments used: {result['adjustments']}")
     print(f"Wrote {args.output}")
+    if result["saved"]:
+        print(f"Saved these adjustments into {args.template} for future hot-swaps")
     return 0
 
 
