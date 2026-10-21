@@ -149,6 +149,21 @@ def main() -> int:
     )
     parser.add_argument("--global-opacity", type=float, default=0.96)
     parser.add_argument("--no-blend-if", action="store_true")
+    parser.add_argument(
+        "--blend-if-high",
+        type=float,
+        default=90.0,
+        help="Blend If upper luminance bound (0-255) -- raise to pull more of the design's "
+        "midtones into the shadow-transparency ramp, not just its darkest pixels, for a stronger "
+        "effect.",
+    )
+    parser.add_argument(
+        "--blend-if-min-alpha",
+        type=float,
+        default=0.15,
+        help="Floor opacity (0-1) for the design's very darkest pixels -- lower for a stronger "
+        "effect (more garment shows through the darkest ink); 0 lets them go fully transparent.",
+    )
     parser.add_argument("--edge-pull-side", choices=("left", "right"), default=None)
     parser.add_argument("--edge-pull-px", type=float, default=0.0)
     parser.add_argument("--edge-pull-falloff", type=float, default=0.4)
@@ -163,6 +178,8 @@ def main() -> int:
             tilt_degrees=args.tilt_degrees,
             global_opacity=args.global_opacity,
             apply_blend_if=not args.no_blend_if,
+            blend_if_high=args.blend_if_high,
+            blend_if_min_alpha=args.blend_if_min_alpha,
             edge_pull_side=args.edge_pull_side,
             edge_pull_px=args.edge_pull_px,
             edge_pull_falloff=args.edge_pull_falloff,
