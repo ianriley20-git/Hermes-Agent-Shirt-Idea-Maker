@@ -265,6 +265,13 @@ def main() -> int:
         default=55.0,
         help="Half-width of the collar search window around the pose anchor, in pixels",
     )
+    parser.add_argument(
+        "--save-template",
+        type=Path,
+        default=None,
+        help="After an operator approves a placement on this mockup, write a reusable template JSON here "
+        "(e.g. a path inside the locally-synced Dropbox folder) -- see connectors/mockup_place.py",
+    )
     args = parser.parse_args()
 
     try:
@@ -281,6 +288,23 @@ def main() -> int:
     for key, value in result.items():
         if key != "mask":
             print(f"{key}: {value}")
+
+    if args.save_template:
+        import json
+
+        template = {
+            "mockup_filename": args.mockup.name,
+            "image_size": result["image_size"],
+            "collar_x": result["collar_x"],
+            "collar_y": result["collar_y"],
+            "px_per_inch": result["px_per_inch"],
+            "rotation_ratio": result["rotation_ratio"],
+            "scale_source": result["scale_source"],
+        }
+        args.save_template.parent.mkdir(parents=True, exist_ok=True)
+        args.save_template.write_text(json.dumps(template, indent=2))
+        print(f"\nWrote template: {args.save_template}")
+
     return 0
 
 

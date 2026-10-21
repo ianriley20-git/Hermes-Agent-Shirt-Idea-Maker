@@ -6,11 +6,12 @@ own established Photoshop workflow (warp into perspective, Blend If to let
 the garment's own shadow show through the design's dark areas, a small
 global opacity trim) rather than inventing a new technique.
 
-Validated by hand this session (2026-10-20/21) on three real design/mockup
-pairings across different shirt colors, poses, and body types. The
-compositing logic lives in `connectors/mockup_composite.py`; the measurement
-steps below are still done by hand per photo, not automated — see "Known
-limitations" at the end.
+Validated this session (2026-10-20/21) on real design/mockup pairings across
+different shirt colors, poses, and body types. The compositing logic lives
+in `connectors/mockup_composite.py`; the measurement steps (Step 2) are now
+automated via `connectors/mockup_landmarks.py` instead of done by hand — see
+"Automated landmark detection" below for how, and "Step 6 — Reuse an
+approved mockup" for the Smart-Object-style template workflow.
 
 ## Step 1 — Prepare the design
 
@@ -47,28 +48,40 @@ lighting — not a flat, evenly-lit studio product shot, which gives the
 Blend If step in Step 4 almost nothing to work with) that thematically fits
 the design, from the operator's "Plain Mockups" Dropbox folder.
 
-Measure the photo with a **ruled grid overlay**, never by eyeballing a
-plain crop — the one real placement mistake this session (a design that
-read as visibly off-center) came from an eyeballed collar-point estimate
-that was off by only ~20px. A grid with labeled gridlines every 10-50px,
-overlaid on a 2-3x zoomed crop, catches that kind of error immediately.
+**Automated**: `connectors/mockup_landmarks.py --mockup <photo> --pose-model
+<pose_landmarker.task>`. Uses two cues for two different jobs, never
+conflating them — see the script's own docstring for the full reasoning:
 
-1. **Shoulder scale.** Crop/zoom the shoulder region, measure the
-   shoulder-seam-to-shoulder-seam pixel width, divide by ~18.5in (average
-   adult shoulder width) for a real px/inch scale specific to this photo.
-   This number is never the same between photos — it depends on framing,
-   distance, and the garment's own cut (a baggy sweatshirt's outer sleeve
-   silhouette reads wider than a fitted tee's true shoulder seam).
-2. **True garment centerline.** Crop/zoom the collar, find the exact pixel
-   coordinate of the collar's lowest front-center point. Use *this*, not
-   the visually-apparent face/body center, as the horizontal anchor —
-   they can differ, and the garment's own geometry is what actually
-   matters for placement.
-3. **Perspective/rotation.** Compare the collar's left-side-to-center span
-   against its right-side-to-center span. A meaningfully smaller span on
-   one side means the torso is turned and that side is rotated away from
-   camera — it should be compressed more when building the quad in Step 3.
-   Near-equal spans mean a square-on pose; use little to no asymmetry.
+1. **MediaPipe pose landmarks** (shoulder-joint distance and midpoint)
+   answer two things: the **scale** (shoulder distance / 11.6in, a constant
+   fitted for body-joint distance specifically — not the same number as a
+   garment-seam shoulder width, and confirmed that conflating the two
+   overshoots badly on a loose/baggy garment), and **where to search** for
+   the collar (a tight window around the shoulder midpoint).
+2. **The garment's own color mask** (segmented, morphologically closed
+   against fabric-texture speckle) answers where the collar **actually
+   is**: a genuine local peak in "topmost garment pixel per column" within
+   that search window, found via proper peak-finding rather than a global
+   max (which wrongly favors a monotonic edge artifact over a real peak).
+3. **Never use face or shoulder position AS the collar position directly.**
+   Confirmed twice, independently, by re-checking an "obviously correct"
+   manual measurement with a precise ruled grid: a person's head can be
+   turned relative to their torso, so eyeballing "looks centered on the
+   face" reproduces exactly that bias. The automated, face-blind
+   measurement was more accurate than the human eye both times.
+
+Lands within ~5-10px of a careful manual re-measurement, cross-validated
+against three real photos of different poses, garment colors, and body
+types.
+
+**Manual fallback**, if automated detection looks wrong on a given photo
+(check with Step 5's verification gate first): a **ruled grid overlay**,
+never a plain eyeballed crop — label gridlines every 10-50px, overlay on a
+2-3x zoomed crop. Measure shoulder-seam-to-shoulder-seam width, divide by
+~18.5in (garment-seam width, a *different* reference than the automated
+path's joint-distance constant) for scale; find the collar's exact lowest
+front-center pixel for the horizontal anchor; compare the collar's
+left-vs-right span for rotation.
 
 ## Step 3 — Compute the placement quad
 
@@ -110,76 +123,74 @@ Using the scale and collar point from Step 2:
 
 ## Step 5 — Verify before presenting as final
 
-Draw a vertical guideline at the computed collar x-coordinate across the
-finished composite and confirm by eye that it bisects the face/body and
-the design symmetrically. This is the one check that would have caught the
-off-center mistake immediately instead of after the operator spotted it —
-always do it, don't rely on a visual impression from the full image alone.
+**Automated** (`connectors/mockup_verify.py`): checks the finished composite
+against the mockup's own garment mask. Two checks, either failing means
+hold for manual review, not ship: (1) **containment** — does the design
+stay within the garment mask's own extent at every row (nothing spills
+onto the background)? (2) **centering** — is the placement's center within
+tolerance (default 15px) of the mask's own independently-measured collar
+x? Confirmed the gate needs the *same* pose-anchored detection method
+powering it that placement uses, not a simpler fallback — tested without a
+pose model and the gate's own internal check reproduced the exact
+false-notch failure mode it was supposed to catch, wrongly rejecting a
+correct placement.
 
-## Automated landmark detection (`connectors/mockup_landmarks.py`, added 2026-10-21)
+**Manual fallback**: draw a vertical guideline at the computed collar
+x-coordinate across the finished composite and confirm by eye that it
+bisects the face/body and the design symmetrically. Worth remembering this
+is the *weaker* check, not the stronger one — see Step 2's note on manual
+face-centering bias; use the automated gate as the real source of truth
+when the two disagree.
 
-Step 2's measurements can now be found automatically instead of by hand,
-using two cues for two different jobs -- confirmed on real test photos that
-conflating them (using either one directly as the collar position) silently
-reproduces real, repeatable errors:
+## Step 6 — Reuse an approved mockup (`connectors/mockup_place.py`)
 
-- **MediaPipe pose landmarks (shoulders) answer WHERE TO LOOK**: a tight
-  search window (default 55px half-width) for the collar notch. Without
-  this, a shadow/crease or a beard overlapping the collar can look like an
-  even more prominent "notch" than the real collar and wins a naive
-  search -- confirmed on a real photo (the false notch was 92px from the
-  true collar; constraining the search to near the pose anchor fixed it).
-- **The garment's own color mask answers WHERE IT ACTUALLY IS**: segment by
-  color (seeded from the image's own center, morphologically closed to
-  survive fabric-texture speckle), then find the collar's low point as a
-  genuine local peak (via `scipy.signal.find_peaks`, not a plain global
-  max, which wrongly favors a monotonically-climbing edge artifact over an
-  real peak) in "topmost garment pixel per column" within that window.
-- **Never use face or shoulder position AS the collar position directly.**
-  Confirmed on a real photo: a person's head can be turned relative to
-  their torso, so the face's horizontal center can be tens of pixels from
-  the garment's true centerline. Worth naming plainly: manually eyeballing
-  a photo's center is *more* exposed to this bias, not less -- re-checking
-  with a precise ruled grid twice this session, the "obviously correct"
-  manual reading turned out to be the one that was off, not the automated
-  measurement.
+Once the operator approves a placement on a given mockup photo, that
+placement is a property of the **photo** (where the collar/shoulders/scale
+actually are), not of whichever design happened to be tested on it — so it
+doesn't need to be re-measured for the next design. This is the
+Photoshop-Smart-Object equivalent for this pipeline: save the measurement,
+hot-swap new content in, let the placement recompute itself around the new
+content's own shape.
 
-Cross-validated against three real photos (different poses, garment colors,
-body types): collar-point detection now lands within ~5-10px of a precise
-ruled-grid re-measurement on all three, versus up to 92px off before the
-pose-anchored search window was added.
+1. **Save a template** after approval:
+   `mockup_landmarks.py --mockup <photo> --pose-model <model> --save-template
+   <path>.json`. Writes the garment's measured landmarks (collar position,
+   scale, rotation — not a literal pixel quad, which would stretch/distort
+   a differently-shaped design swapped in later) to a small JSON file.
+   Save it into the operator's locally-synced Dropbox folder (e.g. right
+   next to the mockup photo in `Plain Mockups/`) so it syncs automatically
+   — no separate upload step needed for local use. A proper Dropbox-API
+   read/write (matching the pattern already established by
+   `dropbox_meme_upload.py`) is the natural next step once this needs to
+   run unattended on the server, not yet built.
+2. **Hot-swap a new design in**: `mockup_place.py --template <path>.json
+   --mockup <photo> --design <new design>.png --output <path>.png`. Builds
+   a fresh placement quad sized for the new design's own aspect ratio using
+   the template's saved measurement, then composites exactly as Step 4
+   describes. No re-measurement, no manual grid, no guessing.
 
-**Still a known gap**: shoulder-WIDTH detection (used for the px/inch
-scale) measures the mask's widest row, which overshoots the true
-shoulder-seam width on a loose/baggy garment (a sweatshirt's sleeves read
-~24% wider than the actual shoulder bones) -- inflates the whole design's
-size on that garment type. Collar *position* is solid; scale/width
-detection on loose garments is the next thing to fix, not yet solved.
-
-## Verification gate (`connectors/mockup_verify.py`, added 2026-10-21)
-
-Checks a finished composite against the mockup's own garment mask after
-the fact — the actual safety net for an unattended pipeline, since no
-placement heuristic is likely to be perfect on every future photo:
-
-1. **Containment**: at every row the design occupies, does it stay within
-   the garment mask's own left/right extent? Catches spillover onto the
-   background.
-2. **Centering**: is the placement's center within tolerance (default
-   15px) of the mask's own independently-measured collar x? Catches a
-   placement that's technically on the fabric but visibly off-center.
-
-Either check failing means hold for manual review, not ship. Confirmed
-this actually distinguishes a real miss from a good placement: run
-*without* a pose model, the gate's own internal check is exposed to the
-same false-notch failure mode as detection itself and would wrongly reject
-a correct placement — the gate needs the same fused (pose + mask) method
-powering it that detection does, not just a simpler one.
+Confirmed on a real template (the black sweatshirt mockup): hot-swapped a
+second, unrelated design in using only the saved template, and it landed
+correctly centered and sized on the first try.
 
 ## Remaining known limitations (true as of 2026-10-21)
 
-- Shoulder-width/scale detection on loose garments (see above) — the one
-  unresolved piece of the automated measurement pipeline.
+- Shoulder-width/scale detection used to overshoot on loose garments (a
+  sweatshirt's baggy sleeves read ~24% wider than the true shoulder-joint
+  distance) — fixed by switching to MediaPipe's own shoulder-landmark
+  distance (a body-joint measurement, immune to garment silhouette) with
+  its own fitted calibration constant (~11.6in, distinct from the ~18.5in
+  garment-seam constant the manual fallback still uses — these are
+  genuinely different physical reference points, not interchangeable).
+  Confirmed: dropped a sweatshirt's measured scale from 40.32 to 35.5
+  px/inch against a validated-good ~32.4, and fixed an oversized, too-low
+  placement in the same change (the vertical drop is also computed as
+  inches x scale, so a scale error throws off both at once).
+- The template workflow (Step 6) saves the measurement, not an
+  operator's manual adjustments on top of it (e.g. a local edge-pull
+  tuned for one specific design's shape) — those still need to be
+  re-specified per design when hot-swapping, not yet part of the saved
+  template.
 - Blend If's luminance range and the global opacity trim are fixed
   defaults, not tuned per photo — they happened to work well on every
   photo tested so far, but haven't been stress-tested against a strongly
