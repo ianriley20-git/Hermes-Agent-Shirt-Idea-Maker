@@ -38,12 +38,31 @@ from scipy import ndimage
 from scipy.signal import find_peaks
 
 
-def _garment_mask(arr: np.ndarray, seed_box_frac: float = 0.08, tolerance: float = 70.0) -> np.ndarray:
+def _garment_mask(
+    arr: np.ndarray,
+    seed_box_frac: float = 0.08,
+    tolerance: float = 70.0,
+    body_bbox: tuple[int, int, int, int] | None = None,
+) -> np.ndarray:
     """Segment the garment by color, seeded from a small box at the image's
     own center (garments are reliably centered and large in these photos),
     keeping only the connected component that contains that seed -- so a
     similarly-colored patch elsewhere in the background doesn't get pulled
-    in."""
+    in.
+
+    Pure color-distance flood-fill has a real failure mode confirmed on a
+    real photo: when the garment's own color is close enough to a wall or a
+    bright window behind/beside it (a light/neutral garment is the common
+    case), the "background" is color-indistinguishable from the garment at
+    that tolerance, so the flood fill escapes the body outline through it --
+    not a rare edge case, the exact same failure hit two different light
+    -colored garments this session. body_bbox (x0, y0, x1, y1), when given,
+    clips candidate pixels to a generous region around the actual body
+    before connected-component labeling, so a wall or window far from the
+    person can never join the garment's component regardless of how close
+    its color is -- spatial information the pose landmarks already give us
+    for other purposes in this module, now also used to bound the mask
+    itself, not just to pick a search window afterward."""
     h, w, _ = arr.shape
     cy, cx = h // 2, w // 2
     half = max(2, int(min(h, w) * seed_box_frac / 2))
@@ -52,6 +71,14 @@ def _garment_mask(arr: np.ndarray, seed_box_frac: float = 0.08, tolerance: float
 
     dist = np.sqrt(((arr.astype(np.float64) - seed_color) ** 2).sum(axis=-1))
     candidate = dist <= tolerance
+
+    if body_bbox is not None:
+        bx0, by0, bx1, by1 = body_bbox
+        bx0, by0 = max(0, bx0), max(0, by0)
+        bx1, by1 = min(w, bx1), min(h, by1)
+        bbox_clip = np.zeros_like(candidate)
+        bbox_clip[by0:by1, bx0:bx1] = True
+        candidate &= bbox_clip
 
     labeled, _ = ndimage.label(candidate, structure=np.ones((3, 3)))
     seed_label = labeled[cy, cx]
@@ -132,7 +159,28 @@ def find_landmarks(
         raise ValueError(f"cannot read image: {exc}") from exc
 
     h, w, _ = arr.shape
-    mask, garment_color = _garment_mask(arr, tolerance=tolerance)
+
+    # Computed once, up front, so it can bound the garment mask itself (see
+    # _garment_mask's docstring) as well as serve its original jobs below
+    # (narrowing the collar search, setting scale).
+    anchor = _pose_anchor(image_path, pose_model_path)
+    body_bbox = None
+    if anchor is not None:
+        mid_x, mid_y, shoulder_dist_px = anchor
+        # Generous on purpose -- this only needs to exclude a wall/window far
+        # from the body, not tightly crop the garment. A loose/baggy garment
+        # can drape well past the shoulder-joint width, so the margins here
+        # are wide: ~1.8x shoulder distance on each side, from just above the
+        # shoulder line down past the waist.
+        half_w = 1.8 * shoulder_dist_px
+        body_bbox = (
+            int(mid_x - half_w),
+            int(mid_y - 0.5 * shoulder_dist_px),
+            int(mid_x + half_w),
+            int(mid_y + 4.0 * shoulder_dist_px),
+        )
+
+    mask, garment_color = _garment_mask(arr, tolerance=tolerance, body_bbox=body_bbox)
 
     rows_with_mask = np.where(mask.any(axis=1))[0]
     if len(rows_with_mask) == 0:
@@ -170,7 +218,6 @@ def find_landmarks(
     dense = np.interp(np.arange(valid_x.min(), valid_x.max() + 1), valid_x, topmost_y[valid_x])
     smoothed = ndimage.gaussian_filter1d(dense, sigma=8)
 
-    anchor = _pose_anchor(image_path, pose_model_path)
     pose_anchor_x = anchor[0] if anchor else None
     pose_shoulder_dist_px = anchor[2] if anchor else None
 
