@@ -202,7 +202,20 @@ scheduler. Code lives here only where the built-in tools fall short:
   `prompts/image_prompt_review.md`'s color-review step); `--noise` filters
   small AI-texture/JPEG-artifact regions below that pixel-area threshold
   (near 0 for a clean/no-distress source, higher for one with real baked
-  -in texture).
+  -in texture); `--paths` (0-100, default 50) sets how tightly the curve
+  fit follows the pixel edge — low suits sketchy/distressed art, high
+  suits crisp flat art.
+- `vc_trace_candidates.py` (post-Stage 6, in testing) — runs `vc_trace`
+  across a noise x paths grid (3x3 by default: low/mid/high on each axis)
+  and builds one labeled contact-sheet PNG, so the operator picks the
+  cleanest combination by eye instead of the agent guessing a single
+  value. This is Step 1's real entry point in `prompts/mockup_generation.md`
+  — the agent never hand-picks noise/paths values for a final design.
+  ```
+  python vc_trace_candidates.py --vc-trace-bin <path to vc_trace.exe> \
+    --input <raw design> --swatches "#000000,#f8d0a0,#e02020,#104878" \
+    --out-dir <scratch dir> [--noise-levels 2,15,50] [--paths-levels 20,50,90]
+  ```
 - `bg_remove.py` (post-Stage 6, in testing) — fallback-only now that
   `vc_trace/` exists (see above) for most designs; still useful for (a) a
   design that genuinely doesn't need re-tracing, or (b) stripping a solid

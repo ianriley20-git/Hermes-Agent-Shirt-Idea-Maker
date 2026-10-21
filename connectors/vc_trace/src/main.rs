@@ -180,6 +180,11 @@ struct Args {
     /// nearest_swatch_biased doc comment). 1.0 disables the bias.
     #[arg(long, default_value_t = 0.5)]
     background_bias: f64,
+    /// Paths (fidelity) 0-100: how closely the curve fit follows the pixel edge -- 0.78px
+    /// tolerance at 0 (loose/smooth, fewer anchor points), 0.33px at the default 50, 0.08px at 100
+    /// (tight/precise). Lower suits a sketchy/distressed source; higher suits crisp flat art.
+    #[arg(long, default_value_t = 50.0)]
+    paths: f64,
     /// Upscale the rasterized output by this factor (vector paths, so this stays crisp).
     #[arg(long, default_value_t = 1.0)]
     scale: f64,
@@ -271,6 +276,7 @@ fn main() {
         swatches,
         fills: true,
         noise: args.noise,
+        paths: args.paths,
         ignore_white: false,
         ignore_color: None,
         ..Default::default()

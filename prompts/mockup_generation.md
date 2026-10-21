@@ -21,6 +21,25 @@ older low-resolution one).
 
 Get a clean, transparent-background PNG. Primary path, as of 2026-10-21:
 
+0. **Generate candidates, don't guess one setting.** Noise and Paths
+   (fidelity) are both real trade-offs with no single value that's
+   provably correct for every source image — this session's own testing
+   moved between several values by hand before settling on one per
+   design. Rather than have the agent pick blind, run
+   `connectors/vc_trace_candidates.py` to generate a small noise x paths
+   grid (3x3 by default: low/mid/high on each axis) plus one labeled
+   contact-sheet image, and send that to the operator to pick from —
+   matching this pipeline's existing pattern of an explicit human
+   approval gate at every creative decision point (see AGENTS.md's Stage
+   P image-prompt review):
+   ```
+   python vc_trace_candidates.py --vc-trace-bin <path to vc_trace.exe> \
+     --input <raw design> --swatches "#000000,#f8d0a0,#e02020,#104878" \
+     --out-dir <scratch dir>
+   ```
+   Once the operator picks a cell (e.g. "noise=15, paths=50"), that
+   candidate PNG *is* the Step 1 output — proceed straight to Step 2 with
+   it, no separate re-trace needed.
 1. **Preferred: `connectors/vc_trace/`** (replaces the old
    SVG-render-then-strip-white-canvas workflow entirely). Sample the
    design's real colors directly from its own color histogram (never from
