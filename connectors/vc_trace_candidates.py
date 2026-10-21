@@ -90,13 +90,42 @@ def build_contact_sheet(
     output_path: Path,
     thumb_size: int = 420,
     label_height: int = 36,
+    crop_frac: tuple[float, float, float, float] | None = None,
 ) -> None:
+    """crop_frac, if given, is (x0, y0, x1, y1) as fractions of each candidate's own size -- crops
+    to that region at native pixel resolution (only downscaled if it exceeds thumb_size) instead of
+    shrinking the whole design, so fine detail (speckle, linework) is actually checkable by eye
+    rather than lost to a small overview thumbnail."""
     if not candidates:
         raise ValueError("no candidates to build a contact sheet from")
 
     by_key = {(n, p): path for n, p, path in candidates}
     cols, rows = len(paths_levels), len(noise_levels)
-    cell_w, cell_h = thumb_size, thumb_size + label_height
+
+    # Pre-crop everything first so the sheet's cell size matches the actual (possibly non-square)
+    # crop aspect ratio, instead of assuming a square thumb_size cell.
+    tiles: dict[tuple[int, float], Image.Image] = {}
+    for noise in noise_levels:
+        for paths_val in paths_levels:
+            path = by_key.get((noise, paths_val))
+            if path is None:
+                continue
+            try:
+                design = Image.open(path).convert("RGBA")
+            except (UnidentifiedImageError, OSError) as exc:
+                print(f"skipping noise={noise} paths={paths_val}, unreadable: {exc}", file=sys.stderr)
+                continue
+            if crop_frac is not None:
+                w, h = design.size
+                x0f, y0f, x1f, y1f = crop_frac
+                design = design.crop((int(w * x0f), int(h * y0f), int(w * x1f), int(h * y1f)))
+            cap = thumb_size * 2 if crop_frac is not None else thumb_size
+            if design.width > cap or design.height > cap:
+                design.thumbnail((cap, cap))
+            tiles[(noise, paths_val)] = design
+
+    cell_w = max(t.width for t in tiles.values())
+    cell_h = max(t.height for t in tiles.values()) + label_height
     sheet = Image.new("RGB", (cols * cell_w, rows * cell_h), (255, 255, 255))
     draw = ImageDraw.Draw(sheet)
     try:
@@ -106,16 +135,10 @@ def build_contact_sheet(
 
     for row, noise in enumerate(noise_levels):
         for col, paths_val in enumerate(paths_levels):
-            path = by_key.get((noise, paths_val))
+            design = tiles.get((noise, paths_val))
             x0, y0 = col * cell_w, row * cell_h
-            if path is None:
+            if design is None:
                 continue
-            try:
-                design = Image.open(path).convert("RGBA")
-            except (UnidentifiedImageError, OSError) as exc:
-                print(f"skipping noise={noise} paths={paths_val}, unreadable: {exc}", file=sys.stderr)
-                continue
-            design.thumbnail((thumb_size, thumb_size))
             tile = _checkerboard(design.size)
             tile.paste(design, (0, 0), design)
             ox = x0 + (cell_w - tile.width) // 2
@@ -141,6 +164,14 @@ def main() -> int:
     parser.add_argument("--background", default=None, help="Background swatch (#rrggbb); omit to auto-detect")
     parser.add_argument("--background-bias", type=float, default=None)
     parser.add_argument("--smooth-rounds", type=int, default=None)
+    parser.add_argument(
+        "--detail-crop",
+        default="0.35,0.15,0.75,0.35",
+        help="x0,y0,x1,y1 as fractions (0-1) of the design -- the busiest-detail region to zoom "
+        "into for the detail sheet (default targets a face/eye area; aim it at whatever part of "
+        "THIS design has the finest linework or most visible speckle risk). Pass an empty string "
+        "to skip the detail sheet.",
+    )
     args = parser.parse_args()
 
     if not args.vc_trace_bin.exists():
@@ -171,10 +202,20 @@ def main() -> int:
     sheet_path = args.out_dir / f"{args.input.stem}_contact_sheet.png"
     build_contact_sheet(candidates, noise_levels, paths_levels, sheet_path)
 
+    detail_sheet_path = None
+    if args.detail_crop.strip():
+        x0f, y0f, x1f, y1f = (float(v.strip()) for v in args.detail_crop.split(","))
+        detail_sheet_path = args.out_dir / f"{args.input.stem}_detail_sheet.png"
+        build_contact_sheet(
+            candidates, noise_levels, paths_levels, detail_sheet_path, crop_frac=(x0f, y0f, x1f, y1f)
+        )
+
     print(f"\nWrote {len(candidates)} candidates to {args.out_dir}")
     for noise, paths_val, path in candidates:
         print(f"  noise={noise} paths={paths_val}: {path}")
-    print(f"Contact sheet: {sheet_path}")
+    print(f"Overview sheet (pick a design, not pixel detail): {sheet_path}")
+    if detail_sheet_path:
+        print(f"Detail sheet (zoomed, for checking speckle/linework): {detail_sheet_path}")
     return 0
 
 

@@ -207,14 +207,25 @@ scheduler. Code lives here only where the built-in tools fall short:
   suits crisp flat art.
 - `vc_trace_candidates.py` (post-Stage 6, in testing) — runs `vc_trace`
   across a noise x paths grid (3x3 by default: low/mid/high on each axis)
-  and builds one labeled contact-sheet PNG, so the operator picks the
-  cleanest combination by eye instead of the agent guessing a single
-  value. This is Step 1's real entry point in `prompts/mockup_generation.md`
-  — the agent never hand-picks noise/paths values for a final design.
+  and builds two labeled sheets, so the operator picks the cleanest
+  combination by eye instead of the agent guessing a single value. This is
+  Step 1's real entry point in `prompts/mockup_generation.md` — the agent
+  never hand-picks noise/paths values for a final design.
+  Writes **two** sheets, not one: an overview (whole design, shrunk to fit)
+  for picking the general look, and a **detail sheet** (`--detail-crop`, a
+  fractional `x0,y0,x1,y1` box) that crops to one zoomed region at
+  near-native resolution instead of shrinking the whole image — the
+  speckle/linework differences this tool exists to surface are invisible
+  at overview-thumbnail scale, confirmed when the operator couldn't
+  actually tell candidates apart from the overview sheet alone. Aim the
+  crop at wherever *this* design's finest detail or most speckle-prone
+  area is (a face, dense hatching, small text) — there's no single default
+  that fits every design.
   ```
   python vc_trace_candidates.py --vc-trace-bin <path to vc_trace.exe> \
     --input <raw design> --swatches "#000000,#f8d0a0,#e02020,#104878" \
-    --out-dir <scratch dir> [--noise-levels 2,15,50] [--paths-levels 20,50,90]
+    --out-dir <scratch dir> [--noise-levels 2,15,50] [--paths-levels 20,50,90] \
+    [--detail-crop 0.35,0.15,0.75,0.35]
   ```
 - `bg_remove.py` (post-Stage 6, in testing) — fallback-only now that
   `vc_trace/` exists (see above) for most designs; still useful for (a) a
