@@ -65,7 +65,11 @@ def _rotate_quad(
 
 
 def build_quad_from_template(
-    template: dict, design_size: tuple[int, int], tilt_degrees: float = 0.0
+    template: dict,
+    design_size: tuple[int, int],
+    tilt_degrees: float = 0.0,
+    scale_factor: float = 1.0,
+    shift_x_in: float = 0.0,
 ) -> list[tuple[float, float]]:
     collar_x = template["collar_x"]
     collar_y = template["collar_y"]
@@ -83,7 +87,10 @@ def build_quad_from_template(
     scale_by_height = max_available_h_in / (PRINT_AREA_W_IN * aspect)
     scale = min(scale_by_width, scale_by_height)
 
-    design_width_in = scale * PRINT_AREA_W_IN
+    # scale_factor is a manual, per-mockup override on top of the box model above (e.g. "a little
+    # larger on this particular photo") -- not a change to the box model itself, which stays the
+    # operator's real Printify settings.
+    design_width_in = scale * PRINT_AREA_W_IN * scale_factor
     design_height_in = design_width_in * aspect
 
     box_top_y = collar_y + BOX_TOP_FROM_COLLAR_IN * px_per_inch
@@ -99,11 +106,16 @@ def build_quad_from_template(
     half_left = half_width * left_factor
     half_right = half_width * right_factor
 
+    # shift_x_in is another manual, per-mockup override -- moves the box's horizontal center away
+    # from the measured collar_x without changing where tilt_degrees rotates around (the collar
+    # point stays the real anatomical anchor regardless of this nudge).
+    center_x = collar_x + shift_x_in * px_per_inch
+
     quad = [
-        (collar_x - half_left, top_y),
-        (collar_x + half_right, top_y),
-        (collar_x + half_right, bottom_y),
-        (collar_x - half_left, bottom_y),
+        (center_x - half_left, top_y),
+        (center_x + half_right, top_y),
+        (center_x + half_right, bottom_y),
+        (center_x - half_left, bottom_y),
     ]
     return _rotate_quad(quad, (collar_x, collar_y), tilt_degrees)
 
@@ -114,6 +126,8 @@ def place(
     design_path: Path,
     output_path: Path,
     tilt_degrees: float = 0.0,
+    scale_factor: float = 1.0,
+    shift_x_in: float = 0.0,
     **composite_kwargs,
 ) -> dict:
     try:
@@ -127,7 +141,7 @@ def place(
     except (UnidentifiedImageError, OSError) as exc:
         raise ValueError(f"cannot read design: {exc}") from exc
 
-    quad = build_quad_from_template(template, design_size, tilt_degrees)
+    quad = build_quad_from_template(template, design_size, tilt_degrees, scale_factor, shift_x_in)
     composite(mockup_path, design_path, output_path, quad, **composite_kwargs)
     return {"quad": quad, "template": template}
 
@@ -146,6 +160,22 @@ def main() -> int:
         "viewer's right (clockwise on screen); negative tilts it left. 0 keeps the design plumb "
         "-vertical, which the garment's own natural drape/pose doesn't always actually look best "
         "with -- a manual, operator-reviewed knob, not auto-derived.",
+    )
+    parser.add_argument(
+        "--scale-factor",
+        type=float,
+        default=1.0,
+        help="Multiplies the design's computed box size (aspect preserved) for this one mockup "
+        "-- e.g. 1.15 for 'a little larger.' A manual override on top of the Printify box model, "
+        "not a change to the box model's own real settings.",
+    )
+    parser.add_argument(
+        "--shift-x-in",
+        type=float,
+        default=0.0,
+        help="Shifts the design's horizontal center this many inches from the measured collar_x "
+        "-- negative moves it left, positive right. Tilt still rotates around the true collar "
+        "point, not this shifted center.",
     )
     parser.add_argument("--global-opacity", type=float, default=0.96)
     parser.add_argument("--no-blend-if", action="store_true")
@@ -183,6 +213,8 @@ def main() -> int:
             args.design,
             args.output,
             tilt_degrees=args.tilt_degrees,
+            scale_factor=args.scale_factor,
+            shift_x_in=args.shift_x_in,
             global_opacity=args.global_opacity,
             apply_blend_if=not args.no_blend_if,
             blend_if_high=args.blend_if_high,
