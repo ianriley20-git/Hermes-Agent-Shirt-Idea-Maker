@@ -27,31 +27,33 @@ Get a clean, transparent-background PNG. Primary path, as of 2026-10-21:
    a downstream derivative like an already-posterized file — that
    silently inherits whatever colors that derivative already lost, which
    is exactly how a real blue accent went missing during this session's
-   testing). Trace with operator-chosen swatches (`--swatches`) and a
-   noise value tuned to the source (near 0 for a design generated without
-   baked-in distressing, higher for an older design with real texture or a
-   JPEG source's compression artifacts to filter), rasterizing straight to
-   a real alpha-transparent PNG in one pass — no reportlab/renderPM white
-   -canvas round trip, no separate background-removal step.
-   **Background handling is border-connectivity-based, not color-based**:
-   `--background` names which swatch is the canvas background, and only
-   the traced region of that color whose bounding box touches the canvas
-   edge gets dropped; every enclosed same-colored region (the design's own
-   black linework, hatching, pupils) stays opaque by default. This matters
-   because a design can use the same color as both background *and* real
-   ink detail throughout (confirmed on "Yesferatu" — thin black line art
-   over a black canvas): both VectorCraft's own Ignore Color and
-   `bg_remove.py`'s enclosed-region sweep blanket-drop every region of
-   that color with no way to tell background from ink apart by color
-   alone, which ate real linework on that design. `vc_trace` doesn't have
-   that failure mode since it checks each region's own position, not just
-   its color.
+   testing, and how a design's single tan/cream ink got wrongly guessed as
+   two separate colors on another). Trace with the operator's exact chosen
+   swatches (`--swatches`) and a noise value tuned to the source,
+   rasterizing straight to a real alpha-transparent PNG in one pass — no
+   reportlab/renderPM white-canvas round trip, no separate
+   background-removal step.
+   **Background handling is blanket, by design**: every region matching
+   the background color (`--background`, or auto-detected from the canvas
+   border if omitted) drops everywhere in the image — including fine
+   internal linework like eyebrows or letter counters. Confirmed with the
+   operator this is intentional: negative-space linework (the garment's
+   own color standing in for an ink line) is a real screen-print technique
+   they want by default, matching `prompts/image_style.md`'s "use this
+   black background aggressively as negative space throughout the
+   artwork," not a defect to guard real ink against.
+   Two things make blanket deletion come out clean rather than speckled:
+   an exact swatch list sampled from the source's own histogram (a
+   near-miss color causes pixels to flicker between two wrong targets at
+   their boundary), and `--background-bias` (default `0.5`), which biases
+   ambiguous anti-aliased edge pixels toward the background swatch instead
+   of letting them land on an unrelated color by sheer Euclidean-distance
+   coincidence (confirmed this really happens: a black/tan blend pixel can
+   sit numerically closer to an unrelated navy swatch than to either true
+   color it's actually between).
 2. **Fallback: `connectors/bg_remove.py`** directly on the raw design PNG
    — for a design that genuinely doesn't need re-tracing, or when
-   `vc_trace` isn't available. If the background color also appears as
-   real ink detail (not just background) anywhere in the design, pass
-   `--island-max-fraction 0` or prefer `vc_trace` instead — see that
-   script's own entry in `connectors/README.md` for why.
+   `vc_trace` isn't available.
 
 Either way, end with a transparent PNG at 2000px+ on the long edge.
 

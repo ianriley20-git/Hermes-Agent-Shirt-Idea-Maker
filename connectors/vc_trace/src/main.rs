@@ -1,22 +1,22 @@
 //! Trace a raster design into flat-color vector art and rasterize it straight to a real
 //! alpha-transparent PNG -- no reportlab/renderPM white-canvas round trip, no bg_remove.py.
 //!
-//! Default background handling: every traced region matching --background drops, everywhere in
-//! the image, not just at the canvas edge. This matches this brand's own documented house style
-//! (prompts/image_style.md: "The black/dark areas visible inside the artwork should generally
-//! represent unprinted shirt fabric, not another printed color" / "Use this black background
-//! aggressively as negative space throughout the artwork") -- a letter's counter, an eye's white,
-//! a mesh cutout are all *meant* to show the garment through, not sit as opaque ink, so the
-//! correct default is to drop the background color wherever it appears, matching VectorCraft's
-//! own Ignore Color behavior.
-//!
-//! --keep-enclosed-ink switches to the old, narrower behavior (drop only background-colored
-//! regions whose bounding box touches the canvas edge, keeping every enclosed same-colored region
-//! opaque) for the rare design that genuinely needs real opaque ink in the background color
-//! somewhere -- off by default since the house style above is the normal case.
+//! Background handling: every traced region matching the background color drops, everywhere in
+//! the image, not just at the canvas edge -- equivalent to Illustrator's "Select Same Fill Color,
+//! then Delete," and to VectorCraft's own Ignore Color. This matches this brand's own documented
+//! house style (prompts/image_style.md: "The black/dark areas visible inside the artwork should
+//! generally represent unprinted shirt fabric, not another printed color" / "Use this black
+//! background aggressively as negative space throughout the artwork") -- a letter's counter, an
+//! eye's white, fine linework like eyebrows/hatching are all *meant* to show the garment through,
+//! not sit as opaque ink. Confirmed with the operator on "Yesferatu": this is a deliberate choice,
+//! not just tolerated -- negative-space linework (letting the garment's own color stand in for an
+//! ink line) is a legitimate screen-print technique they want by default, not a defect to protect
+//! real ink from. --background is optional: when omitted, the background color is auto-detected
+//! as whichever swatch the most border-touching pixels classify to, so the operator doesn't have
+//! to pre-identify it by eye.
 
 use clap::Parser;
-use kurbo::{PathEl, Shape};
+use kurbo::PathEl;
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
 use vectorcraft_trace::{trace, Mode, Palette, Raster, TraceParams};
 
@@ -88,17 +88,33 @@ fn bilateral_smooth(mut buf: Vec<u8>, w: usize, h: usize, rounds: u32) -> Vec<u8
 /// smoothing); committing every pixel to a swatch first, then voting on that discrete label, is a
 /// more decisive cleanup, appropriate since the final art is flat screen-print color anyway.
 fn nearest_swatch(p: [u8; 3], swatches: &[[u8; 3]]) -> u8 {
+    nearest_swatch_biased(p, swatches, None, 1.0)
+}
+
+/// Nearest-swatch classification with an optional distance bias favoring `background_idx` --
+/// scales that swatch's distance down before comparing, so an ambiguous blended pixel (e.g. a
+/// black/tan anti-aliased edge that happens to sit numerically closer to an unrelated third
+/// swatch like navy, a known coincidence of plain Euclidean RGB distance) resolves toward
+/// negative space instead of a wrong opaque color. `bias` < 1.0 favors the background; 1.0 is
+/// unbiased nearest-neighbor.
+fn nearest_swatch_biased(p: [u8; 3], swatches: &[[u8; 3]], background_idx: Option<usize>, bias: f64) -> u8 {
     swatches
         .iter()
         .enumerate()
-        .map(|(i, s)| (i, color_dist2(p, *s)))
+        .map(|(i, s)| {
+            let d = color_dist2(p, *s);
+            let d = if Some(i) == background_idx { d * bias } else { d };
+            (i, d)
+        })
         .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
         .map(|(i, _)| i as u8)
         .unwrap()
 }
 
-fn classify(buf: &[u8], w: usize, h: usize, swatches: &[[u8; 3]]) -> Vec<u8> {
-    (0..w * h).map(|i| nearest_swatch([buf[i * 4], buf[i * 4 + 1], buf[i * 4 + 2]], swatches)).collect()
+fn classify_biased(buf: &[u8], w: usize, h: usize, swatches: &[[u8; 3]], background_idx: usize, bias: f64) -> Vec<u8> {
+    (0..w * h)
+        .map(|i| nearest_swatch_biased([buf[i * 4], buf[i * 4 + 1], buf[i * 4 + 2]], swatches, Some(background_idx), bias))
+        .collect()
 }
 
 fn majority_filter(labels: Vec<u8>, w: usize, h: usize, radius: i32, swatch_count: usize, rounds: u32) -> Vec<u8> {
@@ -151,22 +167,19 @@ struct Args {
     /// Operator-chosen swatches, as #rrggbb, comma-separated.
     #[arg(long, value_delimiter = ',')]
     swatches: Vec<String>,
-    /// Which swatch is the negative-space/background color (#rrggbb). A region of it drops if it
-    /// touches the canvas edge (the real background) OR if it's both small and compact (a letter
-    /// counter, an eye's white -- a "hole"); an elongated region (real linework, a stroke) stays
-    /// opaque regardless of size -- see the house-style note above and --compact-* below.
+    /// Which swatch is the negative-space/background color (#rrggbb); every region of it drops,
+    /// everywhere in the image -- see the house-style note above. Omit to auto-detect it from
+    /// whichever swatch the canvas border itself classifies to.
     #[arg(long)]
-    background: String,
+    background: Option<String>,
     #[arg(long, default_value_t = 2)]
     noise: u32,
-    /// Max area (fraction of canvas) for a compact enclosed background-colored region to drop.
-    #[arg(long, default_value_t = 0.01)]
-    compact_max_area: f64,
-    /// Min fill fraction (pixels / bounding-box area) for a region to count as "compact" (a blob,
-    /// not a stroke). A letter counter or eye-white is typically well above this; a curved stroke
-    /// (eyebrow, eyelash, hatching) is typically well below it.
-    #[arg(long, default_value_t = 0.35)]
-    compact_min_fill: f64,
+    /// Distance bias (0-1) favoring the background swatch when classifying each pixel; < 1.0
+    /// shrinks its effective distance so an ambiguous blended edge pixel resolves toward negative
+    /// space instead of landing on an unrelated swatch by Euclidean coincidence (see the
+    /// nearest_swatch_biased doc comment). 1.0 disables the bias.
+    #[arg(long, default_value_t = 0.5)]
+    background_bias: f64,
     /// Upscale the rasterized output by this factor (vector paths, so this stays crisp).
     #[arg(long, default_value_t = 1.0)]
     scale: f64,
@@ -198,7 +211,6 @@ fn main() {
 
     let swatches: Vec<[u8; 3]> = args.swatches.iter().map(|s| parse_hex(s)).collect();
     assert!(!swatches.is_empty(), "--swatches is required (comma-separated #rrggbb list)");
-    let background = parse_hex(&args.background);
 
     let img = image::open(&args.input).expect("decode input image").to_rgba8();
     let (w, h) = img.dimensions();
@@ -207,12 +219,49 @@ fn main() {
     if args.smooth_rounds > 0 {
         buf = bilateral_smooth(buf, wu, hu, args.smooth_rounds);
     }
-    if args.majority_radius > 0 && args.majority_rounds > 0 {
-        let alpha: Vec<u8> = (0..wu * hu).map(|i| buf[i * 4 + 3]).collect();
-        let labels = classify(&buf, wu, hu, &swatches);
-        let labels = majority_filter(labels, wu, hu, args.majority_radius, swatches.len(), args.majority_rounds);
-        buf = labels_to_rgba(&labels, &alpha, &swatches);
-    }
+
+    let background_idx: usize = match &args.background {
+        Some(s) => {
+            let target = parse_hex(s);
+            swatches
+                .iter()
+                .position(|s| color_dist2(*s, target) <= 1.0)
+                .unwrap_or_else(|| panic!("--background {s} doesn't match any --swatches entry"))
+        }
+        None => {
+            let mut votes = vec![0u64; swatches.len()];
+            let mut border_px = Vec::new();
+            for x in 0..wu {
+                border_px.push((x, 0));
+                border_px.push((x, hu - 1));
+            }
+            for y in 0..hu {
+                border_px.push((0, y));
+                border_px.push((wu - 1, y));
+            }
+            for (x, y) in border_px {
+                let i = (y * wu + x) * 4;
+                let label = nearest_swatch([buf[i], buf[i + 1], buf[i + 2]], &swatches);
+                votes[label as usize] += 1;
+            }
+            votes.iter().enumerate().max_by_key(|&(_, c)| *c).map(|(i, _)| i).unwrap()
+        }
+    };
+    let background = swatches[background_idx];
+    eprintln!("background: #{:02x}{:02x}{:02x}", background[0], background[1], background[2]);
+
+    // Always pre-quantize ourselves (rather than leaving final classification to VectorCraft's
+    // own internal DocumentLibrary quantizer) so the background-bias above actually takes effect,
+    // and so an optional majority-vote despeckle (below) has discrete labels to vote on.
+    let labels = classify_biased(&buf, wu, hu, &swatches, background_idx, args.background_bias);
+    let labels = if args.majority_radius > 0 && args.majority_rounds > 0 {
+        majority_filter(labels, wu, hu, args.majority_radius, swatches.len(), args.majority_rounds)
+    } else {
+        labels
+    };
+    let alpha: Vec<u8> = (0..wu * hu).map(|i| buf[i * 4 + 3]).collect();
+    buf = labels_to_rgba(&labels, &alpha, &swatches);
+
     let raster = Raster::new(w, h, buf).expect("build raster");
 
     let params = TraceParams {
@@ -235,33 +284,13 @@ fn main() {
     let mut pixmap = Pixmap::new(pixmap_w, pixmap_h).expect("pixmap");
     let transform = Transform::from_scale(args.scale as f32, args.scale as f32);
 
-    let border_eps = 1.5_f64;
-
     let mut kept_svg_paths = Vec::new();
     let mut dropped = 0usize;
     let mut kept = 0usize;
 
-    let canvas_area = (w as f64) * (h as f64);
-    let compact_max_px = args.compact_max_area * canvas_area;
-
     for p in &result.paths {
         let bez = p.path.to_bezpath();
-        let is_background_color = color_dist2(p.color, background) <= 30.0 * 30.0;
-
-        let drop = if !is_background_color {
-            false
-        } else {
-            let bbox = bez.bounding_box();
-            let touches_border = bbox.x0 <= border_eps
-                || bbox.y0 <= border_eps
-                || bbox.x1 >= (w as f64) - border_eps
-                || bbox.y1 >= (h as f64) - border_eps;
-            let bbox_area = (bbox.x1 - bbox.x0).max(1.0) * (bbox.y1 - bbox.y0).max(1.0);
-            let fill_fraction = (p.pixels as f64) / bbox_area;
-            let is_compact_hole =
-                (p.pixels as f64) <= compact_max_px && fill_fraction >= args.compact_min_fill;
-            touches_border || is_compact_hole
-        };
+        let drop = color_dist2(p.color, background) <= 30.0 * 30.0;
 
         if drop {
             dropped += 1;

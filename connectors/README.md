@@ -146,23 +146,47 @@ scheduler. Code lives here only where the built-in tools fall short:
   rasterizes the result straight to a real alpha-transparent PNG with
   `tiny-skia`. No reportlab/renderPM white-canvas round trip, no
   `bg_remove.py` step needed for most designs.
-  Background handling: unlike VectorCraft's own Ignore Color (which drops
-  every pixel of that color anywhere in the image), `--background`
-  specifies which swatch is the canvas background, and only the traced
-  region of that color whose bounding box touches the canvas edge gets
-  dropped — every enclosed same-colored region (a design's own black
-  linework, hatching, pupils) stays opaque. This is the fix for a real
-  failure found on "Yesferatu": that design uses black as actual line-art
-  ink throughout (not just as background), and both
-  `bg_remove.py --island-max-fraction` (its enclosed-region sweep) and
-  VectorCraft's own Ignore Color blanket-drop every black region — the
-  background *and* the linework — with no way to tell them apart by color
-  alone. Border-connectivity is the actual signal: a canvas background is
-  the one region touching all four edges; real ink almost never does.
-  `--max-enclosed-area` still exists for a design that genuinely wants a
-  small enclosed background-colored region dropped too (a letter counter,
-  a mesh cutout) — off (`0`) by default, since that's indistinguishable
-  from real linework without operator judgment per design.
+  Background handling: `--background` names which swatch is the canvas
+  background (or omit it — the background color is auto-detected from
+  whichever swatch the canvas border itself classifies to); every region
+  of that color drops, everywhere in the image, same as VectorCraft's own
+  Ignore Color or Illustrator's "Select Same Fill Color, then Delete."
+  **This is a deliberate operator choice, confirmed on "Yesferatu"**: fine
+  black linework (eyebrows, hatching, letter counters) is meant to read as
+  negative space — the garment's own color showing through — not as
+  opaque printed ink (`prompts/image_style.md`: "use this black background
+  aggressively as negative space throughout the artwork"). An earlier
+  version of this tool tried to protect "real ink" from deletion via a
+  border-touch-only rule, which was the wrong default for this house
+  style; it's gone.
+  Two things actually needed fixing to make blanket deletion work well:
+  1. **The exact swatch list has to match the design's real colors.**
+     Always sample colors straight from the raw source's own histogram
+     (never a downstream derivative — that silently inherits whatever
+     colors it already lost), and count carefully: a near-miss swatch
+     (e.g. guessing a separate "skin tone" when the art only actually uses
+     one tan/cream ink for both skin and text) causes pixels to flicker
+     between two wrong targets at their shared boundary, which shows up as
+     speckle.
+  2. **Ambiguous anti-aliased edge pixels can land on the wrong swatch by
+     sheer Euclidean-distance coincidence.** A ~50/50 blend between pure
+     black and a warm tan can sit numerically closer to an unrelated third
+     swatch (e.g. a navy) than to either true endpoint color — confirmed
+     with the actual RGB math on Yesferatu's eyebrow pixels. `vc_trace`
+     pre-quantizes every pixel itself (rather than leaving final
+     classification to VectorCraft's own internal quantizer) with
+     `--background-bias` (default `0.5`) shrinking the background swatch's
+     effective distance, so an ambiguous dark edge pixel resolves toward
+     negative space instead of a wrong opaque color.
+  Also applies bilateral pre-smoothing (reimplementing VectorCraft's own
+  internal `smooth` module, which exists for exactly this but only
+  auto-triggers when the library decides the *whole image* looks like a
+  photo — a design that's mostly flat color with one small painterly
+  detail area reads as flat overall and gets skipped). An optional
+  post-classification majority-vote despeckle (`--majority-radius`, off by
+  default) exists too, but erases thin strokes along with real noise at
+  normal design resolutions — only reach for it on a design with no fine
+  linework to protect.
   Build (Windows note: point `CARGO_TARGET_DIR` somewhere short — the
   default nested target dir hits `MAX_PATH`):
   ```
@@ -171,8 +195,8 @@ scheduler. Code lives here only where the built-in tools fall short:
   Run:
   ```
   vc_trace --input <raw design> --output <transparent PNG> \
-    --swatches "#000000,#f6e8c0,#f6b478,#1a3a5c,#c0392b" \
-    --background "#000000" --noise 2 [--svg <also write an SVG>]
+    --swatches "#000000,#f8d0a0,#e02020,#104878" \
+    --noise 2 [--background "#000000"] [--svg <also write an SVG>]
   ```
   `--swatches` are the operator's exact chosen colors (see
   `prompts/image_prompt_review.md`'s color-review step); `--noise` filters
