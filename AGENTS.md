@@ -23,9 +23,11 @@ publish it live to Shopify once the operator approves it (Stage 7).
 - `prompts/` — task-specific instructions (daily scan, seeded search,
   exact-text iterations, image style, and image-prompt review). Referenced by
   name from cron jobs or on-demand messages.
-- `~/image_prompt_library.md` (server-side, outside git) — the complete
-  revision history for every reviewed image-generation prompt: stable IDs,
-  exact prompt text, designer, operator corrections, and final status.
+- `~/image_prompt_library.md` (server-side, outside git) — a record of
+  every generated image's assembled prompt: stable IDs, exact prompt
+  text, designer, any correction that produced a later revision, and
+  final approved/rejected status. Logged automatically as designs are
+  generated — not an approval gate (see `prompts/image_prompt_review.md`).
 - `config/` — subreddit list, niche keywords, reference sites, seasonal
   calendar. Treat the niche/subreddit lists as a reliable seed, not a
   hard ceiling — `daily_scan.md` Step 1 is where the pool of niches
@@ -90,21 +92,33 @@ Stages 1-3, 5, and now 4 confirmed working (see `TODO.md`). What's
 actually live:
 - **Message routing** (below) is active.
 - **Daily scan** (`prompts/daily_scan.md`) has a live 7 AM
-  America/New_York cron and returns text-only concepts. A concept YES now
-  prepares complete Duke/Nova/Ash provider prompts for review; it does not
-  generate images directly. Step 1 also does seasonal-calendar + open-ended
-  category discovery (Stage 4, wired in 2026-09-20).
+  America/New_York cron and returns text-only concepts. Step 1 also does
+  seasonal-calendar + open-ended category discovery (Stage 4, wired in
+  2026-09-20).
 - **Seeded search** (`prompts/seeded_search.md`) is confirmed working via
-  Telegram and uses the same concept → prompt review → rendered-image review
-  gates.
-- **Image prompt review** (`prompts/image_prompt_review.md`, added
-  2026-09-24) is mandatory before every provider-backed generation/edit,
-  including text iterations, designer variants, remakes, and repair prompts.
-  Exact prompts and correction chains persist in `~/image_prompt_library.md`;
-  only an explicit prompt-specific YES permits generation.
+  Telegram and uses the same single-gate design-review flow as daily scan.
+- **Single-gate image pipeline** (redesigned 2026-10-22, replacing the
+  old three-gate text-concept → prompt-review → rendered-image flow): a
+  concept YES generates one real design directly — auto-assigned
+  designer, one provider call, one deterministic check (does the visible
+  text match the tagline?) — and sends the finished design as the one
+  thing the operator approves or rejects. No separate prompt-review card,
+  no audit/repair loop before the operator sees it. See bucket 3 below
+  and `prompts/image_prompt_review.md` (now prompt assembly/logging only,
+  not an approval gate). Rationale: the old gates were meant to protect
+  against expensive image-generation calls, but in practice the cost and
+  friction came from long back-and-forth Hermes conversations auditing
+  and repairing designs against a bar stricter than the operator's own
+  taste — removed in favor of the operator just reviewing finished
+  designs directly, the way a human art director would.
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND uploaded to a Dropbox `/to-do` folder via
-  `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`).
+  `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`),
+  exactly as generated — no separate "premium" finalization pass and no
+  vectorization step in this pipeline. (Vectorization, via
+  `connectors/vc_trace`, is intentionally a separate, later step that
+  only runs once a design is actually turned into a listed product, not
+  on every approved candidate — not yet built as its own process.)
   Previously emailed via Gmail OAuth — replaced because Google
   force-expires refresh tokens every 7 days while an app stays in OAuth
   "Testing" status, and full verification to escape that was
@@ -172,7 +186,7 @@ actually live:
   upload) and moves the file into `/memes/posted` as part of the same call.
   This is a real, explicit approval gate — scheduling a specific time back
   and forth with the operator *is* the yes — not a heads-up exception; see
-  bucket 7 and `prompts/instagram_post.md` for the exact mechanics. Not yet
+  bucket 6 and `prompts/instagram_post.md` for the exact mechanics. Not yet
   live — needs the Meta Instagram Login app setup
   (`install/01_provision_vps.md` Part 15, mostly done as of 2026-10-12 —
   see `TODO.md`) and the two cron jobs actually created before first use.
@@ -197,103 +211,99 @@ which before responding:
    plus the word "iterations" (route here). Read and follow
    `prompts/text_iterations.md` in full, using the exact text as Step
    0's input.
-3. **A yes/no/correction reply to a concept, reviewed image prompt, or
-   rendered design** (e.g. "yes", "no", "yes on #2", "no Duke, use a
-   horse rather than a dog") — a message can address more than one item;
-   handle each independently. There are now **three distinct gates**. First
-   classify the quoted/referenced item from its content and stable ID; do not
-   treat one gate's YES as approval for a later gate.
+3. **A yes/no/correction reply to a concept or a rendered design** (e.g.
+   "yes", "no", "yes on #2", "no Duke, use a horse rather than a dog") —
+   a message can address more than one item; handle each independently.
+   There are now **two stages**, not three — classify the quoted/
+   referenced item from its content and stable ID first; do not treat a
+   concept YES as approval of the design itself, or vice versa.
 
-   Daily-scan concept cards are numbered within each delivered batch
-   (`#1`, `#2`, etc.). Treat replies such as `yes to #1 and #3`, `no to
-   #2`, or `yes to #1 Ash` as references to the most recent numbered
-   daily batch unless the reply is explicitly attached to an older
-   message. Preserve that concept number through the prompt-review
-   cards (Stage P) and on all Duke/Nova/Ash render captions generated
-   from it. If more than one numbered batch is a plausible target and
-   reply context does not resolve it, ask rather than guessing.
+   Daily-scan/seeded-search concept cards are numbered within each
+   delivered batch (`#1`, `#2`, etc.). Treat replies such as `yes to #1
+   and #3`, `no to #2`, or `yes to #1 Ash` as references to the most
+   recent numbered batch unless the reply is explicitly attached to an
+   older message. Preserve that concept number on the rendered design's
+   caption and ID. If more than one numbered batch is a plausible
+   target and reply context does not resolve it, ask rather than guess.
 
-   **Stage A — replying to a text-only concept (no provider prompt or image
-   yet; from `daily_scan.md`, `seeded_search.md`, or `text_iterations.md`):**
-   - **On YES**: do **not** generate an image. If the concept card already has
-     a `Designer:` line, assemble one complete real provider prompt for that
-     designer. Otherwise assemble three independent prompts—Duke, Nova, and
-     Ash—for the same tagline/visual concept. Read `prompts/image_style.md`
-     and `prompts/image_prompt_review.md`; assign each designer a stable
-     `IP-...-DESIGNER` ID, persist the exact prompt in
-     `~/image_prompt_library.md`, and send each complete prompt as its own
-     Stage P review card. No image tool is called at this stage.
-   - **On NO**: log the rejected concept to memory (tagline/text, register,
-     and reason if supplied) and confirm briefly. No prompt or image is made.
+   **Stage Concept — replying to a text-only concept** (no design yet;
+   from `daily_scan.md`, `seeded_search.md`, or `text_iterations.md`):
+   - **On YES**: generate the design directly — no separate prompt-
+     review round-trip first. If the concept card already names a
+     `Designer:`, use that one. Otherwise pick the single designer whose
+     section in `prompts/image_style.md` best fits the concept's tone/
+     subject (vintage or text-driven → Duke, clean/modern/minimal →
+     Nova, bootleg/airbrush-coded → Ash) — don't generate all three by
+     default; that's what made this expensive. Assemble the complete
+     provider prompt per `prompts/image_prompt_review.md`, log it to
+     `~/image_prompt_library.md` under a stable `IP-...-DESIGNER` ID,
+     and call the image tool once.
+   - Run exactly one deterministic check on the result: does the
+     visible text actually match the tagline (read it back, e.g. via
+     OCR/vision)? If it doesn't, regenerate **once** from the same
+     prompt and move on regardless of the second result — don't loop
+     chasing it further. Everything else about the design (composition,
+     color count, style fit, "too busy," hatching, etc.) is the
+     operator's call, not an automatic pass/fail — send it either way
+     rather than quarantining on a subjective judgment.
+   - Send the rendered design as a new Stage Design item (see below)
+     with its concept number, designer, and `IP-...` ID.
+   - **On NO**: log the rejected concept to memory (tagline/text,
+     register, and reason if supplied) and confirm briefly. Nothing is
+     generated.
 
-   **Stage P — replying to a reviewed image-generation prompt** (a card with
-   a stable `Prompt ID: IP-...` and `Revision: Rn`):
-   - **On YES**: resolve the exact ID/latest pending revision. Preserve the
-     full approved prompt and its correction chain in
-     `~/image_prompt_library.md`, and log a compact learning summary to memory.
-     Then—and only then—call the image tool with exactly the reviewed prompt,
-     source asset, mode, and aspect ratio. Do not silently add, remove, or
-     rewrite instructions after approval. Save and verify the output, then
-     send the rendered image as a new Stage B item with its concept number,
-     designer, Prompt ID, and a fresh rendered-image YES/NO prompt.
-   - **On NO**: mark that designer prompt rejected in the prompt library, log
-     the reason/pattern compactly to memory, and drop it. Generate nothing and
-     do not substitute another designer automatically.
-   - **On a correction**: append the operator's wording verbatim to the prompt
-     history, revise the complete prompt, increment the revision while keeping
-     the same base Prompt ID, log the correction pattern, and resend the full
-     prompt card. Repeat until YES or NO; never generate on a correction alone.
-   - A failed render audit or a requested rendered-image edit also returns to
-     Stage P: show the exact repair/image-edit prompt first. Deterministic
-     non-creative checks do not need a prompt gate, but every provider-backed
-     generation, regeneration, or edit does.
-
-   **Stage B — replying to an already-generated image** (created only from an
-   approved Stage P prompt):
+   **Stage Design — replying to an already-generated design image**:
    - **Always**: log the decision to memory — tagline, register
      (deadpan/wordplay), approved or rejected, and any reason the
      operator gave. See the learning-from-feedback section in
      `prompts/_brand_voice.md`.
-   - **On approval only**: upload the approved design's PNG to Dropbox
-     using `connectors/dropbox_upload.py`, not email — see the Design
-     handoff note above for why email was dropped.
+   - **On YES**: mark the `IP-...` entry approved in
+     `~/image_prompt_library.md`, then upload the design's PNG to
+     Dropbox using `connectors/dropbox_upload.py` — not email, see the
+     Design handoff note above:
      - Run it with Hermes's own venv Python (system `python3` can't
        install packages on this box):
        ```
        /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/dropbox_upload.py --file <path to the generated PNG> --name "<design tagline/title>"
        ```
      - This uploads to `/to-do/<design name>.png` inside the app's own
-       Dropbox App folder (`Apps/<app name>/to-do/`). The operator
-       moves files from `to-do` to `done` themselves once a design
-       becomes a finished product — never move, rename, or delete
-       anything in Dropbox yourself, only ever write new files into
-       `/to-do`.
+       Dropbox App folder (`Apps/<app name>/to-do/`), exactly as
+       generated — no premium-finalization pass, no vectorization (see
+       the Design handoff note above). The operator moves files from
+       `to-do` to `done` themselves once a design becomes a finished
+       product — never move, rename, or delete anything in Dropbox
+       yourself, only ever write new files into `/to-do`.
      - This is the one explicit "yes" the hard rule below requires —
        upload it immediately, don't ask for a second confirmation.
-   - Reply briefly on Telegram confirming what was logged and, for each
-     approval, that the upload succeeded (report the exact `Uploaded to
-     ...` path the script prints) — or if it failed, say so plainly
-     rather than claiming success.
-4. **A designer variant request** (e.g. "I'd like to see Ash's version
-   of the fantasy football one," "show me Nova's take on that," "redo
-   the knight one but edgy") — the operator wants a previously-shown
-   concept reinterpreted by a named designer, but this request authorizes
-   **prompt drafting only**, not image generation:
-   - Identify the exact prior concept. Use recent context or
-     `session_search`; ask only if the concept/designer remains ambiguous.
-   - Re-assemble the complete actual provider prompt for the same tagline/joke
-     using the requested designer's section in `prompts/image_style.md`.
-   - Follow `prompts/image_prompt_review.md`: assign a stable Prompt ID,
-     persist the full R1 prompt, and send the exact prompt card to Telegram.
-     Do not call an image tool yet.
-   - YES to that prompt generates exactly the reviewed prompt and creates a
-     bucket 3 Stage B rendered candidate. NO drops it at zero cost. Corrections
-     increment the same Prompt ID's revision and are resent for review.
-5. **A reply to a weekly blog post message** (a reply to a topic-options
+     - Reply on Telegram confirming the upload succeeded (report the
+       exact `Uploaded to ...` path the script prints) — or if it
+       failed, say so plainly rather than claiming success.
+   - **On NO**: mark the `IP-...` entry rejected, preserve any reason,
+     and confirm briefly. Generate nothing further for this design.
+   - **On "show me [designer]'s version" / a similar request for another
+     designer's take on the same concept**: re-assemble the complete
+     provider prompt for the requested designer, generate it directly
+     (one shot, same rules as above), log it under a new `IP-...-
+     DESIGNER` ID tied to the same concept number, and send it as a new
+     Stage Design item. This also covers a fresh request referencing an
+     older concept from earlier in the conversation/session (e.g. "I'd
+     like to see Ash's version of the fantasy football one") — identify
+     the exact prior concept from context, asking only if it's genuinely
+     ambiguous which one.
+   - **On a correction** (e.g. "make the dog a horse," "less busy,"
+     "simplify the type"): revise the complete prompt incorporating the
+     correction (image-edit mode on the existing render when the
+     correction is a targeted change, a fresh prompt when it's more
+     fundamental), generate it directly — one shot, no prompt-approval
+     round-trip first — log the correction and the new revision under
+     the same base `IP-...` ID, and send the result as a new Stage
+     Design item. Never erase the superseded revision or the correction
+     history.
+4. **A reply to a weekly blog post message** (a reply to a topic-options
    message or a full-draft message sent by `prompts/blog_post.md` —
    distinguish from bucket 3 by the message being about a blog post,
    not a shirt-design concept/image) — two stages, same shape as bucket
-   3's Stage A/B split but with its own mechanics:
+   3's Stage Concept/Stage Design split but with its own mechanics:
 
    **Stage A — replying to a topic-options message** (2-3 numbered
    summaries, no full draft yet):
@@ -335,7 +345,7 @@ which before responding:
      for the same topic — don't re-run Part 1's research unless the
      change is broad enough to really be a different topic (use
      judgment; ask if unclear).
-6. **A YES/NO reply to a backlink opportunity** (an item carrying a
+5. **A YES/NO reply to a backlink opportunity** (an item carrying a
    `BH-...` or `GR-...` ID from `prompts/backlink_outreach.md`) — resolve
    the exact ID and source URL in `~/backlink_opportunity_log.md` before
    acting; ask if a bare reply could identify more than one item.
@@ -352,7 +362,7 @@ which before responding:
    - When the operator reports manual outreach/submission, mark the exact
      row `submitted` with timestamp/evidence; use `live` only after the
      resulting backlink is actually verified.
-7. **A reply to a seasonal meme candidate, a posting-schedule offer, a
+6. **A reply to a seasonal meme candidate, a posting-schedule offer, a
    scheduled item, or an already-posted Instagram item** (an item carrying
    an `M-YYYYMMDD-NN` ID from `prompts/meme_finder.md`,
    `prompts/meme_create.md`, or `prompts/instagram_post.md` — all three
@@ -394,10 +404,10 @@ which before responding:
      --delete`, mark the ledger `Instagram status: deleted`, preserve the
      reason, and confirm the deletion on Telegram. The file stays in
      `/memes/posted` as a record; it is not moved back or re-offered.
-8. **A general question about the project, its state, or how something
+7. **A general question about the project, its state, or how something
    works** (e.g. "what stage are we at?") — answer directly and
    factually from this file and the repo, no need to run a prompt file.
-9. **Anything else** (small talk, unclear intent, something that doesn't
+8. **Anything else** (small talk, unclear intent, something that doesn't
    fit any bucket above) — respond normally as yourself, or ask a
    clarifying question if genuinely unsure which bucket applies.
 

@@ -141,16 +141,10 @@ send only the "nothing cleared the bar" message.
 
 ## Step 9 — Send concepts to Telegram (text only, no image yet)
 
-**Don't generate an image yet.** A concept YES creates complete provider
-prompts for review, not images. If a designer was named/implied in Step 0,
-prepare one prompt for that designer; otherwise prepare Duke, Nova, and Ash
-prompts independently. Each receives a stable Prompt ID and follows
-`prompts/image_prompt_review.md`. Only a later YES to a specific reviewed
-prompt permits its image call.
-
-If a designer was named/implied in Step 0, note that designer on every concept
-card. Otherwise omit the designer line; Stage A will prepare all three prompts
-for comparison before any cost is incurred.
+If a designer was named/implied in Step 0, note that designer on every
+concept card — `AGENTS.md` bucket 3's Stage Concept will use it directly
+instead of picking one. Otherwise omit the designer line and let Stage
+Concept pick per concept as usual.
 
 If nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
@@ -166,11 +160,10 @@ Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
 Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" prepares [the named designer's exact prompt | the
-Duke, Nova, and Ash exact prompts] for your review next; no image is generated.
+to more than one). "yes" generates one real design for this concept —
+you'll review the finished design next, not a prompt.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later concept YES triggers exact designer
-prompt assembly/review under `AGENTS.md` bucket 3 Stage A/P, not image
-generation directly.
+ends once the concepts are sent. A later concept YES triggers direct
+design generation under `AGENTS.md` bucket 3's Stage Concept.

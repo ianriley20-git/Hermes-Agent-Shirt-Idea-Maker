@@ -168,13 +168,6 @@ to Step 9 and send only the "nothing cleared the bar" message.
 
 ## Step 9 — Send concepts to Telegram (text only, no image yet)
 
-**Don't pick a designer or generate an image yet.** A concept YES now
-creates one complete reviewable provider prompt from each designer (Duke,
-Nova, Ash), not images. Each prompt is sent under its own stable Prompt ID per
-`prompts/image_prompt_review.md`. Only a later YES to an exact designer prompt
-allows that image to be generated; a NO costs nothing, and a correction returns
-a revised prompt for review.
-
 If nothing cleared the bar in Step 8: send exactly that ("Nothing
 cleared the bar today") and briefly note what was closest, rather than
 lowering the standard to produce a concept anyway.
@@ -182,8 +175,8 @@ lowering the standard to produce a concept anyway.
 Otherwise, number the surviving concepts sequentially in final display
 order (`#1`, `#2`, and so on), then send each concept as its own message.
 The number is the concept's stable identifier for this daily batch: keep
-it when the concept later becomes Duke/Nova/Ash renders so replies such as
-`yes to #1 and #3` or `yes to #1 Ash` can be resolved without requiring
+it when the concept later becomes a rendered design so replies such as
+`yes to #1 and #3` or `yes to #1` can be resolved without requiring
 the operator to retype a tagline.
 
 ```
@@ -196,12 +189,11 @@ Source: [subreddit / trends keyword / seasonal calendar / niche library / refere
 
 Reply "yes" or "no" on this one, or approve/reject multiple concepts by
 number (for example, `yes to #1 and #3`). You can still reference a
-tagline instead. "yes" prepares the complete Duke, Nova, and Ash
-image-generation prompts for your review next; it does not generate
-images yet.
+tagline instead. "yes" generates one real design for this concept
+(designer picked automatically, unless you'd rather name one) — you'll
+review the finished design next, not a prompt.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later concept YES triggers designer prompt
-assembly and review, handled by `AGENTS.md` bucket 3 Stage A/P; it does not
-trigger image generation directly.
+ends once the concepts are sent. A later concept YES triggers direct
+design generation, handled by `AGENTS.md` bucket 3's Stage Concept.

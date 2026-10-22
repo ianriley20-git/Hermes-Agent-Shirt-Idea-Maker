@@ -1008,6 +1008,46 @@ concepts, 2026-09-03)
       correction round, one prompt rejection, and one failed-audit repair all
       remain image-free until the exact latest prompt revision is approved.
 
+## Stage 5 superseded: single-gate image pipeline, 2026-10-22
+
+- [x] **Reason**: operator found this three-gate flow (concept text →
+      prompt review → rendered-image review), plus Hermes's own
+      self-authored "premium finalization"/audit skill layered on top of
+      it, had made day-to-day use "altogether too complicated and
+      restrictive with a ton of back and forth." A real production
+      transcript review the same day found the actual cost/friction was
+      long Hermes conversations auditing and repairing designs against a
+      bar stricter than the operator's own taste — not the image-
+      generation calls themselves, which is what this gate was built to
+      protect against. See `AGENTS.md` bucket 3's Stage Concept/Stage
+      Design and `prompts/image_prompt_review.md` for the replacement.
+- [x] **What changed**: a concept YES now auto-assigns one designer and
+      generates one design directly (no prompt-review round-trip, no
+      audit/repair loop) with a single deterministic check — the visible
+      text matches the tagline. The operator reviews the finished design
+      itself as the one approval gate; YES uploads straight to Dropbox
+      `/to-do` as generated, NO drops it, "show me [designer]'s version"
+      or a correction triggers one more direct generation.
+- [x] **What did NOT change**: the Dropbox upload is still the one
+      explicit "yes" the hard rule requires; `~/image_prompt_library.md`
+      still logs every assembled prompt and correction for the record,
+      just without gating generation on operator approval of the prompt
+      text itself.
+- [ ] **Not addressed by this repo change alone**: Hermes's own
+      self-authored "premium finalization"/image-generation-production-
+      workflows skill lives entirely outside this git repo (server-side,
+      separately self-patched) and isn't touched by an `AGENTS.md`/
+      `prompts/` edit. Needs a direct one-time instruction to Hermes
+      after this merges, confirming that skill's job is superseded by
+      this flow so it stops running its own parallel audit/finalization
+      logic.
+- [ ] **No vectorization step in this pipeline, by design**: `vc_trace`
+      (`connectors/vc_trace`, see the `bg-removal-mockup-testing` branch)
+      is deliberately NOT part of design approval — it's meant for a
+      separate, later product-upload process that runs once per design
+      that actually ships, not on every approved candidate. That process
+      doesn't exist yet.
+
 ## Stage 8: backlink outreach and gift-request monitoring, built 2026-09-23
 
 - [x] **Why**: expand the coupon/promo-directory tactic into a repeatable
