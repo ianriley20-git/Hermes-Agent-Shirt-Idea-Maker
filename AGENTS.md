@@ -96,21 +96,15 @@ actually live:
   category discovery (Stage 4, wired in 2026-09-20).
 - **Seeded search** (`prompts/seeded_search.md`) is confirmed working via
   Telegram and uses the same single-gate design-review flow as daily scan.
-- **Single-gate image pipeline** (redesigned 2026-10-22, corrected the
-  same day to remove a leftover text-concept checkpoint — replacing the
-  old three-gate text-concept → prompt-review → rendered-image flow):
-  every concept that clears the brand-voice filter generates its designs
-  automatically, as part of running `daily_scan.md`/`seeded_search.md`/
-  `text_iterations.md` itself — no separate "yes" just to generate, no
-  prompt-review card, no audit/repair loop. The operator never approves a
-  text-only concept; the first and only thing sent is the finished
-  design(s), which is the one thing approved or rejected per Stage
-  Design below. Rationale: the old gates were meant to protect against
-  expensive image-generation calls, but in practice the cost and
-  friction came from long back-and-forth Hermes conversations auditing
-  and repairing designs against a bar stricter than the operator's own
-  taste — removed in favor of the operator just reviewing finished
-  designs directly, the way a human art director would.
+- **Two-gate image pipeline** (redesigned 2026-10-22 to a single gate,
+  corrected the same day to drop the text-concept checkpoint, then
+  restored it the same day once the 6-designer rework shipped and made
+  a bad joke cost 3x the generation calls it used to): a concept YES
+  generates a batch of designs directly (no further checkpoint, no
+  prompt-review card, no audit/repair loop before the operator sees
+  them); the operator then approves or rejects each finished design.
+  Two real approvals, not three — nothing resembling the old prompt-
+  review round-trip came back. See bucket 3 below.
 - **Six-designer roster** (replaced the old Duke/Nova/Ash set 2026-10-22
   — Ash retired, Duke kept, Nova rebuilt, and Orion/Walt/Dean/Penn
   added; see `prompts/image_style.md`): Duke (1950s ad/pin-up vintage),
@@ -120,13 +114,13 @@ actually live:
   minimalist icon). Each is a fixed, read-only prompt template — Hermes
   substitutes only the joke text into `{{JOKE}}` and must never edit or
   self-tune a template's wording based on approvals/rejections (see that
-  file's hard rule). Default per approved concept: 3 of the 6 designers,
-  each independently dark or light shirt at random (never both unless
-  asked), unless the operator names one specific designer. One
-  deterministic check per render (does the visible text match the
-  tagline?), one retry on failure. See bucket 3 below and
-  `prompts/image_prompt_review.md` (prompt substitution/logging only,
-  not an approval gate).
+  file's hard rule). On a concept YES: 3 of the 6 designers generate by
+  default for daily-scan/seeded-search (or just one if named), all 6 for
+  `text_iterations.md`, each independently dark or light shirt at random
+  (never both unless asked), Dean always light. One deterministic check
+  per render (does the visible text match the tagline?), one retry on
+  failure. See bucket 3 below and `prompts/image_prompt_review.md`
+  (prompt substitution/logging only, not an approval gate).
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND uploaded to a Dropbox `/to-do` folder via
   `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`),
@@ -227,24 +221,51 @@ which before responding:
    plus the word "iterations" (route here). Read and follow
    `prompts/text_iterations.md` in full, using the exact text as Step
    0's input.
-3. **A yes/no/correction reply to a rendered design** (e.g. "yes", "no",
-   "yes on #2", "no Duke, use a horse rather than a dog") — a message
-   can address more than one item; handle each independently. There is
-   **one stage** here, not a concept-then-design split: every concept
-   that clears `daily_scan.md`/`seeded_search.md`/`text_iterations.md`'s
-   own brand-voice filter generates its design automatically as part of
-   running that prompt (see bucket 1/2 and those files' own final
-   step) — the operator never sees a text-only concept requiring its
-   own separate yes/no. The first and only thing the operator approves
-   or rejects is the finished design.
+3. **A yes/no/correction reply to a concept or a rendered design** (e.g.
+   "yes", "no", "yes on #2", "no Duke, use a horse rather than a dog") —
+   a message can address more than one item; handle each independently.
+   There are **two stages** (restored 2026-10-22 after the 6-designer
+   rework made "approve first, generate after" cost real again — a
+   concept now generates 3 designs by default, not 1, so a bad joke
+   slipping through costs 3x what it used to): classify the quoted/
+   referenced item from its content and stable ID first; do not treat a
+   concept YES as approval of any design itself, or vice versa.
 
-   Concept numbers (`#1`, `#2`, etc.) carry through from the scan/search
-   batch onto each rendered design's caption and ID, so replies like
-   `yes to #1 and #3` or `no to #2` can still be resolved without the
-   operator retyping a tagline. Treat these as references to the most
-   recent numbered batch unless the reply is explicitly attached to an
-   older message; if more than one numbered batch is a plausible target
-   and reply context does not resolve it, ask rather than guess.
+   Note `text_iterations.md` is **not** part of this split — the
+   operator supplies the exact wording themselves, so there's no
+   Hermes-surfaced joke to screen; it generates its design batch
+   directly, no text-only concept message first (see that file). The
+   split below applies only to `daily_scan.md`/`seeded_search.md`, where
+   Hermes itself is proposing concepts the operator hasn't seen yet.
+
+   Concept numbers (`#1`, `#2`, etc.) are assigned when
+   `daily_scan.md`/`seeded_search.md` sends its text-only concept batch,
+   and carry through onto every design generated from that concept.
+   Treat replies such as `yes to #1 and #3`, `no to #2`, or `yes to #1
+   Walt` as references to the most recent numbered batch unless the
+   reply is explicitly attached to an older message. If more than one
+   numbered batch is a plausible target and reply context does not
+   resolve it, ask rather than guess.
+
+   **Stage Concept — replying to a text-only concept** (no design yet;
+   from `daily_scan.md` or `seeded_search.md`):
+   - **On YES**: generate the design batch directly — no further
+     approval before generating. Pick designers and shirt colors per
+     `prompts/image_style.md`'s "Picking designers and shirt color per
+     concept" section: 3 of the 6 designers by default (or just the one
+     named on the concept card), each independently dark or light at
+     random (Dean is always light). Substitute the joke into each chosen
+     template's `{{JOKE}}` per `prompts/image_prompt_review.md` — never
+     assemble a custom prompt. One provider call and one deterministic
+     check (visible text matches the tagline, one retry on failure) per
+     design, logged to `~/image_prompt_library.md` under stable
+     `IP-...-DESIGNER-SHIRT` IDs tied to this concept number.
+   - Send each finished design as its own new Stage Design item (see
+     below), captioned with its concept number, designer, and shirt
+     color.
+   - **On NO**: log the rejected concept to memory (tagline/text,
+     register, and reason if supplied) and confirm briefly. Nothing is
+     generated.
 
    **Stage Design — replying to an already-generated design image**:
    - **Always**: log the decision to memory — tagline, register

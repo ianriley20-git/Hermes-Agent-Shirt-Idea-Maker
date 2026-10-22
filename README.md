@@ -22,10 +22,12 @@ Telegram (you) <---> Hermes Agent gateway <---> model (Claude and/or GPT-4)
                              |
                     web/Reddit/Trends search --> concept ideas
                              |
-                    concepts clearing brand voice generate their
-                    designs directly (3 of 6 designer templates by
-                    default, see prompts/image_style.md) --
-                    no separate concept or prompt approval step
+                    [you approve a concept]
+                             |
+                    approved concept generates a batch of designs
+                    directly (3 of 6 designer templates by default,
+                    see prompts/image_style.md) -- no separate
+                    prompt-approval step
                              |
                     [you approve/correct/reject each finished design]
                              |
@@ -76,11 +78,12 @@ each one:
 3. On-demand seeded search on a theme you message the bot
 4. Seasonal calendar + open-ended category discovery, feeding the daily
    scan directly (not a separate opt-in nudge)
-5. Concept clears brand voice → designs generate directly (3 of 6
-   designer templates by default) → finished design(s) return to
-   Telegram for the one approval gate (simplified 2026-10-22; see
-   `TODO.md`'s "Stage 5 superseded"/"Stage 5 corrected same day" entries
-   for what this replaced and why)
+5. Approved concept → a batch of designs generates directly (3 of 6
+   designer templates by default, see `prompts/image_style.md`) →
+   finished designs return to Telegram for approval each (reworked
+   2026-10-22 three times in one day — see `TODO.md`'s "Stage 5
+   superseded" / "Stage 5 corrected same day" / "Designer roster rework"
+   entries for the full history and why the concept gate came back)
 6. Approved image → uploaded to a Dropbox `/to-do` folder
 7. Weekly SEO blog post — 2-3 topic options on Telegram, then a full
    draft, then live publish to Shopify on approval

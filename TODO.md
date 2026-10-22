@@ -1474,3 +1474,29 @@ concepts, 2026-09-03)
       converging on similar compositions again), that Dean never renders
       dark, and that a correction/alternate-designer request still
       substitutes into the fixed template rather than writing a new one.
+
+## Concept-approval gate restored for daily_scan/seeded_search, 2026-10-22
+
+- [x] **Reason**: the same-day designer rework changed an approved
+      concept from generating 1 design to generating 3 by default — the
+      operator noticed this reopened exactly the cost problem the
+      concept gate had existed to prevent (a bad joke now costs 3x the
+      generation calls it used to) and asked to bring the gate back.
+- [x] **What changed**: `daily_scan.md`/`seeded_search.md` send a
+      text-only concept card again (as before the single-gate rewrite);
+      a concept YES generates the 3-of-6 (or named-designer) batch
+      directly, no further checkpoint before that. `AGENTS.md` bucket 3
+      is back to two stages — Stage Concept, then Stage Design per
+      rendered image. The deterministic-check-only philosophy from the
+      single-gate rewrite is unchanged: no audit/repair loop, no
+      prompt-review card, still just one OCR check per render.
+- [x] **`text_iterations.md` explicitly excluded**: the operator supplies
+      the exact wording directly, so there's no Hermes-surfaced joke to
+      screen — that request already is the approval. It keeps generating
+      all 6 designers directly with no concept-card step, unchanged from
+      the designer-rework commit.
+- [ ] **Live verification after merge**: confirm a real daily-scan/
+      seeded-search run sends a text-only concept card first, that a
+      concept YES generates the 3-design batch with no intervening
+      prompt card, and that `text_iterations.md` still generates
+      directly with no concept card at all.

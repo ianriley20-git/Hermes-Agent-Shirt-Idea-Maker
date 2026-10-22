@@ -7,18 +7,21 @@ independently of any script.
 - `_brand_voice.md` — shared Riley Ink tone rules, plus the
   memory-based learning-from-feedback loop. Referenced by every other
   prompt file below; not run standalone.
-- `daily_scan.md` — Stage 2. Scheduled daily trend scan. Every concept
-  that clears the brand-voice filter generates its designs automatically
-  (no text-concept approval step) — the operator's first and only
-  approval is on the finished design(s).
+- `daily_scan.md` — Stage 2. Scheduled daily trend scan that sends
+  text-only concepts for approval. A concept YES generates a batch of
+  designs directly (3 of 6 designer templates by default) — no
+  prompt-review card, just the finished designs for the operator's next
+  approval.
 - `seeded_search.md` — Stage 3. On-demand deep-dive on a named theme,
-  using the same direct-generate → single design-review gate as the
+  using the same concept → design-batch → design-review gates as the
   daily scan.
 - `text_iterations.md` — On-demand, triggered by exact text + the word
   "iterations" (e.g. "Parlay or Nothing - iterations") rather than a
-  theme. The wording is fixed by the operator and used verbatim; variety
-  comes from running it through multiple designer templates (all 6 by
-  default), not from Hermes inventing different scenes.
+  theme. The wording is fixed by the operator and used verbatim, so
+  unlike the two above there's no concept-approval step — it generates
+  directly across all 6 designer templates, since the operator's own
+  "iterations" request already is the approval, and variety comes from
+  which designer runs, not from Hermes inventing different scenes.
 - `image_style.md` — Stage 5. Six named house "designers," most with a
   dark-shirt and light-shirt version (11 fixed templates total): Duke
   (1950s ad/pin-up vintage), Orion (heroic comic/B-movie poster,

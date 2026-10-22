@@ -144,49 +144,34 @@ policy).
 If nothing on this theme clears the bar, skip straight to Step 9 and
 send only the "nothing cleared the bar" message.
 
-## Step 9 — Generate and send a design for every surviving concept
+## Step 9 — Send concepts to Telegram (text only, no image yet)
 
-No text-only concept message, and no separate "yes" to trigger
-generation — a concept clearing Step 8's bar *is* the trigger. If
-nothing on this theme cleared the bar: say so plainly ("Nothing on
+If a designer was named/implied in Step 0, note that designer on every
+concept card — `AGENTS.md` bucket 3's Stage Concept will use only that
+one instead of the default batch of 3. Otherwise omit the designer line
+and let Stage Concept pick the default 3-of-6 per concept as usual.
+
+If nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
-lowering the standard to produce a concept anyway. Nothing is generated
-in that case.
+lowering the standard to produce a concept anyway.
 
-Otherwise, number the surviving concepts sequentially (`#1`, `#2`, and
-so on) — carried through onto each rendered design so replies like `yes
-to #1 and #3` can be resolved without retyping a tagline. For each one,
-in order:
-
-1. Use the designer named/implied in Step 0 if there was one — that
-   single designer only, at the shirt color specified or random if not.
-   Otherwise pick designers and shirt colors per
-   `prompts/image_style.md`'s "Picking designers and shirt color per
-   concept" section — 3 of the 6 designers by default, each
-   independently dark or light at random (Dean is always light).
-2. For each chosen (designer, shirt) pair, substitute the tagline (plus
-   a short occasion/context note) into that fixed template's `{{JOKE}}`
-   per `prompts/image_prompt_review.md` — never write a scene
-   description or assemble a custom prompt. One provider call, one
-   deterministic check (visible text matches the tagline, one retry on
-   failure), logged to `~/image_prompt_library.md` under a stable
-   `IP-...-DESIGNER-SHIRT` ID.
-3. Send each finished design as its own message:
+Otherwise, send each concept as its own message:
 
 ```
-#1 — [Duke | Orion | Walt | Dean | Penn | Nova] ([dark | light])
 Tagline: "..."
+[Designer: [Duke | Orion | Walt | Dean | Penn | Nova] — only include this line when a designer was requested for this run; omit it otherwise]
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
-[the rendered design image]
-
-Reply "yes" or "no" on this one, or approve/reject multiple by number
-(e.g. `yes to #1 and #3`). Ask for another designer's take, or give a
-correction, and I'll generate that directly too.
+Reply "yes" or "no" on this one (or reference it by tagline if replying
+to more than one). "yes" generates 3 real designs for this concept (or
+just the named designer above, if one is set) — you'll review each
+finished design next, not a prompt.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once every surviving concept's design has been sent. Replies are
-handled entirely by `AGENTS.md` bucket 3's Stage Design.
+ends once the concepts are sent. A later concept YES triggers direct
+design generation under `AGENTS.md` bucket 3's Stage Concept, which
+picks designers/shirt colors per `prompts/image_style.md` and
+substitutes the tagline into each per `prompts/image_prompt_review.md`.
