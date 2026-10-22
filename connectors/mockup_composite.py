@@ -51,6 +51,38 @@ def _local_pull_edge(design: Image.Image, side: str, max_pull_px: float, falloff
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode=design.mode)
 
 
+def _recenter_horizontal(design: Image.Image, center_frac: float) -> Image.Image:
+    """Shift the design's own horizontal center (x = w/2) to land at center_frac of its own width
+    instead, compressing the half that got smaller and stretching the half that got bigger --
+    smoothly and continuously (two linear segments meeting exactly at one point, not two separately
+    -warped halves), so a later whole-image perspective warp lands the design's visual center on an
+    arbitrary point of the destination quad without ever producing a seam. (A first version of this
+    independently perspective-warped the design's two halves into two sub-quads sharing an edge --
+    confirmed visibly broken: two separately-solved projective transforms only agree at a shared
+    edge's two endpoints, not its interior, so the two halves visibly misaligned right at the
+    centerline. This single-continuous-warp approach doesn't have that failure mode by
+    construction.)"""
+    if abs(center_frac - 0.5) < 1e-6:
+        return design
+
+    arr = np.asarray(design).astype(np.float64)
+    h, w = arr.shape[:2]
+    mid = w / 2.0
+    target = center_frac * w
+
+    xs = np.arange(w, dtype=np.float64)
+    forward_x = np.where(xs <= mid, xs * (target / mid) if mid else xs, target + (xs - mid) * ((w - target) / (w - mid)) if w != mid else xs)
+    source_x = np.interp(xs, forward_x, xs)
+
+    out = np.empty_like(arr)
+    coords_y = np.broadcast_to(np.arange(h, dtype=np.float64)[:, None], (h, w))
+    coords_x = np.broadcast_to(source_x, (h, w))
+    for c in range(arr.shape[2]):
+        out[..., c] = map_coordinates(arr[..., c], [coords_y, coords_x], order=1, mode="constant", cval=0)
+
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode=design.mode)
+
+
 def _find_coeffs(dest_quad: list[tuple[float, float]], src_quad: list[tuple[float, float]]) -> list[float]:
     """Solve for PERSPECTIVE coeffs that make `image.transform(size,
     Image.PERSPECTIVE, coeffs)` place src_quad's corners (the design's own 4
@@ -92,6 +124,59 @@ def _blend_if_underlying_transparency(
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode="RGBA")
 
 
+def _perspective_warp(design: Image.Image, dest_quad: list[tuple[float, float]], canvas_size: tuple[int, int]) -> Image.Image:
+    """Warp design (already RGBA) so its own 4 corners land on dest_quad, onto a canvas_size
+    -sized transparent layer. Pre-downscales toward the quad's own footprint first -- PERSPECTIVE's
+    BICUBIC interpolates at sample points, it isn't an area-averaging decimation filter, so warping
+    straight from a much larger source (a ~2880px design onto a few-hundred-px quad on a small
+    mockup photo) under-samples fine detail and aliases into visible noise/"pixelation" -- most
+    visible on exactly the fine linework this pipeline already fights to preserve. Resizing with
+    LANCZOS first (a proper area-aware filter) to roughly 2x the quad's own size gives the
+    perspective warp a much smaller reduction to handle, which BICUBIC resamples cleanly. Never
+    upscales -- only kicks in when the source is meaningfully bigger than where it's landing."""
+    w, h = design.size
+    dest_xs = [p[0] for p in dest_quad]
+    dest_w = max(dest_xs) - min(dest_xs)
+    target_scale = (dest_w * 2.0) / w if w else 1.0
+    if 0 < target_scale < 1.0:
+        new_w = max(1, round(w * target_scale))
+        new_h = max(1, round(h * target_scale))
+        design = design.resize((new_w, new_h), Image.LANCZOS)
+        w, h = new_w, new_h
+
+    src_quad = [(0, 0), (w, 0), (w, h), (0, h)]
+    coeffs = _find_coeffs(dest_quad, src_quad)
+    return design.transform(canvas_size, Image.PERSPECTIVE, coeffs, Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+
+
+def _finish_composite(
+    mockup: Image.Image,
+    warped: Image.Image,
+    output_path: Path,
+    global_opacity: float,
+    apply_blend_if: bool,
+    blend_if_low: float,
+    blend_if_high: float,
+    blend_if_min_alpha: float,
+) -> None:
+    if apply_blend_if:
+        warped = _blend_if_underlying_transparency(warped, mockup, blend_if_low, blend_if_high, blend_if_min_alpha)
+
+    if global_opacity != 1.0:
+        arr = np.asarray(warped).astype(np.float64)
+        arr[..., 3] *= global_opacity
+        warped = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), mode="RGBA")
+
+    result = mockup.copy()
+    result.alpha_composite(warped)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    result.convert("RGB").save(output_path, format="PNG")
+
+    with Image.open(output_path) as verified:
+        verified.verify()
+
+
 def composite(
     mockup_path: Path,
     design_path: Path,
@@ -115,45 +200,52 @@ def composite(
     if edge_pull_px and edge_pull_side:
         design = _local_pull_edge(design, edge_pull_side, edge_pull_px, edge_pull_falloff)
 
-    # Pre-downscale toward the quad's own footprint before warping. PERSPECTIVE's BICUBIC
-    # interpolates at sample points; it isn't an area-averaging decimation filter, so warping
-    # straight from a much larger source (a ~2880px design onto a few-hundred-px quad on a small
-    # mockup photo) under-samples fine detail and aliases into visible noise/"pixelation" -- most
-    # visible on exactly the fine linework this pipeline already fights to preserve. Resizing with
-    # LANCZOS first (a proper area-aware filter) to roughly 2x the quad's own size gives the
-    # perspective warp a much smaller reduction to handle, which BICUBIC resamples cleanly. Never
-    # upscales -- only kicks in when the source is meaningfully bigger than where it's landing.
-    w, h = design.size
-    dest_xs = [p[0] for p in dest_quad]
-    dest_w = max(dest_xs) - min(dest_xs)
-    target_scale = (dest_w * 2.0) / w if w else 1.0
-    if 0 < target_scale < 1.0:
-        new_w = max(1, round(w * target_scale))
-        new_h = max(1, round(h * target_scale))
-        design = design.resize((new_w, new_h), Image.LANCZOS)
-        w, h = new_w, new_h
+    warped = _perspective_warp(design, dest_quad, mockup.size)
+    _finish_composite(mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha)
 
-    src_quad = [(0, 0), (w, 0), (w, h), (0, h)]
 
-    coeffs = _find_coeffs(dest_quad, src_quad)
-    warped = design.transform(mockup.size, Image.PERSPECTIVE, coeffs, Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+def composite_quad(
+    mockup_path: Path,
+    design_path: Path,
+    output_path: Path,
+    corners: list[tuple[float, float]],
+    center_frac: float = 0.5,
+    global_opacity: float = 0.96,
+    apply_blend_if: bool = True,
+    blend_if_low: float = 0.0,
+    blend_if_high: float = 50.0,
+    blend_if_min_alpha: float = 0.35,
+) -> None:
+    """Warp a design into an arbitrary hand-placed 4-corner perspective quad (corners in order
+    top-left, top-right, bottom-right, bottom-left -- same convention as composite()'s dest_quad),
+    with the design's own visual center landing on center_frac (0-1) of the quad's width instead of
+    always the geometric middle -- so the design compresses more on whichever side is narrower, the
+    way the operator's own manual Photoshop technique warps each side of a design to follow a
+    garment's real curvature, rather than always scaling the whole layer symmetrically. Generalizes
+    the Printify-box-model path's rotation_ratio (asymmetric left/right compression around a single
+    collar point) to a fully free-form quad with independently placed corners.
 
-    if apply_blend_if:
-        warped = _blend_if_underlying_transparency(warped, mockup, blend_if_low, blend_if_high, blend_if_min_alpha)
+    Implementation note: an earlier version of this split the design at its own center and warped
+    each half independently into its own half-quad sharing an edge at the centerline -- confirmed
+    visibly broken on a real test render (a seam right through the artwork). Two separately-solved
+    projective transforms only agree at a shared edge's two endpoints, not its interior, so the two
+    halves don't actually line up along the centerline in general. This version instead
+    pre-recenters the design horizontally (see _recenter_horizontal) and then does ONE continuous
+    whole-image perspective warp of the whole quad -- mathematically can't produce a seam, since
+    there's only ever one transform."""
+    try:
+        mockup = Image.open(mockup_path).convert("RGBA")
+        design = Image.open(design_path).convert("RGBA")
+    except (UnidentifiedImageError, OSError) as exc:
+        raise ValueError(f"cannot read input image: {exc}") from exc
 
-    if global_opacity != 1.0:
-        arr = np.asarray(warped).astype(np.float64)
-        arr[..., 3] *= global_opacity
-        warped = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), mode="RGBA")
+    if len(corners) != 4:
+        raise ValueError(f"composite_quad needs exactly 4 corners (top-left,top-right,bottom-right,bottom-left), got {len(corners)}")
 
-    result = mockup.copy()
-    result.alpha_composite(warped)
+    design = _recenter_horizontal(design, center_frac)
+    warped = _perspective_warp(design, corners, mockup.size)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    result.convert("RGB").save(output_path, format="PNG")
-
-    with Image.open(output_path) as verified:
-        verified.verify()
+    _finish_composite(mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha)
 
 
 def _parse_quad(raw: str) -> list[tuple[float, float]]:

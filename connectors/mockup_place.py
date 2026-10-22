@@ -19,6 +19,17 @@ the SAME template JSON, right alongside the measured landmarks, so the
 next design hot-swapped into this mockup picks them up automatically with
 no flags to re-pass. Deliberately excludes edge-pull, which is tuned to
 one specific design's own shape, not a property of the photo.
+
+A template can also carry a hand-placed `quad_corners` (plus `center_frac`)
+from the Mockup Placement Tool (a separate local app, not part of this
+repo) -- a true 4-corner perspective box with an independently-placed
+center point, instead of the Printify-box-model's single collar point +
+scale + rotation_ratio. When present, this takes over placement entirely
+via mockup_composite.py's composite_quad(), since a free-form quad already
+captures scale/rotation/tilt in its own shape -- tilt_degrees/scale_factor/
+shift_x_in are ignored in that case (there's no single quad left to
+rotate/scale/shift post-hoc); only global_opacity and Blend If still apply
+on top.
 """
 
 from __future__ import annotations
@@ -31,7 +42,7 @@ from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
 
-from mockup_composite import composite
+from mockup_composite import composite, composite_quad
 
 # Printify's own standard front print-area box, replicated from the
 # operator's real, already-established Printify-POD-Manager app
@@ -188,19 +199,36 @@ def place(
         },
     )
 
-    quad = build_quad_from_template(
-        template, design_size, resolved["tilt_degrees"], resolved["scale_factor"], resolved["shift_x_in"]
-    )
-    composite(
-        mockup_path,
-        design_path,
-        output_path,
-        quad,
-        global_opacity=resolved["global_opacity"],
-        blend_if_high=resolved["blend_if_high"],
-        blend_if_min_alpha=resolved["blend_if_min_alpha"],
-        **composite_kwargs,
-    )
+    if "quad_corners" in template:
+        # A hand-placed 4-corner quad (from the separate Mockup Placement Tool) already captures
+        # scale/rotation/tilt in its own shape -- tilt_degrees/scale_factor/shift_x_in have no quad
+        # left to apply to and are silently ignored here; only opacity/Blend If still layer on top.
+        quad = [tuple(p) for p in template["quad_corners"]]
+        composite_quad(
+            mockup_path,
+            design_path,
+            output_path,
+            quad,
+            center_frac=template.get("center_frac", 0.5),
+            global_opacity=resolved["global_opacity"],
+            apply_blend_if=composite_kwargs.get("apply_blend_if", True),
+            blend_if_high=resolved["blend_if_high"],
+            blend_if_min_alpha=resolved["blend_if_min_alpha"],
+        )
+    else:
+        quad = build_quad_from_template(
+            template, design_size, resolved["tilt_degrees"], resolved["scale_factor"], resolved["shift_x_in"]
+        )
+        composite(
+            mockup_path,
+            design_path,
+            output_path,
+            quad,
+            global_opacity=resolved["global_opacity"],
+            blend_if_high=resolved["blend_if_high"],
+            blend_if_min_alpha=resolved["blend_if_min_alpha"],
+            **composite_kwargs,
+        )
 
     if save_adjustments:
         template.update(resolved)
