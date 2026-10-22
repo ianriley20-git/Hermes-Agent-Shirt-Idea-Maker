@@ -7,24 +7,31 @@ independently of any script.
 - `_brand_voice.md` — shared Riley Ink tone rules, plus the
   memory-based learning-from-feedback loop. Referenced by every other
   prompt file below; not run standalone.
-- `daily_scan.md` — Stage 2. Scheduled daily trend scan that sends
-  text-only concepts. Concept approval prepares Duke/Nova/Ash prompts for
-  review; it no longer generates images directly.
-- `seeded_search.md` — Stage 3. On-demand deep-dive on a named theme, using
-  the same concept → prompt review → image review gates as the daily scan.
+- `daily_scan.md` — Stage 2. Scheduled daily trend scan. Every concept
+  that clears the brand-voice filter generates its designs automatically
+  (no text-concept approval step) — the operator's first and only
+  approval is on the finished design(s).
+- `seeded_search.md` — Stage 3. On-demand deep-dive on a named theme,
+  using the same direct-generate → single design-review gate as the
+  daily scan.
 - `text_iterations.md` — On-demand, triggered by exact text + the word
   "iterations" (e.g. "Parlay or Nothing - iterations") rather than a
-  theme. Skips topic research entirely — the wording is fixed by the
-  operator, this is pure visual ideation: 4-6 different illustration
-  concepts for that exact text, spread across designers.
-- `image_style.md` — Stage 5. Three named house "designers," each a
-  distinct visual lane: Duke (retro vintage), Nova (modern & simple), and
-  Ash (bootleg airbrush). Defines how the complete real provider prompt is
-  assembled.
-- `image_prompt_review.md` — mandatory cost-control gate before every
-  provider-backed image generation/edit. Persists exact prompts under stable
-  IDs, handles YES/NO/correction revisions, and requires generation to use the
-  approved prompt verbatim. `AGENTS.md` routes all replies.
+  theme. The wording is fixed by the operator and used verbatim; variety
+  comes from running it through multiple designer templates (all 6 by
+  default), not from Hermes inventing different scenes.
+- `image_style.md` — Stage 5. Six named house "designers," most with a
+  dark-shirt and light-shirt version (11 fixed templates total): Duke
+  (1950s ad/pin-up vintage), Orion (heroic comic/B-movie poster,
+  posterized), Walt (WPA national park poster), Dean (seals/crests/
+  vintage signage, light only), Penn (typography only), Nova (modern
+  minimalist icon). Each designer decides its own visual from the joke
+  text alone — these are fixed, read-only templates; only `{{JOKE}}` is
+  substituted, never the template wording itself.
+- `image_prompt_review.md` — prompt substitution and logging (not an
+  approval gate as of 2026-10-22 — the operator reviews finished
+  designs, not prompts). Persists the exact substituted prompt and any
+  correction history under stable IDs in `~/image_prompt_library.md`.
+  `AGENTS.md` routes all replies.
 - `blog_post.md` — Stage 7. Scheduled weekly blog post for SEO/internal
   linking, published live to Shopify. Two Telegram approval gates: a
   pick between 2-3 topic options, then a full-draft approve/reject/

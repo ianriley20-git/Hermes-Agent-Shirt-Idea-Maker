@@ -18,11 +18,13 @@ it's genuinely ambiguous what the theme is, ask a clarifying question
 instead of guessing.
 
 Also check whether the message names a designer or describes a style
-that maps to one (e.g. "Nova," "modern/clean," "Ash," "bootleg/airbrush,"
-"Duke," "vintage") — see each designer's "Requested via" line in
-`prompts/image_style.md`. If one is named/implied, use that designer
-for every concept in this run instead of picking freely per concept. If
-none is mentioned, pick per concept in Step 9 as normal (aim for a mix).
+that maps to one (e.g. "Nova," "modern/clean," "Walt," "national park,"
+"Duke," "vintage," "Dean," "crest/seal," "Penn," "typography," "Orion,"
+"heroic/posterized") — see each designer's "Requested via" line in
+`prompts/image_style.md`. If one is named/implied, use only that
+designer for every concept in this run instead of the default batch of
+3. If none is mentioned, Step 9 generates the default 3-of-6 per concept
+as normal.
 
 ## Step 1 — Reddit check (angle/timing signal only — not content)
 
@@ -123,7 +125,10 @@ each with:
 ```
 Tagline: "..."
 Origin: original | reused
-Visual concept: [one line]
+Visual concept: [one line — internal note only; as of the 2026-10-22
+  designer rework this is NOT fed into generation, each designer
+  template invents its own visual from the tagline alone. Keep it for
+  your own research bookkeeping only.]
 Why it's timely: [one line, cite the actual signal]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
 ```
@@ -153,18 +158,23 @@ so on) — carried through onto each rendered design so replies like `yes
 to #1 and #3` can be resolved without retyping a tagline. For each one,
 in order:
 
-1. Use the designer named/implied in Step 0 if there was one; otherwise
-   pick the single designer whose section in `prompts/image_style.md`
-   best fits the concept's tone/subject (vintage or text-driven → Duke,
-   clean/modern/minimal → Nova, bootleg/airbrush-coded → Ash).
-2. Assemble and generate per `prompts/image_prompt_review.md` — one
-   provider call, one deterministic check (visible text matches the
-   tagline, one retry on failure), logged to `~/image_prompt_library.md`
-   under a stable `IP-...-DESIGNER` ID.
-3. Send the finished design as its own message:
+1. Use the designer named/implied in Step 0 if there was one — that
+   single designer only, at the shirt color specified or random if not.
+   Otherwise pick designers and shirt colors per
+   `prompts/image_style.md`'s "Picking designers and shirt color per
+   concept" section — 3 of the 6 designers by default, each
+   independently dark or light at random (Dean is always light).
+2. For each chosen (designer, shirt) pair, substitute the tagline (plus
+   a short occasion/context note) into that fixed template's `{{JOKE}}`
+   per `prompts/image_prompt_review.md` — never write a scene
+   description or assemble a custom prompt. One provider call, one
+   deterministic check (visible text matches the tagline, one retry on
+   failure), logged to `~/image_prompt_library.md` under a stable
+   `IP-...-DESIGNER-SHIRT` ID.
+3. Send each finished design as its own message:
 
 ```
-#1 — [Duke | Nova | Ash]
+#1 — [Duke | Orion | Walt | Dean | Penn | Nova] ([dark | light])
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]

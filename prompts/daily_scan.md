@@ -146,7 +146,10 @@ New territory: yes  [only include this line when the concept's niche
   isn't one of the 5 fixed niches in config/niche_keywords.md — i.e. it
   came from Step 1's discovery or an already-logged ~/niche_library.md
   entry. Omit entirely for concepts from the established niches.]
-Visual concept: [one line]
+Visual concept: [one line — internal note only; as of the 2026-10-22
+  designer rework this is NOT fed into generation, each designer
+  template invents its own visual from the tagline alone. Keep it for
+  your own research bookkeeping only.]
 Why it's timely: [one line, cite the actual signal — subreddit post,
   trends spike, seasonal calendar, niche library, or reference-site
   format]
@@ -180,17 +183,23 @@ for this daily batch, carried through onto the rendered design so later
 replies like `yes to #1 and #3` can be resolved without the operator
 retyping a tagline. For each one, in order:
 
-1. Pick the single designer whose section in `prompts/image_style.md`
-   best fits the concept's tone/subject (vintage or text-driven → Duke,
-   clean/modern/minimal → Nova, bootleg/airbrush-coded → Ash).
-2. Assemble and generate per `prompts/image_prompt_review.md` — one
-   provider call, one deterministic check (visible text matches the
-   tagline, one retry on failure), logged to `~/image_prompt_library.md`
-   under a stable `IP-...-DESIGNER` ID.
-3. Send the finished design as its own message:
+1. Pick designers and shirt colors per `prompts/image_style.md`'s
+   "Picking designers and shirt color per concept" section — 3 of the 6
+   designers by default (aim for genuine variety across the three), each
+   independently dark or light at random (Dean is always light), unless
+   the concept card names one specific designer, in which case use only
+   that one.
+2. For each chosen (designer, shirt) pair, substitute the tagline (plus
+   a short occasion/context note, e.g. "Thanksgiving") into that fixed
+   template's `{{JOKE}}` per `prompts/image_prompt_review.md` — never
+   write a scene description or assemble a custom prompt; each template
+   decides its own visual. One provider call, one deterministic check
+   (visible text matches the tagline, one retry on failure), logged to
+   `~/image_prompt_library.md` under a stable `IP-...-DESIGNER-SHIRT` ID.
+3. Send each finished design as its own message:
 
 ```
-#1 — [Duke | Nova | Ash]
+#1 — [Duke | Orion | Walt | Dean | Penn | Nova] ([dark | light])
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / seasonal calendar / niche library / reference site / etsy search]

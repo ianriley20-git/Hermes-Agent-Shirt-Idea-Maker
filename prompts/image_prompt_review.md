@@ -14,39 +14,50 @@ daily-scan/seeded-search/text-iterations concept approvals, a requested
 alternate designer's take, and a correction/regeneration of an existing
 design.
 
-## 1. Assemble the exact real prompt
+## 1. Pick designer(s) and shirt color, then substitute — don't assemble
 
-Read `prompts/image_style.md` and assemble the complete provider prompt: the
-selected designer's fixed header followed by the concrete Scene and Text
-treatment. Resolve every creative choice now — subject, action, object count,
-composition, palette, typography, background, exact visible text, exclusions,
-and safe margins. This is the actual string sent to the image tool, not a
-summary or placeholder.
+As of the 2026-10-22 designer rework, there is no creative prompt
+assembly step anymore. Read `prompts/image_style.md`'s "Picking
+designers and shirt color per concept" section to choose which of the 6
+designers (and dark/light shirt) apply — 3 designers by default, or just
+one if the operator named it.
 
-For image-to-image work (e.g. a correction on an existing render), also
-identify the exact source asset and the full edit instruction that will
-be sent with it.
+For each chosen (designer, shirt color) pair, take that exact fixed
+template from `prompts/image_style.md` and substitute **only** the joke
+text (plus occasion/context, e.g. "Thanksgiving") into its `{{JOKE}}`
+placeholder. **Do not describe the image, add a scene, or write any
+other creative instruction — the template's own `VISUAL IDEA` section is
+what decides the image, not you.** Do not alter any other word of the
+template. This is the actual string sent to the image tool.
+
+For a correction on an existing render, also identify the exact source
+asset and the full edit instruction that will be sent with it — the
+underlying template is still never edited, only the edit instruction
+itself describes the change.
 
 ## 2. Assign a stable ID and persist it
 
 Use:
 
-`IP-YYYYMMDD-HHMM-SS-DESIGNER`
+`IP-YYYYMMDD-HHMM-SS-DESIGNER-SHIRT`
 
 - `YYYYMMDD-HHMM` identifies the batch this concept came from.
 - `SS` is the source concept slot (`01`, `02`, etc.), preserving a daily/seeded
   scan's `#N` where one exists.
-- `DESIGNER` is `DUKE`, `NOVA`, or `ASH`.
-- The base ID never changes for that designer treatment on that concept.
-  A correction or an alternate-designer request gets a new revision
-  (`R1` → `R2`) or a new `-DESIGNER` suffix, not a new unrelated ID.
+- `DESIGNER` is `DUKE`, `ORION`, `WALT`, `DEAN`, `PENN`, or `NOVA`.
+- `SHIRT` is `DARK` or `LIGHT` (Dean is always `LIGHT`).
+- The base ID never changes for that designer+shirt treatment on that
+  concept. A correction gets a new revision (`R1` → `R2`) on the same
+  ID; a different designer or shirt color is a new ID, not a revision.
 
 Create `~/image_prompt_library.md` if absent. Before calling the image
-tool, append the exact prompt, revision, source concept, designer,
-aspect ratio/mode, source asset (if an edit), and status `pending`.
-After the operator's Stage Design reply, update that entry to
-`approved` or `rejected` and append any correction verbatim — never
-overwrite or erase an earlier revision.
+tool, append the exact substituted prompt, revision, source concept,
+designer, shirt color, aspect ratio/mode, source asset (if an edit), and
+status `pending`. After the operator's Stage Design reply, update that
+entry to `approved` or `rejected` and append any correction verbatim —
+never overwrite or erase an earlier revision. This log is a record only
+— see `prompts/image_style.md`'s hard rule that the templates themselves
+are never edited based on what gets logged here.
 
 ## 3. The one deterministic check
 

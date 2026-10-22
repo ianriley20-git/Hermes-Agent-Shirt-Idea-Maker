@@ -1433,3 +1433,44 @@ concepts, 2026-09-03)
       retimed, meme_create and the posting-offer cron created fresh) —
       still blocked on the same prerequisites as before
       (`UNSPLASH_ACCESS_KEY`, Meta Instagram Login setup).
+
+## Designer roster rework: 3 to 6 designers, fixed read-only templates, 2026-10-22
+
+- [x] **Reason**: the old Duke/Nova/Ash prompts were long, rigidly
+      prescribed composition/palette, and Hermes had been self-editing
+      its own skills after approvals — outputs were converging on the
+      same design over and over. Operator handed over a complete rework.
+- [x] **What changed**: Ash retired (airbrush/gradients don't print
+      well — a Y2K-styled "Skye" designer was trialed and retired too,
+      never shipped). Six designers now: Duke (kept, 1950s ad/pin-up
+      vintage), Orion, Walt, Dean, Penn (new), Nova (rebuilt). Most have
+      a dark-shirt and light-shirt version (Dean is light-only) — 11
+      fixed templates total, see `prompts/image_style.md`. Each
+      template takes only `{{JOKE}}` (the tagline/exact text plus
+      occasion/context) and invents its own visual — Hermes no longer
+      drafts a "Visual concept"/scene description to feed in, and no
+      shared layout/palette rules sit on top of a template; both were
+      identified as the cause of the old sameness.
+- [x] **Generation count, confirmed with operator**: for
+      `daily_scan.md`/`seeded_search.md`, 3 of the 6 designers generate
+      per approved concept by default (or just one, if the operator
+      named a specific designer) — a deliberate change from the
+      single-gate rewrite's "one designer per concept," made because the
+      operator wants to compare designer takes and pick the best, not
+      approve a single guess. `text_iterations.md` defaults to **all 6**
+      designers per exact-text request, since "iterations" is already an
+      explicit request for variety. For every generation, shirt color
+      (dark/light) is chosen independently at random per designer,
+      never both for the same one unless asked.
+- [x] **Hard rule**: the 11 templates are fixed and read-only. Hermes
+      must never edit or self-tune a template's wording based on
+      approvals, rejections, or feedback patterns — only an explicit
+      operator-directed edit changes one, same governance as any other
+      pipeline change. Stated in both `prompts/image_style.md` and
+      `AGENTS.md`'s hard rules, specifically because this is exactly the
+      kind of drift that caused the rework in the first place.
+- [ ] **Live verification after merge**: confirm a real scan/search run
+      generates 3 genuinely different designer takes per concept (not
+      converging on similar compositions again), that Dean never renders
+      dark, and that a correction/alternate-designer request still
+      substitutes into the fixed template rather than writing a new one.

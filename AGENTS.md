@@ -99,23 +99,34 @@ actually live:
 - **Single-gate image pipeline** (redesigned 2026-10-22, corrected the
   same day to remove a leftover text-concept checkpoint — replacing the
   old three-gate text-concept → prompt-review → rendered-image flow):
-  every concept that clears the brand-voice filter generates its design
+  every concept that clears the brand-voice filter generates its designs
   automatically, as part of running `daily_scan.md`/`seeded_search.md`/
-  `text_iterations.md` itself — auto-assigned designer, one provider
-  call, one deterministic check (does the visible text match the
-  tagline?). The operator never approves a text-only concept; the first
-  and only thing sent is the finished design, which is the one thing
-  approved or rejected. No prompt-review card, no audit/repair loop, no
-  separate "yes" just to generate. See bucket 3 below and
-  `prompts/image_prompt_review.md` (now prompt assembly/logging only,
-  not an approval gate). Rationale: the old gates were meant to protect
-  against expensive image-generation calls, but in practice the cost and
+  `text_iterations.md` itself — no separate "yes" just to generate, no
+  prompt-review card, no audit/repair loop. The operator never approves a
+  text-only concept; the first and only thing sent is the finished
+  design(s), which is the one thing approved or rejected per Stage
+  Design below. Rationale: the old gates were meant to protect against
+  expensive image-generation calls, but in practice the cost and
   friction came from long back-and-forth Hermes conversations auditing
   and repairing designs against a bar stricter than the operator's own
   taste — removed in favor of the operator just reviewing finished
-  designs directly, the way a human art director would, scrolling
-  through a handful of images per run rather than approving each stage
-  of getting there.
+  designs directly, the way a human art director would.
+- **Six-designer roster** (replaced the old Duke/Nova/Ash set 2026-10-22
+  — Ash retired, Duke kept, Nova rebuilt, and Orion/Walt/Dean/Penn
+  added; see `prompts/image_style.md`): Duke (1950s ad/pin-up vintage),
+  Orion (heroic comic/B-movie poster, posterized, no linework), Walt
+  (1930s-50s WPA national park poster), Dean (seals/crests/vintage
+  signage, light shirt only), Penn (typography-only), Nova (modern
+  minimalist icon). Each is a fixed, read-only prompt template — Hermes
+  substitutes only the joke text into `{{JOKE}}` and must never edit or
+  self-tune a template's wording based on approvals/rejections (see that
+  file's hard rule). Default per approved concept: 3 of the 6 designers,
+  each independently dark or light shirt at random (never both unless
+  asked), unless the operator names one specific designer. One
+  deterministic check per render (does the visible text match the
+  tagline?), one retry on failure. See bucket 3 below and
+  `prompts/image_prompt_review.md` (prompt substitution/logging only,
+  not an approval gate).
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND uploaded to a Dropbox `/to-do` folder via
   `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`),
@@ -264,24 +275,26 @@ which before responding:
    - **On NO**: mark the `IP-...` entry rejected, preserve any reason,
      and confirm briefly. Generate nothing further for this design.
    - **On "show me [designer]'s version" / a similar request for another
-     designer's take on the same concept**: re-assemble the complete
-     provider prompt for the requested designer, generate it directly
-     (one shot, same rules as above), log it under a new `IP-...-
-     DESIGNER` ID tied to the same concept number, and send it as a new
-     Stage Design item. This also covers a fresh request referencing an
-     older concept from earlier in the conversation/session (e.g. "I'd
-     like to see Ash's version of the fantasy football one") — identify
-     the exact prior concept from context, asking only if it's genuinely
-     ambiguous which one.
+     designer's take on the same concept**: per `prompts/image_style.md`,
+     take that designer's fixed template (dark shirt, unless light was
+     asked for or it's Dean, who is light-only) and substitute the joke
+     in — never write a new prompt by hand. Generate it directly (one
+     shot), log it under a new `IP-...-DESIGNER-SHIRT` ID tied to the
+     same concept number, and send it as a new Stage Design item. This
+     also covers a fresh request referencing an older concept from
+     earlier in the conversation/session (e.g. "I'd like to see Walt's
+     version of the fantasy football one") — identify the exact prior
+     concept from context, asking only if it's genuinely ambiguous which
+     one.
    - **On a correction** (e.g. "make the dog a horse," "less busy,"
-     "simplify the type"): revise the complete prompt incorporating the
-     correction (image-edit mode on the existing render when the
-     correction is a targeted change, a fresh prompt when it's more
-     fundamental), generate it directly — one shot, no prompt-approval
-     round-trip first — log the correction and the new revision under
-     the same base `IP-...` ID, and send the result as a new Stage
-     Design item. Never erase the superseded revision or the correction
-     history.
+     "simplify the type"): use image-edit mode on the existing render —
+     source asset is the rejected image, edit instruction is the
+     operator's correction verbatim. **Never edit the underlying fixed
+     template itself** (see `prompts/image_style.md`'s hard rule).
+     Generate it directly — one shot — log the correction and the new
+     revision under the same base `IP-...` ID, and send the result as a
+     new Stage Design item. Never erase the superseded revision or the
+     correction history.
 4. **A reply to a weekly blog post message** (a reply to a topic-options
    message or a full-draft message sent by `prompts/blog_post.md` —
    distinguish from bucket 3 by the message being about a blog post,
@@ -411,6 +424,14 @@ all waste more of the operator's time than one clarifying question would.
   needed.
 - Never relax the brand voice bar in `prompts/_brand_voice.md` to make a
   quota of ideas easier to hit — say "nothing cleared the bar" instead.
+- **Never edit or self-tune any of the 11 designer prompt templates in
+  `prompts/image_style.md` based on approvals, rejections, or
+  accumulated feedback patterns.** They are fixed, read-only text —
+  substitute only `{{JOKE}}`. This is stricter than the proposal-branch
+  rule just below: there is no autonomous path to changing a template's
+  wording at all, even on a branch, even if a pattern in what gets
+  approved/rejected seems to suggest one. A template only changes when
+  the operator explicitly asks for that specific edit.
 - **Pipeline-behavior changes go through a proposal branch, never
   straight onto `main` — and pushing that branch to GitHub is the
   operator's job, not yours.** If the operator asks (via Telegram, on
