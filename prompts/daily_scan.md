@@ -166,34 +166,45 @@ If fewer than 4 ideas clear the bar, use fewer — never pad with weaker
 ideas to hit the range. If nothing clears the bar at all, skip straight
 to Step 9 and send only the "nothing cleared the bar" message.
 
-## Step 9 — Send concepts to Telegram (text only, no image yet)
+## Step 9 — Generate and send a design for every surviving concept
 
-If nothing cleared the bar in Step 8: send exactly that ("Nothing
-cleared the bar today") and briefly note what was closest, rather than
-lowering the standard to produce a concept anyway.
+No text-only concept message, and no separate "yes" to trigger
+generation — a concept clearing Step 8's bar *is* the trigger. If
+nothing cleared the bar: send exactly that ("Nothing cleared the bar
+today") and briefly note what was closest, rather than lowering the
+standard to produce a concept anyway. Nothing is generated in that case.
 
 Otherwise, number the surviving concepts sequentially in final display
-order (`#1`, `#2`, and so on), then send each concept as its own message.
-The number is the concept's stable identifier for this daily batch: keep
-it when the concept later becomes a rendered design so replies such as
-`yes to #1 and #3` or `yes to #1` can be resolved without requiring
-the operator to retype a tagline.
+order (`#1`, `#2`, and so on) — this is the concept's stable identifier
+for this daily batch, carried through onto the rendered design so later
+replies like `yes to #1 and #3` can be resolved without the operator
+retyping a tagline. For each one, in order:
+
+1. Pick the single designer whose section in `prompts/image_style.md`
+   best fits the concept's tone/subject (vintage or text-driven → Duke,
+   clean/modern/minimal → Nova, bootleg/airbrush-coded → Ash).
+2. Assemble and generate per `prompts/image_prompt_review.md` — one
+   provider call, one deterministic check (visible text matches the
+   tagline, one retry on failure), logged to `~/image_prompt_library.md`
+   under a stable `IP-...-DESIGNER` ID.
+3. Send the finished design as its own message:
 
 ```
-#1
+#1 — [Duke | Nova | Ash]
 Tagline: "..."
 Why it's timely: [one line]
 Source: [subreddit / trends keyword / seasonal calendar / niche library / reference site / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 [New territory — only include this line when Step 8 flagged it as such]
 
-Reply "yes" or "no" on this one, or approve/reject multiple concepts by
-number (for example, `yes to #1 and #3`). You can still reference a
-tagline instead. "yes" generates one real design for this concept
-(designer picked automatically, unless you'd rather name one) — you'll
-review the finished design next, not a prompt.
+[the rendered design image]
+
+Reply "yes" or "no" on this one, or approve/reject multiple by number
+(e.g. `yes to #1 and #3`). Ask for another designer's take, or give a
+correction, and I'll generate that directly too.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later concept YES triggers direct
-design generation, handled by `AGENTS.md` bucket 3's Stage Concept.
+ends once every surviving concept's design has been sent. Replies are
+handled entirely by `AGENTS.md` bucket 3's Stage Design — there is no
+earlier stage to route to.

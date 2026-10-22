@@ -60,23 +60,30 @@ specific visual concept, but make sure at least two different designers
 appear across the batch (unless the operator requested one specific
 designer for all of them — see Step 0).
 
-## Step 4 — Send concepts to Telegram (text only, no image yet)
+## Step 4 — Generate and send a design for every iteration
 
-This gate still lets the operator choose which visual concept(s) are worth
-generating at all — a concept YES generates one real design directly with
-its assigned designer, no separate prompt-review round-trip first.
+No text-only concept message — generate all of Step 1's surviving
+iterations directly with their Step 3 designer assignments, no separate
+"yes" per concept first. Number them sequentially (`#1`, `#2`, and so
+on), carried through onto each rendered design. For each one:
 
-Send each concept as its own message:
+1. Assemble and generate per `prompts/image_prompt_review.md` — one
+   provider call, one deterministic check (visible text matches the
+   exact text, one retry on failure), logged to
+   `~/image_prompt_library.md` under a stable `IP-...-DESIGNER` ID.
+2. Send the finished design as its own message:
 
 ```
+#1 — [Duke | Nova | Ash]
 "[exact text]"
 Concept: [one line describing this iteration's visual idea]
-Designer: [Duke | Nova | Ash]
 
-Reply "yes" to generate this design, or "no" to drop the concept. You'll
-review the finished design next, not a prompt.
+[the rendered design image]
+
+Reply "yes" or "no" on this one, or approve/reject multiple by number
+(e.g. `yes to #1 and #3`). Ask for another designer's take, or give a
+correction, and I'll generate that directly too.
 ```
 
-This prompt's job ends once the concepts are sent. A later concept YES
-triggers direct design generation under `AGENTS.md` bucket 3's Stage
-Concept, using the assigned designer.
+This prompt's job ends once every iteration's design has been sent.
+Replies are handled entirely by `AGENTS.md` bucket 3's Stage Design.

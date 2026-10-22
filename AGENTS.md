@@ -92,25 +92,30 @@ Stages 1-3, 5, and now 4 confirmed working (see `TODO.md`). What's
 actually live:
 - **Message routing** (below) is active.
 - **Daily scan** (`prompts/daily_scan.md`) has a live 7 AM
-  America/New_York cron and returns text-only concepts. Step 1 also does
-  seasonal-calendar + open-ended category discovery (Stage 4, wired in
-  2026-09-20).
+  America/New_York cron. Step 1 also does seasonal-calendar + open-ended
+  category discovery (Stage 4, wired in 2026-09-20).
 - **Seeded search** (`prompts/seeded_search.md`) is confirmed working via
   Telegram and uses the same single-gate design-review flow as daily scan.
-- **Single-gate image pipeline** (redesigned 2026-10-22, replacing the
-  old three-gate text-concept → prompt-review → rendered-image flow): a
-  concept YES generates one real design directly — auto-assigned
-  designer, one provider call, one deterministic check (does the visible
-  text match the tagline?) — and sends the finished design as the one
-  thing the operator approves or rejects. No separate prompt-review card,
-  no audit/repair loop before the operator sees it. See bucket 3 below
-  and `prompts/image_prompt_review.md` (now prompt assembly/logging only,
+- **Single-gate image pipeline** (redesigned 2026-10-22, corrected the
+  same day to remove a leftover text-concept checkpoint — replacing the
+  old three-gate text-concept → prompt-review → rendered-image flow):
+  every concept that clears the brand-voice filter generates its design
+  automatically, as part of running `daily_scan.md`/`seeded_search.md`/
+  `text_iterations.md` itself — auto-assigned designer, one provider
+  call, one deterministic check (does the visible text match the
+  tagline?). The operator never approves a text-only concept; the first
+  and only thing sent is the finished design, which is the one thing
+  approved or rejected. No prompt-review card, no audit/repair loop, no
+  separate "yes" just to generate. See bucket 3 below and
+  `prompts/image_prompt_review.md` (now prompt assembly/logging only,
   not an approval gate). Rationale: the old gates were meant to protect
   against expensive image-generation calls, but in practice the cost and
   friction came from long back-and-forth Hermes conversations auditing
   and repairing designs against a bar stricter than the operator's own
   taste — removed in favor of the operator just reviewing finished
-  designs directly, the way a human art director would.
+  designs directly, the way a human art director would, scrolling
+  through a handful of images per run rather than approving each stage
+  of getting there.
 - **Design handoff** (Stage 6): an approved ("yes") design is logged to
   memory AND uploaded to a Dropbox `/to-do` folder via
   `connectors/dropbox_upload.py` (see bucket 3 below and `TODO.md`),
@@ -211,46 +216,24 @@ which before responding:
    plus the word "iterations" (route here). Read and follow
    `prompts/text_iterations.md` in full, using the exact text as Step
    0's input.
-3. **A yes/no/correction reply to a concept or a rendered design** (e.g.
-   "yes", "no", "yes on #2", "no Duke, use a horse rather than a dog") —
-   a message can address more than one item; handle each independently.
-   There are now **two stages**, not three — classify the quoted/
-   referenced item from its content and stable ID first; do not treat a
-   concept YES as approval of the design itself, or vice versa.
+3. **A yes/no/correction reply to a rendered design** (e.g. "yes", "no",
+   "yes on #2", "no Duke, use a horse rather than a dog") — a message
+   can address more than one item; handle each independently. There is
+   **one stage** here, not a concept-then-design split: every concept
+   that clears `daily_scan.md`/`seeded_search.md`/`text_iterations.md`'s
+   own brand-voice filter generates its design automatically as part of
+   running that prompt (see bucket 1/2 and those files' own final
+   step) — the operator never sees a text-only concept requiring its
+   own separate yes/no. The first and only thing the operator approves
+   or rejects is the finished design.
 
-   Daily-scan/seeded-search concept cards are numbered within each
-   delivered batch (`#1`, `#2`, etc.). Treat replies such as `yes to #1
-   and #3`, `no to #2`, or `yes to #1 Ash` as references to the most
+   Concept numbers (`#1`, `#2`, etc.) carry through from the scan/search
+   batch onto each rendered design's caption and ID, so replies like
+   `yes to #1 and #3` or `no to #2` can still be resolved without the
+   operator retyping a tagline. Treat these as references to the most
    recent numbered batch unless the reply is explicitly attached to an
-   older message. Preserve that concept number on the rendered design's
-   caption and ID. If more than one numbered batch is a plausible
-   target and reply context does not resolve it, ask rather than guess.
-
-   **Stage Concept — replying to a text-only concept** (no design yet;
-   from `daily_scan.md`, `seeded_search.md`, or `text_iterations.md`):
-   - **On YES**: generate the design directly — no separate prompt-
-     review round-trip first. If the concept card already names a
-     `Designer:`, use that one. Otherwise pick the single designer whose
-     section in `prompts/image_style.md` best fits the concept's tone/
-     subject (vintage or text-driven → Duke, clean/modern/minimal →
-     Nova, bootleg/airbrush-coded → Ash) — don't generate all three by
-     default; that's what made this expensive. Assemble the complete
-     provider prompt per `prompts/image_prompt_review.md`, log it to
-     `~/image_prompt_library.md` under a stable `IP-...-DESIGNER` ID,
-     and call the image tool once.
-   - Run exactly one deterministic check on the result: does the
-     visible text actually match the tagline (read it back, e.g. via
-     OCR/vision)? If it doesn't, regenerate **once** from the same
-     prompt and move on regardless of the second result — don't loop
-     chasing it further. Everything else about the design (composition,
-     color count, style fit, "too busy," hatching, etc.) is the
-     operator's call, not an automatic pass/fail — send it either way
-     rather than quarantining on a subjective judgment.
-   - Send the rendered design as a new Stage Design item (see below)
-     with its concept number, designer, and `IP-...` ID.
-   - **On NO**: log the rejected concept to memory (tagline/text,
-     register, and reason if supplied) and confirm briefly. Nothing is
-     generated.
+   older message; if more than one numbered batch is a plausible target
+   and reply context does not resolve it, ask rather than guess.
 
    **Stage Design — replying to an already-generated design image**:
    - **Always**: log the decision to memory — tagline, register
@@ -302,8 +285,8 @@ which before responding:
 4. **A reply to a weekly blog post message** (a reply to a topic-options
    message or a full-draft message sent by `prompts/blog_post.md` —
    distinguish from bucket 3 by the message being about a blog post,
-   not a shirt-design concept/image) — two stages, same shape as bucket
-   3's Stage Concept/Stage Design split but with its own mechanics:
+   not a shirt-design concept/image) — its own two stages, unrelated to
+   bucket 3's single-stage design review:
 
    **Stage A — replying to a topic-options message** (2-3 numbered
    summaries, no full draft yet):

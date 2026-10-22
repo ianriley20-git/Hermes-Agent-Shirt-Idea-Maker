@@ -139,31 +139,44 @@ policy).
 If nothing on this theme clears the bar, skip straight to Step 9 and
 send only the "nothing cleared the bar" message.
 
-## Step 9 — Send concepts to Telegram (text only, no image yet)
+## Step 9 — Generate and send a design for every surviving concept
 
-If a designer was named/implied in Step 0, note that designer on every
-concept card — `AGENTS.md` bucket 3's Stage Concept will use it directly
-instead of picking one. Otherwise omit the designer line and let Stage
-Concept pick per concept as usual.
-
-If nothing on this theme cleared the bar: say so plainly ("Nothing on
+No text-only concept message, and no separate "yes" to trigger
+generation — a concept clearing Step 8's bar *is* the trigger. If
+nothing on this theme cleared the bar: say so plainly ("Nothing on
 [theme] cleared the bar") and note what was closest, rather than
-lowering the standard to produce a concept anyway.
+lowering the standard to produce a concept anyway. Nothing is generated
+in that case.
 
-Otherwise, send each concept as its own message:
+Otherwise, number the surviving concepts sequentially (`#1`, `#2`, and
+so on) — carried through onto each rendered design so replies like `yes
+to #1 and #3` can be resolved without retyping a tagline. For each one,
+in order:
+
+1. Use the designer named/implied in Step 0 if there was one; otherwise
+   pick the single designer whose section in `prompts/image_style.md`
+   best fits the concept's tone/subject (vintage or text-driven → Duke,
+   clean/modern/minimal → Nova, bootleg/airbrush-coded → Ash).
+2. Assemble and generate per `prompts/image_prompt_review.md` — one
+   provider call, one deterministic check (visible text matches the
+   tagline, one retry on failure), logged to `~/image_prompt_library.md`
+   under a stable `IP-...-DESIGNER` ID.
+3. Send the finished design as its own message:
 
 ```
+#1 — [Duke | Nova | Ash]
 Tagline: "..."
-[Designer: [Duke | Nova | Ash] — only include this line when a designer was requested for this run; omit it otherwise]
 Why it's timely: [one line]
 Source: [subreddit / trends phrase / reference site / web result / etsy search]
 [Origin: reused — only include this line for reused concepts, omit it for original ones]
 
-Reply "yes" or "no" on this one (or reference it by tagline if replying
-to more than one). "yes" generates one real design for this concept —
-you'll review the finished design next, not a prompt.
+[the rendered design image]
+
+Reply "yes" or "no" on this one, or approve/reject multiple by number
+(e.g. `yes to #1 and #3`). Ask for another designer's take, or give a
+correction, and I'll generate that directly too.
 ```
 
 This is the actual delivered output for this run — this prompt's job
-ends once the concepts are sent. A later concept YES triggers direct
-design generation under `AGENTS.md` bucket 3's Stage Concept.
+ends once every surviving concept's design has been sent. Replies are
+handled entirely by `AGENTS.md` bucket 3's Stage Design.

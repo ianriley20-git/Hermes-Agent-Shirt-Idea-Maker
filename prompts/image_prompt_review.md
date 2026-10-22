@@ -1,12 +1,13 @@
 # Image prompt assembly & logging
 
 This is **not** an approval gate — as of the 2026-10-22 pipeline
-simplification, the operator reviews finished designs, not prompts. This
-file covers how to assemble the exact prompt and keep a record of it
-before every provider-backed generation/edit call, so there's always a
-precise answer to "what was actually sent" without re-deriving it from
-memory. See `AGENTS.md` bucket 3's Stage Concept/Stage Design for when
-this fires and what happens to the result.
+simplification, the operator reviews finished designs, not prompts, and
+there's no text-concept checkpoint before generation either (corrected
+the same day). This file covers how to assemble the exact prompt and
+keep a record of it before every provider-backed generation/edit call,
+so there's always a precise answer to "what was actually sent" without
+re-deriving it from memory. See `AGENTS.md` bucket 3's Stage Design for
+when this fires and what happens to the result.
 
 It applies to every provider-backed image generation or edit: normal
 daily-scan/seeded-search/text-iterations concept approvals, a requested

@@ -1033,20 +1033,49 @@ concepts, 2026-09-03)
       still logs every assembled prompt and correction for the record,
       just without gating generation on operator approval of the prompt
       text itself.
-- [ ] **Not addressed by this repo change alone**: Hermes's own
-      self-authored "premium finalization"/image-generation-production-
-      workflows skill lives entirely outside this git repo (server-side,
-      separately self-patched) and isn't touched by an `AGENTS.md`/
-      `prompts/` edit. Needs a direct one-time instruction to Hermes
-      after this merges, confirming that skill's job is superseded by
-      this flow so it stops running its own parallel audit/finalization
-      logic.
+- [x] **Hermes's own skill, updated 2026-10-22**: told Hermes directly
+      after merge to retire its self-authored "premium finalization"/
+      image-generation-production-workflows skill (it lived entirely
+      outside this git repo, server-side, separately self-patched).
+      Hermes replaced it with v2.0.0 matching this flow and, notably,
+      actually committed it to real git history this time (previously
+      untracked). Found and flagged in the process: syncing the server's
+      `main` surfaced 3 commits that had been sitting on the server's
+      local `main` only, never pushed/reviewed (`5dd7fbb` the full
+      premium-finalization connector/audit build, `fed27a5` a disclose-
+      don't-auto-veto fix to it, `477c59a` an unrelated merge) —
+      preserved at `hermes-backup/pre-sync-main-2026-10-22` on the
+      server, deliberately not merged (superseded by this change), kept
+      only as possible raw material for the future product-upload
+      process. A real instance of the governance gap this pipeline
+      change was partly meant to address — worth knowing it happened.
 - [ ] **No vectorization step in this pipeline, by design**: `vc_trace`
       (`connectors/vc_trace`, see the `bg-removal-mockup-testing` branch)
       is deliberately NOT part of design approval — it's meant for a
       separate, later product-upload process that runs once per design
       that actually ships, not on every approved candidate. That process
       doesn't exist yet.
+
+## Stage 5 corrected same day: no text-concept checkpoint either, 2026-10-22
+
+- [x] **Reason**: the first pass of the single-gate rewrite (above) still
+      sent a text-only concept card requiring its own "yes" before
+      generating a design — confirmed live on a real seeded search
+      ("Thanksgiving seeded search"), and the operator flagged it
+      immediately: "I thought I was just approving designs now." Correct
+      — the original ask was no checkpoint before generation at all,
+      just scrolling through finished designs to approve or deny.
+- [x] **What changed**: `daily_scan.md`/`seeded_search.md`/
+      `text_iterations.md`'s final step now generates every concept that
+      clears the brand-voice filter directly — no text-only message, no
+      separate "yes" to trigger generation. `AGENTS.md` bucket 3 is down
+      to one stage (Stage Design) instead of two (Stage Concept/Stage
+      Design). The brand-voice filter itself is unchanged and still runs
+      before generation, at no cost.
+- [ ] **Live verification after merge**: confirm a real scan/search run
+      sends rendered designs directly with no intervening text-concept
+      message, and that a "yes"/"no"/alternate-designer/correction reply
+      on a design still works exactly as the single-gate rewrite intended.
 
 ## Stage 8: backlink outreach and gift-request monitoring, built 2026-09-23
 
