@@ -125,6 +125,29 @@ def _blend_if_underlying_transparency(
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode="RGBA")
 
 
+def _multiply_blend_with_underlying(design_rgba: Image.Image, underlying_rgb: Image.Image, strength: float) -> Image.Image:
+    """Photoshop 'Multiply' blend mode, at reduced strength rather than a full 100% layer -- the
+    operator's own manual technique for a white/light garment, where Blend-If's dark-transparency
+    ramp has almost nothing to react to (there's rarely any sufficiently dark fabric luminance on a
+    light garment to trigger it). Multiplying the design's own ink color against the garment's own
+    pixel color underneath darkens it slightly wherever the fabric itself has any shading/texture,
+    so the design reads as sitting in the fabric rather than a flat sticker laid on top -- the
+    light-garment counterpart to what Blend-If does for a dark one. strength 0 = no effect (plain
+    design color), 1 = full Photoshop Multiply; the operator's own description was "subtle," so the
+    default is low. Only the design's own RGB changes here, never its alpha -- distinct from
+    Blend-If, which only touches alpha and never RGB. design_rgba and underlying_rgb must already
+    be the same size and pixel-aligned (both the mockup photo's own canvas size)."""
+    design_arr = np.asarray(design_rgba).astype(np.float64)
+    rgb = design_arr[..., :3]
+    under_arr = np.asarray(underlying_rgb.convert("RGB")).astype(np.float64)
+    multiplied = (rgb * under_arr) / 255.0
+    blended_rgb = rgb * (1 - strength) + multiplied * strength
+
+    out = design_arr.copy()
+    out[..., :3] = blended_rgb
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), mode="RGBA")
+
+
 def _perspective_warp(design: Image.Image, dest_quad: list[tuple[float, float]], canvas_size: tuple[int, int]) -> Image.Image:
     """Warp design (already RGBA) so its own 4 corners land on dest_quad, onto a canvas_size
     -sized transparent layer. Pre-downscales toward the quad's own footprint first -- PERSPECTIVE's
@@ -159,7 +182,14 @@ def _finish_composite(
     blend_if_low: float,
     blend_if_high: float,
     blend_if_min_alpha: float,
+    apply_multiply: bool = False,
+    multiply_strength: float = 0.18,
 ) -> None:
+    # Mutually exclusive in practice (one dark-garment effect, one light-garment effect), but not
+    # enforced here -- order is multiply (RGB only) then Blend-If (alpha only), so nothing is lost
+    # if a caller ever did want both.
+    if apply_multiply:
+        warped = _multiply_blend_with_underlying(warped, mockup, multiply_strength)
     if apply_blend_if:
         warped = _blend_if_underlying_transparency(warped, mockup, blend_if_low, blend_if_high, blend_if_min_alpha)
 
@@ -277,6 +307,8 @@ def composite_spine(
     blend_if_low: float = 0.0,
     blend_if_high: float = 50.0,
     blend_if_min_alpha: float = 0.35,
+    apply_multiply: bool = False,
+    multiply_strength: float = 0.18,
 ) -> None:
     """Place a design from a 3-point curve (spine_top, spine_control, and an operator-placed
     spine_bottom that -- deliberately -- never reaches this function: it only exists in the Mockup
@@ -343,7 +375,10 @@ def composite_spine(
     quad = [(anchor_x + x * cos_t - y * sin_t, anchor_y + x * sin_t + y * cos_t) for x, y in rect]
 
     warped = _perspective_warp(design, quad, mockup.size)
-    _finish_composite(mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha)
+    _finish_composite(
+        mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha,
+        apply_multiply=apply_multiply, multiply_strength=multiply_strength,
+    )
 
 
 def _parse_quad(raw: str) -> list[tuple[float, float]]:

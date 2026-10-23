@@ -157,7 +157,24 @@ _ADJUSTMENT_DEFAULTS = {
     "global_opacity": 0.96,
     "blend_if_high": 50.0,
     "blend_if_min_alpha": 0.35,
+    "multiply_strength": 0.18,
 }
+
+# The operator's own manual technique is garment-darkness-dependent, not a single universal
+# treatment: a subtle Multiply blend for a white/light garment (so the design reads as dyed into
+# the fabric), the existing Blend-If dark-transparency ramp for a dark one (so real shadows/folds
+# show through). Picked automatically from the mockup's own already-measured garment_color (see
+# mockup_landmarks.find_landmarks) rather than a manual per-mockup flag -- same philosophy as the
+# mask-based size-fit: derive it from the photo itself. 150 sits roughly at "light gray" on a 0-255
+# luminance scale, comfortably separating an actual light/white garment from a mid-gray or darker one.
+LIGHT_GARMENT_LUMINANCE_THRESHOLD = 150.0
+
+
+def _garment_luminance(garment_color: list[float] | tuple[float, float, float] | None) -> float | None:
+    if not garment_color:
+        return None
+    r, g, b = garment_color
+    return 0.299 * r + 0.587 * g + 0.114 * b
 
 
 def _resolve_adjustments(template: dict, overrides: dict[str, float | None]) -> dict[str, float]:
@@ -180,6 +197,7 @@ def place(
     global_opacity: float | None = None,
     blend_if_high: float | None = None,
     blend_if_min_alpha: float | None = None,
+    multiply_strength: float | None = None,
     save_adjustments: bool = False,
     **composite_kwargs,
 ) -> dict:
@@ -203,6 +221,7 @@ def place(
             "global_opacity": global_opacity,
             "blend_if_high": blend_if_high,
             "blend_if_min_alpha": blend_if_min_alpha,
+            "multiply_strength": multiply_strength,
         },
     )
 
@@ -211,6 +230,14 @@ def place(
         # drag-middle flow) -- tilt and size are both auto-derived from the curve and the mockup's
         # own saved garment mask, so tilt_degrees/scale_factor/shift_x_in have nothing left to
         # apply to and are silently ignored here, same as the quad_corners path.
+        #
+        # Light vs. dark garment treatment is likewise auto-derived, from the same measured
+        # garment_color find_landmarks already produced -- not a manual per-mockup choice. A
+        # template measured before this existed won't have garment_color yet; treat that the same
+        # as "dark" (Blend-If only), matching this pipeline's prior behavior exactly rather than
+        # silently changing how an already-approved mockup looks.
+        luminance = _garment_luminance(template.get("garment_color"))
+        is_light = luminance is not None and luminance >= LIGHT_GARMENT_LUMINANCE_THRESHOLD
         quad = {"spine_top": tuple(template["spine_top"]), "spine_control": tuple(template["spine_control"])}
         composite_spine(
             mockup_path,
@@ -223,9 +250,11 @@ def place(
             design_top_offset_in=template.get("design_top_offset_in", 2.0),
             max_design_w_in=template.get("max_design_w_in", MAX_DESIGN_W_IN),
             global_opacity=resolved["global_opacity"],
-            apply_blend_if=composite_kwargs.get("apply_blend_if", True),
+            apply_blend_if=composite_kwargs.get("apply_blend_if", True) and not is_light,
             blend_if_high=resolved["blend_if_high"],
             blend_if_min_alpha=resolved["blend_if_min_alpha"],
+            apply_multiply=is_light,
+            multiply_strength=resolved["multiply_strength"],
         )
     elif "quad_corners" in template:
         # A hand-placed 4-corner quad (from the separate Mockup Placement Tool) already captures
@@ -322,6 +351,16 @@ def main() -> int:
         "lets the design go fully transparent there. Hardcoded default 0.35.",
     )
     parser.add_argument(
+        "--multiply-strength",
+        type=float,
+        default=None,
+        help="Spine templates only. Strength (0-1) of the subtle Multiply blend applied instead of "
+        "Blend-If when the mockup's own measured garment is light (luminance >= "
+        f"{LIGHT_GARMENT_LUMINANCE_THRESHOLD:.0f}) -- 0 is no effect (plain design color), 1 is a "
+        "full Photoshop Multiply layer. Has no effect on a dark garment, where Blend-If is used "
+        "instead automatically. Hardcoded default 0.18.",
+    )
+    parser.add_argument(
         "--save-adjustments",
         action="store_true",
         help="After a successful placement, write the resolved tilt/scale/shift/opacity/blend-if "
@@ -347,6 +386,7 @@ def main() -> int:
             apply_blend_if=not args.no_blend_if,
             blend_if_high=args.blend_if_high,
             blend_if_min_alpha=args.blend_if_min_alpha,
+            multiply_strength=args.multiply_strength,
             save_adjustments=args.save_adjustments,
             edge_pull_side=args.edge_pull_side,
             edge_pull_px=args.edge_pull_px,
