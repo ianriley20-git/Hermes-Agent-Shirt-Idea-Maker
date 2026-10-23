@@ -12,6 +12,7 @@ measure the photo.
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -245,6 +246,103 @@ def composite_quad(
     design = _recenter_horizontal(design, center_frac)
     warped = _perspective_warp(design, corners, mockup.size)
 
+    _finish_composite(mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha)
+
+
+def mask_width_profile(mask: np.ndarray) -> list[list[int] | None]:
+    """Compact per-row [left_x, right_x] extent of a garment mask (None for a row with no mask
+    pixels at all) -- small enough to live in a template JSON, so composite_spine() doesn't need
+    mediapipe/the mask recomputed on every hot-swap, only once when the mockup photo is first
+    measured."""
+    h, w = mask.shape
+    profile: list[list[int] | None] = []
+    for y in range(h):
+        hits = np.where(mask[y])[0]
+        profile.append([int(hits[0]), int(hits[-1])] if len(hits) else None)
+    return profile
+
+
+def composite_spine(
+    mockup_path: Path,
+    design_path: Path,
+    output_path: Path,
+    spine_top: tuple[float, float],
+    spine_control: tuple[float, float],
+    px_per_inch: float,
+    mask_profile: list[list[int] | None],
+    design_top_offset_in: float = 2.0,
+    max_design_w_in: float = 9.5,
+    global_opacity: float = 0.96,
+    apply_blend_if: bool = True,
+    blend_if_low: float = 0.0,
+    blend_if_high: float = 50.0,
+    blend_if_min_alpha: float = 0.35,
+) -> None:
+    """Place a design from a 3-point curve (spine_top, spine_control, and an operator-placed
+    spine_bottom that -- deliberately -- never reaches this function: it only exists in the Mockup
+    Placement Tool to help the operator eyeball a sensible curve while dragging spine_control, the
+    same way the curve's own visible bend is just a drawing aid, not a per-row warp. The actual
+    placement is a single rotate + uniform scale + translate (an affine transform, expressed here
+    as a parallelogram destination quad for _perspective_warp to reuse unchanged):
+
+    - Tilt: the angle between straight-down and the direction from spine_top to spine_control --
+      one net lean for the whole design, not a continuous bend along the curve (that's a
+      meaningfully bigger warp the operator explicitly didn't want here).
+    - Anchor: spine_top, shifted design_top_offset_in inches along that same tilted direction
+      (not straight down), using the mockup's own already-measured px_per_inch.
+    - Size: the normal Printify box width (max_design_w_in), auto-shrunk only as far as needed so
+      the design's resulting left/right edges stay inside the garment's own mask -- from
+      mask_width_profile() -- at every row it would occupy, replacing the manual "scale down until
+      it stops spilling" trial-and-error this pipeline used before.
+    """
+    try:
+        mockup = Image.open(mockup_path).convert("RGBA")
+        design = Image.open(design_path).convert("RGBA")
+    except (UnidentifiedImageError, OSError) as exc:
+        raise ValueError(f"cannot read input image: {exc}") from exc
+
+    dx = spine_control[0] - spine_top[0]
+    dy = spine_control[1] - spine_top[1]
+    length = math.hypot(dx, dy)
+    ux, uy = (dx / length, dy / length) if length > 1e-6 else (0.0, 1.0)
+
+    # Angle that rotates the reference straight-down vector (0, 1) onto (ux, uy), using the same
+    # rotation convention as mockup_place.py's _rotate_quad (x' = x cosθ - y sinθ, y' = x sinθ + y
+    # cosθ) -- so a spine bending toward the viewer's right (ux > 0) produces the same sign of tilt
+    # that convention already documents.
+    tilt_degrees = math.degrees(math.atan2(-ux, uy))
+
+    offset_px = design_top_offset_in * px_per_inch
+    anchor_x = spine_top[0] + ux * offset_px
+    anchor_y = spine_top[1] + uy * offset_px
+
+    design_w, design_h = design.size
+    aspect = design_h / design_w
+    ideal_width_px = max_design_w_in * px_per_inch
+    ideal_height_px = ideal_width_px * aspect
+
+    y0 = max(0, int(round(anchor_y)))
+    y1 = min(len(mask_profile) - 1, int(round(anchor_y + ideal_height_px)))
+    half_widths = []
+    for y in range(y0, y1 + 1):
+        entry = mask_profile[y]
+        if entry is None:
+            continue
+        left_x, right_x = entry
+        half_widths.append(min(anchor_x - left_x, right_x - anchor_x))
+    safe_half_width = max(min(half_widths), 1.0) if half_widths else ideal_width_px / 2
+
+    fit_scale = min(1.0, (2 * safe_half_width) / ideal_width_px)
+    final_width = ideal_width_px * fit_scale
+    final_height = ideal_height_px * fit_scale
+
+    half_w = final_width / 2
+    rect = [(-half_w, 0.0), (half_w, 0.0), (half_w, final_height), (-half_w, final_height)]
+    theta = math.radians(tilt_degrees)
+    cos_t, sin_t = math.cos(theta), math.sin(theta)
+    quad = [(anchor_x + x * cos_t - y * sin_t, anchor_y + x * sin_t + y * cos_t) for x, y in rect]
+
+    warped = _perspective_warp(design, quad, mockup.size)
     _finish_composite(mockup, warped, output_path, global_opacity, apply_blend_if, blend_if_low, blend_if_high, blend_if_min_alpha)
 
 

@@ -20,16 +20,23 @@ next design hot-swapped into this mockup picks them up automatically with
 no flags to re-pass. Deliberately excludes edge-pull, which is tuned to
 one specific design's own shape, not a property of the photo.
 
-A template can also carry a hand-placed `quad_corners` (plus `center_frac`)
-from the Mockup Placement Tool (a separate local app, not part of this
-repo) -- a true 4-corner perspective box with an independently-placed
-center point, instead of the Printify-box-model's single collar point +
-scale + rotation_ratio. When present, this takes over placement entirely
-via mockup_composite.py's composite_quad(), since a free-form quad already
-captures scale/rotation/tilt in its own shape -- tilt_degrees/scale_factor/
-shift_x_in are ignored in that case (there's no single quad left to
-rotate/scale/shift post-hoc); only global_opacity and Blend If still apply
-on top.
+A template can also carry one of two placements from the Mockup Placement
+Tool (a separate local app, not part of this repo), either of which takes
+over entirely -- tilt_degrees/scale_factor/shift_x_in are ignored in both
+cases (there's no single quad left to rotate/scale/shift post-hoc); only
+global_opacity and Blend If still apply on top:
+
+- `spine_top` + `spine_control` (+ `px_per_inch`, `mask_profile`, written
+  by the tool's simplified click-top/click-bottom/drag-middle flow): a
+  3-point curve. Tilt comes from the angle between straight-down and the
+  spine_top-to-spine_control direction; size auto-shrinks only as far as
+  needed to stay inside the mockup's own saved garment mask. See
+  mockup_composite.py's composite_spine(). This is the current default in
+  the tool -- prefer it for any mockup not already using the quad below.
+- `quad_corners` (plus `center_frac`): a true 4-corner perspective box
+  with an independently-placed center point, from the tool's earlier
+  drag-4-corners flow. Still fully supported for mockups already measured
+  this way -- via mockup_composite.py's composite_quad().
 """
 
 from __future__ import annotations
@@ -42,7 +49,7 @@ from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
 
-from mockup_composite import composite, composite_quad
+from mockup_composite import composite, composite_quad, composite_spine
 
 # Printify's own standard front print-area box, replicated from the
 # operator's real, already-established Printify-POD-Manager app
@@ -199,7 +206,28 @@ def place(
         },
     )
 
-    if "quad_corners" in template:
+    if "spine_top" in template and "spine_control" in template:
+        # A 3-point curve (from the Mockup Placement Tool's simplified click-top/click-bottom/
+        # drag-middle flow) -- tilt and size are both auto-derived from the curve and the mockup's
+        # own saved garment mask, so tilt_degrees/scale_factor/shift_x_in have nothing left to
+        # apply to and are silently ignored here, same as the quad_corners path.
+        quad = {"spine_top": tuple(template["spine_top"]), "spine_control": tuple(template["spine_control"])}
+        composite_spine(
+            mockup_path,
+            design_path,
+            output_path,
+            tuple(template["spine_top"]),
+            tuple(template["spine_control"]),
+            template["px_per_inch"],
+            template["mask_profile"],
+            design_top_offset_in=template.get("design_top_offset_in", 2.0),
+            max_design_w_in=template.get("max_design_w_in", MAX_DESIGN_W_IN),
+            global_opacity=resolved["global_opacity"],
+            apply_blend_if=composite_kwargs.get("apply_blend_if", True),
+            blend_if_high=resolved["blend_if_high"],
+            blend_if_min_alpha=resolved["blend_if_min_alpha"],
+        )
+    elif "quad_corners" in template:
         # A hand-placed 4-corner quad (from the separate Mockup Placement Tool) already captures
         # scale/rotation/tilt in its own shape -- tilt_degrees/scale_factor/shift_x_in have no quad
         # left to apply to and are silently ignored here; only opacity/Blend If still layer on top.
