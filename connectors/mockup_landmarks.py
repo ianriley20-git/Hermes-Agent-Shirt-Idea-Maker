@@ -43,30 +43,46 @@ def _garment_mask(
     seed_box_frac: float = 0.08,
     tolerance: float = 70.0,
     body_bbox: tuple[int, int, int, int] | None = None,
+    seed_xy: tuple[int, int] | None = None,
 ) -> np.ndarray:
-    """Segment the garment by color, seeded from a small box at the image's
-    own center (garments are reliably centered and large in these photos),
-    keeping only the connected component that contains that seed -- so a
-    similarly-colored patch elsewhere in the background doesn't get pulled
-    in.
+    """Segment the garment by color, seeded from a small box either at a
+    given (x, y) -- normally just below the pose-landmark shoulder midpoint,
+    reliably on the torso -- or, when no pose anchor is available, the
+    image's own geometric center (garments are usually centered and large
+    in these photos, but that's an assumption, not a guarantee). Keeps only
+    the connected component that contains that seed, so a similarly-colored
+    patch elsewhere in the background doesn't get pulled in.
 
-    Pure color-distance flood-fill has a real failure mode confirmed on a
-    real photo: when the garment's own color is close enough to a wall or a
-    bright window behind/beside it (a light/neutral garment is the common
-    case), the "background" is color-indistinguishable from the garment at
-    that tolerance, so the flood fill escapes the body outline through it --
-    not a rare edge case, the exact same failure hit two different light
-    -colored garments this session. body_bbox (x0, y0, x1, y1), when given,
-    clips candidate pixels to a generous region around the actual body
-    before connected-component labeling, so a wall or window far from the
-    person can never join the garment's component regardless of how close
-    its color is -- spatial information the pose landmarks already give us
-    for other purposes in this module, now also used to bound the mask
-    itself, not just to pick a search window afterward."""
+    Confirmed on a real photo: a plain image-center seed breaks outright
+    (raises below) when the subject isn't actually centered in that
+    particular frame -- the center patch lands on background, not garment.
+    Preferring the pose-derived seed when available fixes this at the
+    source rather than papering over a bad seed_label with a lower
+    tolerance.
+
+    Pure color-distance flood-fill has a second, different failure mode,
+    also confirmed on a real photo: when the garment's own color is close
+    enough to a wall or a bright window behind/beside it (a light/neutral
+    garment is the common case), the "background" is color-indistinguishable
+    from the garment at that tolerance, so the flood fill escapes the body
+    outline through it -- not a rare edge case, the exact same failure hit
+    two different light-colored garments this session. body_bbox (x0, y0,
+    x1, y1), when given, clips candidate pixels to a generous region around
+    the actual body before connected-component labeling, so a wall or
+    window far from the person can never join the garment's component
+    regardless of how close its color is -- spatial information the pose
+    landmarks already give us for other purposes in this module, now also
+    used to bound the mask itself, not just to pick a search window
+    afterward."""
     h, w, _ = arr.shape
-    cy, cx = h // 2, w // 2
+    if seed_xy is not None:
+        cx, cy = seed_xy
+        cx = max(0, min(w - 1, cx))
+        cy = max(0, min(h - 1, cy))
+    else:
+        cy, cx = h // 2, w // 2
     half = max(2, int(min(h, w) * seed_box_frac / 2))
-    seed_patch = arr[cy - half : cy + half, cx - half : cx + half].reshape(-1, 3)
+    seed_patch = arr[max(0, cy - half) : cy + half, max(0, cx - half) : cx + half].reshape(-1, 3)
     seed_color = np.median(seed_patch, axis=0)
 
     dist = np.sqrt(((arr.astype(np.float64) - seed_color) ** 2).sum(axis=-1))
@@ -165,6 +181,7 @@ def find_landmarks(
     # (narrowing the collar search, setting scale).
     anchor = _pose_anchor(image_path, pose_model_path)
     body_bbox = None
+    fallback_seed_candidates: list[tuple[int, int]] = []
     if anchor is not None:
         mid_x, mid_y, shoulder_dist_px = anchor
         # Generous on purpose -- this only needs to exclude a wall/window far
@@ -179,8 +196,36 @@ def find_landmarks(
             int(mid_x + half_w),
             int(mid_y + 4.0 * shoulder_dist_px),
         )
+        # Candidate fallback seeds below the shoulder line, nearest first --
+        # NOT the primary seed. A single fixed offset (tried and reverted:
+        # 1.5x) overshot past the visible shirt on a close-crop bust photo
+        # while working fine on a full-body shot, because how far down the
+        # torso is actually visible depends entirely on how tightly the
+        # photo is framed, which this has no way to know in advance. Trying
+        # several and taking the first that actually lands on a real
+        # connected region is more robust than committing to one guess.
+        fallback_seed_candidates = [
+            (int(mid_x), int(mid_y + mult * shoulder_dist_px)) for mult in (0.6, 1.0, 1.5, 2.2)
+        ]
 
-    mask, garment_color = _garment_mask(arr, tolerance=tolerance, body_bbox=body_bbox)
+    try:
+        # Image-center seed first, unchanged from before -- already validated across every mockup
+        # measured so far this session, so this preserves that behavior exactly for the common case
+        # where the subject actually is centered.
+        mask, garment_color = _garment_mask(arr, tolerance=tolerance, body_bbox=body_bbox)
+    except ValueError:
+        if not fallback_seed_candidates:
+            raise
+        last_exc: ValueError | None = None
+        mask = garment_color = None
+        for seed_xy in fallback_seed_candidates:
+            try:
+                mask, garment_color = _garment_mask(arr, tolerance=tolerance, body_bbox=body_bbox, seed_xy=seed_xy)
+                break
+            except ValueError as exc:
+                last_exc = exc
+        if mask is None:
+            raise last_exc  # noqa: B904 -- re-raising the last fallback's own error, not swallowing it
 
     rows_with_mask = np.where(mask.any(axis=1))[0]
     if len(rows_with_mask) == 0:
