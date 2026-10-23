@@ -274,7 +274,51 @@ scheduler. Code lives here only where the built-in tools fall short:
   most mature piece of the upload-loop initiative so far, validated across
   multiple designs and mockup photos with the gate passing clean on every
   one.
-- upload-app integration (post-Stage 6, scoped separately)
+- `printify_publish.py` (post-Stage 6, in testing — scoped 2026-10-23) —
+  creates and publishes a Printify product directly via Printify's own
+  REST API, for the Telegram "fast lane" on simple designs. A
+  deliberately line-for-line port of Riley Ink's separate
+  `Printify-POD-Manager` Electron app's `src/printify.ts` module (same
+  endpoints, same payload shapes, same retry/backoff, same
+  variant-matching and title/description-adaptation logic) plus the
+  relevant orchestration from that app's `create-in-printify` handler —
+  not a redesign. That app's own settings (API token, shop IDs,
+  product-line presets) are encrypted locally via Electron's
+  `safeStorage` and aren't readable from outside it, so this connector
+  takes its own env vars instead: `PRINTIFY_API_TOKEN`, plus
+  `PRINTIFY_SHOPIFY_SHOP_ID` / `PRINTIFY_ETSY_SHOP_ID` per channel
+  actually used.
+  Two separate steps, matching this repo's explicit-yes-before-
+  irreversible-action rule: `create` uploads the design and makes a
+  draft product (not yet visible on the storefront — Printify's create
+  endpoint doesn't publish by itself), `publish` is the one call that
+  actually makes it live. A Telegram "yes, publish" must route to
+  `publish` only — never let `create` auto-chain into it.
+  Setup helpers (same pattern as `shopify_blog_publish.py --list-blogs`)
+  to find real IDs for a product-line preset without digging through
+  POD-Manager's own UI:
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py --list-shops
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py --list-blueprints "bella"
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py --list-print-providers 12
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py --blueprint-id 12 --print-provider-id <id> --list-variants
+  ```
+  Create (draft only):
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py \
+    --blueprint-id <id> --print-provider-id <id> create \
+    --design <final vectorized design PNG> --blueprint-title "<e.g. Unisex Jersey Short Sleeve Tee>" \
+    --title "..." --description "..." --tags "a,b,c" \
+    --sizes "S,M,L,XL" --colors "Black,White" --channel shopify
+  ```
+  Publish (the one irreversible call):
+  ```
+  /home/hermes/.hermes/hermes-agent/venv/bin/python printify_publish.py publish --channel shopify --product-id <id>
+  ```
+  Not yet wired into `AGENTS.md`'s message routing or a `prompts/` stage
+  — needs the operator's real Printify API token and confirmed
+  product-line presets (blueprint/print-provider per garment type)
+  before that happens.
 
 Stage 1 confirmed Telegram needs no custom code — `.env` + `hermes gateway
 setup` is sufficient.
