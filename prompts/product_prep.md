@@ -66,12 +66,17 @@ front.
 ## Step 3 — Vectorize
 
 ```
-vc_trace.exe --input <Design Name>.png \
+connectors/vc_trace/target/release/vc_trace --input <Design Name>.png \
   --output "<Design Name> - vector.png" \
   --svg "<Design Name> - vector.svg" \
   --swatches <comma list from Step 2> \
   --scale 3
 ```
+
+(`vc_trace` on the server — a Linux binary built from the committed Rust
+source, see `install/01_provision_vps.md` Part 17; `vc_trace.exe` only on
+the operator's own Windows dev machine. Same binary, same flags, just a
+platform-specific filename — don't hardcode one or the other.)
 
 Leave noise/paths/background-bias at their defaults (2 / 50 / 0.5) —
 those are source-image-fidelity trade-offs `mockup_generation.md` Step 1
@@ -119,12 +124,31 @@ and already carrying real spine-placement data in `Plain Mockups/`:
   `mockup_place.py` auto-picks Blend-If). Crewneck/sweatshirt:
   `Black Crewneck Gym` (luminance ~27, same auto-pick).
 
-For each of the two templates in the matching pair:
+**Fetch the matching pair's 2 templates (JSON + photo, 4 files) from
+Dropbox first** — the server has no local sync of `Plain Mockups` the
+way the operator's own machine does, so these aren't already on disk.
+Download fresh each run rather than keeping a persistent local cache:
+these are small (a few MB total) and infrequent (once per Stage Design
+approval), and a stale cache would silently miss a template update made
+through the Mockup Placement Tool (e.g. a `--save-adjustments` tuning
+pass) in between runs.
+
+```
+python connectors/dropbox_download.py --dropbox-path "/Plain Mockups/<template name>.json" --out "<template name>.json"
+python connectors/dropbox_download.py --dropbox-path "/Plain Mockups/<template name>.png" --out "<template name>.png"
+```
+
+Requires the Dropbox app token to carry `files.content.read` in addition
+to Part 13's original write-only scope — see
+`install/01_provision_vps.md` Part 17 if this fails with an auth/scope
+error rather than a normal network failure.
+
+Then for each of the two downloaded templates in the matching pair:
 
 ```
 python connectors/mockup_place.py \
-  --template "Plain Mockups/<template name>.json" \
-  --mockup "Plain Mockups/<template name>.png" \
+  --template "<template name>.json" \
+  --mockup "<template name>.png" \
   --design "<Design Name> - vector.png" \
   --output "<Design Name> - <tee|crewneck> mockup.png"
 ```
@@ -208,13 +232,16 @@ single review point for the whole package, not a per-step gate.
 
 ## Known limitations (true as of 2026-10-24)
 
-- Dry-run tested 2026-10-24 against a real approved design ("Bonus Bet
-  Regret," a light-canvas design) end to end through Step 4 (no live
-  Dropbox/Telegram, since those need the live server session) — the
-  script chain ran clean, and surfaced the light/dark mockup-matching
-  requirement Step 4 now documents (confirmed with the operator the same
-  day). Not yet tested against a dark-canvas design or through Steps 5-6
-  live.
+- Dry-run tested 2026-10-24 against two real approved designs end to end
+  through Step 4 (no live Dropbox/Telegram yet, since those need the
+  live server session) — a light-canvas one ("Bonus Bet Regret," which
+  surfaced the light/dark mockup-matching requirement Step 4 now
+  documents) and a dark-canvas one ("His is Rizzen," confirming the dark
+  pair and clean background auto-detection with no foreground-color
+  ambiguity). Not yet tested through Steps 5-6 live, or against the real
+  Dropbox-download path Step 4 now uses on the server (the dry run read
+  `Plain Mockups` locally, from the operator's own Dropbox sync, not via
+  `dropbox_download.py`).
 - `auto_swatches.py`'s thresholds (`--min-population-frac` 0.004,
   `--min-distance` 45.0) are the same defaults validated against three
   designs in this session's own earlier manual-vectorization testing,

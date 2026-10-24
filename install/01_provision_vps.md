@@ -867,3 +867,72 @@ Same **Cron Jobs** mechanism as the others — point it at
 running **Tuesday, Thursday, and Saturday at 4:00 AM America/New_York** —
 the same slot as the existing "Seasonal meme finder" cron, since they're
 two independent sources feeding the same backlog, not a sequence.
+
+## Part 17 — Automatic production prep (Stage 12): vc_trace build + Dropbox read scope
+
+`prompts/product_prep.md` runs automatically on Stage Design's own YES
+(see AGENTS.md bucket 3, Stage B). It needs two things nothing earlier in
+this doc set up: a compiled `vc_trace` binary, and read access to the
+`/Plain Mockups` folder Part 13's Dropbox app only had write access to.
+
+### Build vc_trace from source
+
+The Rust source (`connectors/vc_trace/src/main.rs`, `Cargo.toml`,
+`Cargo.lock`) is committed to this repo — only the compiled binary isn't
+(it's platform-specific; this session's own copy is a Windows `.exe`,
+built on the operator's own machine, and won't run on this Linux
+server). Install Rust once, then build:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+cd ~/riley-ink-pipeline/connectors/vc_trace
+cargo build --release
+```
+
+Produces `~/riley-ink-pipeline/connectors/vc_trace/target/release/vc_trace`
+(no `.exe` on Linux). Confirm it runs:
+
+```bash
+./target/release/vc_trace --help
+```
+
+### Add Dropbox read access
+
+Part 13's Dropbox app was deliberately scoped write-only. This flow
+needs to read the fixed mockup templates (JSON + photo pairs) out of
+`/Plain Mockups`, which the write-only token can't do — a download call
+against it fails with an insufficient-scope `AuthError`, not silent
+success.
+
+1. In the Dropbox App Console (`dropbox.com/developers/apps`), open the
+   same app from Part 13 → **Permissions** tab → also check
+   **`files.content.read`** → **Submit**.
+2. **Scope changes don't retroactively apply to an already-issued
+   refresh token** — you need a fresh one. Repeat Part 13's "Get a
+   long-lived refresh token" steps exactly (same app key/secret, same
+   authorize URL, same token exchange `curl` call) to get a new
+   `refresh_token` that actually carries the new scope.
+3. Replace the old value in `.env`:
+   ```bash
+   nano ~/.hermes/.env
+   ```
+   Update `DROPBOX_REFRESH_TOKEN` to the new one. Save (**Ctrl+O**,
+   Enter), exit (**Ctrl+X**). `DROPBOX_APP_KEY`/`DROPBOX_APP_SECRET`
+   don't change.
+
+### Verify
+
+```bash
+/home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/dropbox_download.py \
+  --dropbox-path "/Plain Mockups/White Shirt Backwards Hat.json" --out /tmp/template_test.json
+```
+Should print `Downloaded to /tmp/template_test.json` — if it instead
+fails with an auth/scope error, the refresh token in `.env` is still the
+old write-only one; re-check step 2 above.
+
+Then approve a real design via Telegram and confirm `prompts/product_prep.md`
+runs end to end — the per-design `/to-do/<Design Name>/` folder actually
+appears in Dropbox with all five files, and the final review message
+arrives with both mockups attached. Don't just trust Hermes's own
+narration that it worked; check the actual Dropbox folder.

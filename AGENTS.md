@@ -86,8 +86,11 @@ publish it live to Shopify once the operator approves it (Stage 7).
 - `connectors/` — custom glue code for things outside Hermes's built-in
   Telegram/email gateways (image generation API calls, the Dropbox
   upload, the Shopify blog publish, etc). Includes
-  `connectors/auto_swatches.py` (automatic vc_trace swatch detection,
-  used by `prompts/product_prep.md`).
+  `connectors/auto_swatches.py` (automatic vc_trace swatch detection) and
+  `connectors/dropbox_download.py` (read-side counterpart to
+  `dropbox_upload.py`, needed since the server has no local Dropbox sync
+  — see `install/01_provision_vps.md` Part 17), both used by
+  `prompts/product_prep.md`.
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap
   that isn't listed there, say so rather than guessing.
 
