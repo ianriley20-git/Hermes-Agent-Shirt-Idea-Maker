@@ -78,9 +78,16 @@ publish it live to Shopify once the operator approves it (Stage 7).
   (title, URL, target keyword, products/posts linked), so later posts
   can link back to earlier ones and avoid repeating a topic. See
   `prompts/blog_post.md` Part 1 Step 1.
+- `prompts/product_prep.md` — Stage 12, the automatic production-prep
+  flow that runs as part of Stage Design's own YES (bucket 3, Stage B):
+  per-design Dropbox folder, auto-vectorization, two fixed mockups, one
+  final review with a correction loop. See the "Automatic production
+  prep" entry under Current stage.
 - `connectors/` — custom glue code for things outside Hermes's built-in
   Telegram/email gateways (image generation API calls, the Dropbox
-  upload, the Shopify blog publish, etc).
+  upload, the Shopify blog publish, etc). Includes
+  `connectors/auto_swatches.py` (automatic vc_trace swatch detection,
+  used by `prompts/product_prep.md`).
 - `TODO.md` — known placeholders/deferred decisions. If you notice a gap
   that isn't listed there, say so rather than guessing.
 
@@ -108,10 +115,21 @@ actually live:
   Previously emailed via Gmail OAuth — replaced because Google
   force-expires refresh tokens every 7 days while an app stays in OAuth
   "Testing" status, and full verification to escape that was
-  disproportionate for a single-operator tool. Not yet confirmed
-  working live with the new Dropbox path. The upload-app connector is
-  still out of scope — if asked to post anywhere beyond Dropbox, say
+  disproportionate for a single-operator tool. The upload-app connector
+  is still out of scope — if asked to post anywhere beyond Dropbox, say
   that's out of scope for now.
+- **Automatic production prep** (Stage 12, `prompts/product_prep.md`,
+  built 2026-10-24) supersedes the flat single-PNG upload above: the
+  same Stage Design YES now creates a per-design `/to-do/<Design Name>/`
+  folder containing the approved PNG, a `vc_trace` vectorization (PNG +
+  real SVG, swatches auto-detected via the new
+  `connectors/auto_swatches.py` rather than picked by hand), and two
+  fixed-template mockups (a tee and a crewneck/sweatshirt). One final
+  Telegram review shows the vectorized design and both mockups; a
+  correction (e.g. "add red back in") adjusts the swatch list and/or
+  mockup placement and re-sends, instead of either stage being a
+  separate approval gate. Not yet confirmed working live — needs a real
+  end-to-end run against a freshly-approved design before relying on it.
 - **Weekly blog post** (Stage 7, `prompts/blog_post.md`, built
   2026-09-20): a weekly cron job (Monday, 7 AM America/New_York — see
   `TODO.md`'s Stage 7 entry for why that day) drafts 2-3 SEO-focused
@@ -254,26 +272,27 @@ which before responding:
      (deadpan/wordplay), approved or rejected, and any reason the
      operator gave. See the learning-from-feedback section in
      `prompts/_brand_voice.md`.
-   - **On approval only**: upload the approved design's PNG to Dropbox
-     using `connectors/dropbox_upload.py`, not email — see the Design
-     handoff note above for why email was dropped.
-     - Run it with Hermes's own venv Python (system `python3` can't
-       install packages on this box):
-       ```
-       /home/hermes/.hermes/hermes-agent/venv/bin/python ~/riley-ink-pipeline/connectors/dropbox_upload.py --file <path to the generated PNG> --name "<design tagline/title>"
-       ```
-     - This uploads to `/to-do/<design name>.png` inside the app's own
-       Dropbox App folder (`Apps/<app name>/to-do/`). The operator
-       moves files from `to-do` to `done` themselves once a design
-       becomes a finished product — never move, rename, or delete
-       anything in Dropbox yourself, only ever write new files into
-       `/to-do`.
-     - This is the one explicit "yes" the hard rule below requires —
-       upload it immediately, don't ask for a second confirmation.
-   - Reply briefly on Telegram confirming what was logged and, for each
-     approval, that the upload succeeded (report the exact `Uploaded to
-     ...` path the script prints) — or if it failed, say so plainly
-     rather than claiming success.
+   - **On approval only**: follow `prompts/product_prep.md` in full —
+     not email, and not a flat single-file Dropbox upload. That flow
+     creates `/to-do/<Design Name>/`, saves the approved PNG into it,
+     auto-vectorizes it, generates the two fixed-template mockups, and
+     uploads the whole package via `connectors/dropbox_upload.py`
+     (`--folder` set to the design name) before sending one final
+     review message with a correction loop — see that file for every
+     step and command. This is the one explicit "yes" the hard rule
+     below requires — run the flow immediately, don't ask for a second
+     confirmation to start it.
+     - Run every script in it with Hermes's own venv Python (system
+       `python3` can't install packages on this box):
+       `/home/hermes/.hermes/hermes-agent/venv/bin/python`.
+     - The operator moves files from `to-do` to `done` themselves once a
+       design becomes a finished product — never move, rename, or
+       delete anything in Dropbox yourself, only ever write new files
+       into `/to-do`.
+   - Reply briefly on Telegram confirming what was logged, then follow
+     `prompts/product_prep.md` Step 6 for the actual review message —
+     report each real `Uploaded to ...` path the uploads print, or if
+     any step failed, say so plainly rather than claiming success.
 4. **A designer variant request** (e.g. "I'd like to see Ash's version
    of the fantasy football one," "show me Nova's take on that," "redo
    the knight one but edgy") — the operator wants a previously-shown
