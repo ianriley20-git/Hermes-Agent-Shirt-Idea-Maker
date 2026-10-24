@@ -85,21 +85,41 @@ vector deliverable, archived alongside it for whenever the upload-app
 connector or a print vendor needs actual vector geometry rather than a
 rasterized trace).
 
-## Step 4 — Generate the two fixed mockups
+## Step 4 — Generate the two fixed mockups, matched to the design's own color
 
-Two fixed default garment photos, chosen 2026-10-24 for being plain/
-generic (no holiday or seasonal scene) and already carrying real,
-validated spine-placement data in `Plain Mockups/` — not the two
-originally guessed ("White Shirt Office" turned out marked
-`not_useful`, "Plain White Crewneck" turned out never actually measured
-with the spine tool):
+**Pick the mockup pair by the design's own canvas/background color, light
+or dark — never mix a design against the opposite family.** Confirmed by
+the operator 2026-10-24 after this flow's own first dry run: a design's
+negative-space regions (background-colored gaps vc_trace leaves wherever
+an ink matches the canvas color — see `mockup_generation.md`'s note on
+this being an intentional screen-print technique, not a defect) are only
+invisible in the right way when the mockup's own garment lightness
+matches the design's canvas. A light-canvas design (e.g. white lettering
+that's literally the same hex as its own white page, as on "Bonus Bet
+Regret") reads correctly as blank/negative space on a light garment —
+the garment's own fabric fills the gap convincingly — but would show the
+wrong thing entirely on a dark garment (dark fabric where the lettering
+should read). The reverse applies to a dark-canvas design on a light
+garment. This is simply which family of mockup a given design was
+*designed for*, the same choice already made once per design at Stage
+Concept (the random/assigned dark-or-light shirt baked into its
+`IP-...-DESIGNER-SHIRT` ID) — reuse that same recorded choice here rather
+than re-deciding it.
 
-- **Tee**: `White Shirt Backwards Hat` (light garment — luminance ~187,
-  so `mockup_place.py` auto-picks the Multiply blend, not Blend-If)
-- **Sweatshirt/crewneck**: `Cream Crewneck Female Library` (light
-  garment, same auto-pick)
+Two validated pairs, both plain/generic (no holiday or seasonal scene)
+and already carrying real spine-placement data in `Plain Mockups/`:
 
-For each:
+- **Light-canvas designs** — Tee: `White Shirt Backwards Hat` (luminance
+  ~187, `mockup_place.py` auto-picks Multiply). Crewneck:
+  `Cream Crewneck Female Library` (same auto-pick). Not the two
+  originally guessed ("White Shirt Office" turned out marked
+  `not_useful`, "Plain White Crewneck" turned out never actually measured
+  with the spine tool).
+- **Dark-canvas designs** — Tee: `Black Tee Family Room` (luminance ~36,
+  `mockup_place.py` auto-picks Blend-If). Crewneck/sweatshirt:
+  `Black Crewneck Gym` (luminance ~27, same auto-pick).
+
+For each of the two templates in the matching pair:
 
 ```
 python connectors/mockup_place.py \
@@ -114,11 +134,14 @@ design into an approved template" workflow `mockup_generation.md`
 already documents; the light/dark blend choice and placement geometry
 come from each template's own saved measurement.
 
-If either default template ever gets marked `not_useful` (via the
-Mockup Placement Tool's own button) or loses its measurement, stop and
-tell the operator rather than silently substituting a different photo —
-picking a replacement default is a judgment call for them, not
-something to decide mid-run.
+If either template in the matching pair ever gets marked `not_useful`
+(via the Mockup Placement Tool's own button) or loses its measurement,
+stop and tell the operator rather than silently substituting a different
+photo or falling back to the other pair's family — picking a replacement
+default is a judgment call for them, not something to decide mid-run. If
+a design's dark-or-light intent genuinely can't be determined (e.g. its
+Prompt ID is missing or malformed), hold and ask rather than guessing —
+getting this wrong defeats the whole point of matching families above.
 
 ## Step 5 — Upload the package
 
@@ -185,13 +208,13 @@ single review point for the whole package, not a per-step gate.
 
 ## Known limitations (true as of 2026-10-24)
 
-- Not yet wired into AGENTS.md's bucket 3 Stage Design handling — see
-  AGENTS.md's Design handoff note for the flat (non-folder) upload this
-  replaces once wired in.
-- The two fixed mockup defaults are both light garments, so this flow as
-  written never exercises the dark-garment Blend-If path automatically —
-  a deliberate scope choice (start simple), not an oversight; revisit if
-  the operator wants a dark-garment default mockup too.
+- Dry-run tested 2026-10-24 against a real approved design ("Bonus Bet
+  Regret," a light-canvas design) end to end through Step 4 (no live
+  Dropbox/Telegram, since those need the live server session) — the
+  script chain ran clean, and surfaced the light/dark mockup-matching
+  requirement Step 4 now documents (confirmed with the operator the same
+  day). Not yet tested against a dark-canvas design or through Steps 5-6
+  live.
 - `auto_swatches.py`'s thresholds (`--min-population-frac` 0.004,
   `--min-distance` 45.0) are the same defaults validated against three
   designs in this session's own earlier manual-vectorization testing,

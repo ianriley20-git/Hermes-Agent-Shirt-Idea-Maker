@@ -124,8 +124,12 @@ actually live:
   folder containing the approved PNG, a `vc_trace` vectorization (PNG +
   real SVG, swatches auto-detected via the new
   `connectors/auto_swatches.py` rather than picked by hand), and two
-  fixed-template mockups (a tee and a crewneck/sweatshirt). One final
-  Telegram review shows the vectorized design and both mockups; a
+  fixed-template mockups (a tee and a crewneck/sweatshirt) — picked from
+  a light or dark pair to match the design's own canvas color, confirmed
+  2026-10-24 to matter: a design's negative-space gaps only read
+  correctly on a mockup whose garment lightness matches the design's
+  own. One final Telegram review shows the vectorized design and both
+  mockups; a
   correction (e.g. "add red back in") adjusts the swatch list and/or
   mockup placement and re-sends, instead of either stage being a
   separate approval gate. Not yet confirmed working live — needs a real
