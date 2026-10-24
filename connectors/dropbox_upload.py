@@ -9,6 +9,7 @@ setup this replaced (see TODO.md).
 
 Usage:
     python3 dropbox_upload.py --file /path/to/design.png --name "Design Tagline"
+    python3 dropbox_upload.py --file /path/to/vector.png --name "Design Tagline - vector" --folder "Design Tagline"
 """
 import argparse
 import os
@@ -26,30 +27,39 @@ def sanitize_filename(name: str) -> str:
     return name or "design"
 
 
-def upload(file_path: str, design_name: str) -> str:
+def upload(file_path: str, design_name: str, folder: str | None = None, overwrite: bool = False) -> str:
     dbx = dropbox.Dropbox(
         app_key=os.environ["DROPBOX_APP_KEY"],
         app_secret=os.environ["DROPBOX_APP_SECRET"],
         oauth2_refresh_token=os.environ["DROPBOX_REFRESH_TOKEN"],
     )
 
-    dropbox_path = f"/to-do/{sanitize_filename(design_name)}.png"
+    ext = os.path.splitext(file_path)[1] or ".png"
+    if folder:
+        dropbox_path = f"/to-do/{sanitize_filename(folder)}/{sanitize_filename(design_name)}{ext}"
+    else:
+        dropbox_path = f"/to-do/{sanitize_filename(design_name)}{ext}"
 
     with open(file_path, "rb") as f:
         data = f.read()
 
-    metadata = dbx.files_upload(data, dropbox_path, mode=WriteMode("add"), autorename=True)
+    if overwrite:
+        metadata = dbx.files_upload(data, dropbox_path, mode=WriteMode("overwrite"))
+    else:
+        metadata = dbx.files_upload(data, dropbox_path, mode=WriteMode("add"), autorename=True)
     return metadata.path_display
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--file", required=True, help="Path to the local PNG file to upload")
+    parser.add_argument("--file", required=True, help="Path to the local file to upload")
     parser.add_argument("--name", required=True, help="Design name/tagline, used to build the Dropbox filename")
+    parser.add_argument("--folder", default=None, help="Optional subfolder under /to-do to nest this file in (e.g. the design name, so every asset for one design lands in one place)")
+    parser.add_argument("--overwrite", action="store_true", help="Replace an existing file at the same path instead of autorenaming -- use this when re-uploading a corrected retry of a file already sent for review")
     args = parser.parse_args()
 
     try:
-        uploaded_path = upload(args.file, args.name)
+        uploaded_path = upload(args.file, args.name, args.folder, args.overwrite)
     except KeyError as e:
         print(f"Missing required environment variable: {e}", file=sys.stderr)
         return 1
